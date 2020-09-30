@@ -1,0 +1,30 @@
+# ===================================================================
+#
+# Markdown lint file
+#
+# ===================================================================
+
+# First heading should be a top level heading
+MD002: false
+
+# Line length
+MD013: false
+
+# Multiple top level headings in the same document
+MD025:
+  # Ignore front matter "title:" as violations to this rule
+  front_matter_title: ""
+
+# Inline HTML
+MD033: false
+
+# Require spaces to indent nested list items
+MD007:
+  indent: 4
+
+# Properly numbered ordered lists
+MD029:
+  style: ordered
+
+# Code block style
+MD046: false
