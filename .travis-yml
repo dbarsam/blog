@@ -4,4 +4,4 @@ node_js:
 install:
   - npm install -g markdownlint-cli
 script:
-  - markdownlint *.md ; markdownlint */*.md
+  - markdownlint **/*.md
