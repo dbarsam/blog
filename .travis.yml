@@ -1,7 +1,19 @@
-language: node_js
-node_js:
-  - 8
-install:
-  - npm install -g markdownlint-cli
-script:
-  - markdownlint **/*.md
+jobs:
+  include:
+    - stage: lint
+      language: node_js
+      node_js:
+        - 8
+      install:
+        - npm install -g markdownlint-cli
+      script:
+        - markdownlint **/*.md
+    - stage: build
+      language: python
+      python:
+        - 3.6
+      install:
+        - python -m pip install --upgrade pip
+        - python -m pip install -r requirements.txt
+      script:
+        - make publish
