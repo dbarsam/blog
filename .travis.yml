@@ -3,8 +3,9 @@ jobs:
     - stage: lint
       language: node_js
       node_js:
-        - 8
+        - 12
       install:
+        - npm install -g npm@latest
         - npm install -g markdownlint-cli
       script:
         - markdownlint **/*.md
