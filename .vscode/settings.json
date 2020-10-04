@@ -1,0 +1,10 @@
+{
+    "files.trimTrailingWhitespace": true,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.exclude": {
+        "**/*.pyc": true,
+        "**/__pycache__": true,
+    },
+}
