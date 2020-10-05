@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Dev Notes</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-09-14T12:30:00-04:00</updated><entry><title>How this blog works</title><link href="/how-this-blog-works.html" rel="alternate"></link><published>2020-09-14T01:29:08+00:00</published><updated>2020-09-14T12:30:00-04:00</updated><author><name>D Barsam</name></author><id>tag:None,2020-09-14:/how-this-blog-works.html</id><summary type="html">&lt;p&gt;A quick summary about the blog's backend structure.&lt;/p&gt;</summary><content type="html">&lt;h1&gt;How this blog works&lt;/h1&gt;
+&lt;p&gt;This project is a blog with a pipeline.  The pipeline builds the blog's web site with a number of CI/CD components:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The content for this blog is stored as a project on &lt;a href="https://github.com"&gt;GitHub&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;An article (written in Markdown, a plain text mark up language) is subitted to the project.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://travis-ci.org"&gt;Travis CI&lt;/a&gt;, which has been watching for this change, kicks off a build step with the repository.&lt;/li&gt;
+&lt;li&gt;The build step launches &lt;a href="http://docs.getpelican.com"&gt;Pelican&lt;/a&gt; and generates all html pages from the project markdown files.&lt;/li&gt;
+&lt;li&gt;Travis CI &lt;a href="https://docs.travis-ci.com/user/deployment/pages/"&gt;submits the html files&lt;/a&gt; to the &lt;code&gt;master&lt;/code&gt; branch back on GitHub.&lt;/li&gt;
+&lt;li&gt;GiHub displays the html files as a static web site.&lt;/li&gt;
+&lt;/ol&gt;</content><category term="misc"></category><category term="blog"></category></entry></feed>
