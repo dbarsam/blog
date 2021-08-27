@@ -1,5 +1,8 @@
-### Blog ###
-output/
+### Build Artifacts ###
+/output/
+
+### Conda Environments ###
+/.conda
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
