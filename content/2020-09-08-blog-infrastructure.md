@@ -59,7 +59,7 @@ This project's automated actions are executed on [Travis-CI].  Like GitHub, ther
         - make publish
       deploy:
         provider: pages
-        cleanup: false
+        skip_cleanup: true
         strategy: git
         token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
         keep_history: true
