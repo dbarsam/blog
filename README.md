@@ -1,6 +1,6 @@
 # blog
 
-A project to contain the source code and content for a *Dev Notes* [blog].
+A project to contain the source code and content for the *#Dev* [blog].
 
 ## Setup
 
