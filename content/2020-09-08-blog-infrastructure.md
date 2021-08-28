@@ -60,6 +60,7 @@ This project's automated actions are executed on [Travis-CI].  Like GitHub, ther
       deploy:
         provider: pages
         cleanup: false
+        strategy: git
         token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
         keep_history: true
         local_dir: output
