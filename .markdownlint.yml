@@ -14,11 +14,6 @@ MD003:
 # Line length
 MD013: false
 
-# Multiple top level headings in the same document
-MD025:
-  # Ignore front matter "title:" as violations to this rule
-  front_matter_title: ""
-
 # Inline HTML
 MD033: false
 
