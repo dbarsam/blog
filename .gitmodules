@@ -1,6 +1,6 @@
-[submodule "pelican\\themes\\pelican-clean-blog"]
-	path = pelican\\themes\\pelican-clean-blog
+[submodule "pelican/themes/pelican-clean-blog"]
+	path = pelican/themes/pelican-clean-blog
 	url = https://github.com/gilsondev/pelican-clean-blog.git
-[submodule "pelican\\themes\\pelican-chunk"]
-	path = pelican\\themes\\pelican-chunk
+[submodule "pelican/themes/pelican-chunk"]
+	path = pelican/themes/pelican-chunk
 	url = https://github.com/onlyhavecans/pelican-chunk.git
