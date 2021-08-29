@@ -1,12 +1,12 @@
 ---
 title: How this blog works
 date: 2020-09-14T01:29:08.051Z
-modified: 2020-09-14 12:30
 category: about the blog
 tags: blog,pipeline,travis-ci,github,markdown,python,pelican
 slug: how-this-blog-works
 authors: db
 summary: A summary of the blog's infrastructure.
+header_cover: /images/article-bg.png
 ---
 
 This project is a blog with a pipeline; the pipeline compiles the project's text files into static html pages and pushes them to a host, which displays it as a website.  The whole process is split along these steps:

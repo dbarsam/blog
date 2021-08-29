@@ -143,6 +143,7 @@ THEME = os.path.join('pelican', 'themes', 'pelican-clean-blog')
 # ####################################
 # Theme Specific Settings
 # ####################################
+HEADER_COVER = 'images/home-bg.png'
 HEADER_COLOR = '#004a59'
 COLOR_SCHEME_CSS = 'tomorrow_night.css'
 EXTRA_PATH_METADATA = {
