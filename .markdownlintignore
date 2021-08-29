@@ -1,0 +1,8 @@
+# ===================================================================
+#
+# Markdown lint ignore file
+#
+# ===================================================================
+
+# Ignore Markdown files in the external pelican directory
+/pelican/
