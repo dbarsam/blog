@@ -107,7 +107,8 @@ ARTICLE_PATHS = [
 
 # A list of directories to look for static files, relative to PATH.
 STATIC_PATHS = [
-    'images'
+    'images',
+    'extra'
 ]
 
 # ####################################
