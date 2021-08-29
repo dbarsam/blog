@@ -3,7 +3,7 @@ title: How this blog works
 date: 2020-09-14T01:29:08.051Z
 modified: 2020-09-14 12:30
 category: about the blog
-tags: blog,pipeline,travis-ci,github,markdown,python
+tags: blog,pipeline,travis-ci,github,markdown,python,pelican
 slug: how-this-blog-works
 authors: db
 summary: A summary of the blog's infrastructure.
