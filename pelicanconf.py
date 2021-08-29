@@ -134,3 +134,17 @@ AUTHOR_FEED_RSS = None
 # ####################################
 
 DEFAULT_PAGINATION = 10
+
+# ####################################
+# Theme
+# ####################################
+THEME = os.path.join('pelican', 'themes', 'pelican-clean-blog')
+
+# ####################################
+# Theme Specific Settings
+# ####################################
+HEADER_COLOR = '#004a59'
+COLOR_SCHEME_CSS = 'tomorrow_night.css'
+EXTRA_PATH_METADATA = {
+    'extra/favicon.ico': {'path': 'favicon.ico'}
+}
