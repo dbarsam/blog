@@ -9,13 +9,13 @@ summary: A summary of the blog's infrastructure.
 header_cover: /images/article-bg.png
 ---
 
-This project is a blog with a pipeline; the pipeline compiles the project's text files into static html pages and pushes them to a host, which displays it as a website.  The whole process is split along these steps:
+This project is a blog with a pipeline.  The pipeline compiles the project's text files into static html pages and pushes them to a host which then displays it as a website.  The whole process is split along these steps:
 
 1. All content for this blog is stored as files in a project on [GitHub].
 2. Articles (written in [Markdown], a plain text mark up language) are submitted as files into the project via Git, the source control of the project.
-3. [Travis-CI], which has been watching for any change by Git, creates and launches a build pipeline on one of its servers.
-4. A stage in the build pipeline launches [Pelican] and generates all html pages from the project markdown files.
-5. Another stage [submits the html files] to the `gh-pages` branch back on GitHub, where Github displays anything on the `gh-pages` branch a static web site.
+3. [Travis-CI], which has been watching the source control, reacts to any change by Git by creating and launching a build pipeline on one of its servers.
+4. Part of the build pipeline launches [Pelican] and generates all html pages from the project markdown files.
+5. Another part [submits the html files] to the `gh-pages` branch back on GitHub, where Github displays anything on the `gh-pages` branch a static web site.
 
 ## GitHub
 
