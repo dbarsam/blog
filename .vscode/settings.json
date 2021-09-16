@@ -7,4 +7,10 @@
         "**/*.pyc": true,
         "**/__pycache__": true,
     },
+    "cSpell.words": [
+        "monospace",
+        "submodule",
+        "submodules",
+        "symlink"
+    ],
 }

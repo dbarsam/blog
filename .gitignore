@@ -2,7 +2,7 @@
 /output/
 
 ### Conda Environments ###
-/.conda
+/.conda/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
