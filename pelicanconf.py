@@ -149,3 +149,4 @@ COLOR_SCHEME_CSS = 'tomorrow_night.css'
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'}
 }
+SOCIAL = (('github', 'https://github.com/dbarsam'),)
