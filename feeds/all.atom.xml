@@ -1,57 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Dev Notes</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2020-09-14T12:30:00-04:00</updated><subtitle></subtitle><entry><title>How this blog works</title><link href="https://dbarsam.github.io/blog/how-this-blog-works.html" rel="alternate"></link><published>2020-09-14T01:29:08+00:00</published><updated>2020-09-14T12:30:00-04:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-09-14:/blog/how-this-blog-works.html</id><summary type="html">&lt;p&gt;A summary of the blog's infrastructure.&lt;/p&gt;</summary><content type="html">&lt;p&gt;This project is a blog with a pipeline; the pipeline compiles the project's text files into static html pages and pushes them to a host, which displays it as a website.  The whole process is split along these steps:&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2020-09-14T01:29:08+00:00</updated><subtitle>A collection of software development notes</subtitle><subtitle>A collection of software development notes</subtitle><entry><title>How this blog is themed</title><link href="https://dbarsam.github.io/blog/how-this-blog-themes.html" rel="alternate"></link><published>2020-09-14T01:29:08+00:00</published><updated>2020-09-14T01:29:08+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-09-14:/blog/how-this-blog-themes.html</id><summary type="html">&lt;p&gt;A summary of the blog's theming infrastructure.&lt;/p&gt;</summary><content type="html">&lt;p&gt;&lt;a href="http://docs.getpelican.com"&gt;Pelican&lt;/a&gt; is the tool that makes this static website from the markdown files in the repository.  But, while it has the power to theme the website out of the box, it's not that clear exactly how that is supposed to work.&lt;/p&gt;
+&lt;h2 id="getting-the-theme"&gt;Getting the Theme&lt;/h2&gt;
+&lt;p&gt;Pelican themes are packaged as a raw bundle of files, but if you're used to CI workflows this concept is rather challenging.  Instead of installing a theme through the Python package managed &lt;code&gt;pip&lt;/code&gt;, Pelican expects the files to be available somewhere on disk first and accesses them at run-time, either via a copy or symlink done with the Pelican utility &lt;a href="https://docs.getpelican.com/en/stable/pelican-themes.html"&gt;pelican-themes&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Up to this point in the blog set-up, we've been installing Pelican and its components as Python packages pinned at specific versions -- and pinning dependencies is such a basic requirement of pipeline automation that not having it feels like something is missing.  While some developers have made their theme available as packages (e.g. &lt;a href="https://pypi.org/project/plumage/"&gt;Plumage&lt;/a&gt;) most themes are collected as submodules of files in the &lt;a href="https://github.com/getpelican/pelican-themes"&gt;Pelican Themes GitHub Project&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="embedding-the-theme"&gt;Embedding the Theme&lt;/h2&gt;
+&lt;p&gt;There's different strategies to 'embedding' a theme.  This project has added it to the repo as a git submodule.  A git submodule is a git-specific way to embed one repo into another repo at a specific commit.  So instead of specifying a released version of the theme, the git submodule points to a specific code change in the repository.&lt;/p&gt;
+&lt;p&gt;Using the &lt;a href="https://github.com/gilsondev/pelican-clean-blog"&gt;pelican-clean-blog&lt;/a&gt; as an example, we first add the submodule through git:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;git submodule add https://github.com/gilsondev/pelican-clean-blog pelican/themes/pelican-clean-blog&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you're working on window you'll need to watch out for file paths with slashes.  If you have any error that's like this,&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;fatal: No url found for submodule path &amp;#39;pelican/themes/pelican-clean-blog&amp;#39; in .gitmodules&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Change the slashes from the escaped window slashes &lt;code&gt;pelican\\themes\\pelican-clean-blog&lt;/code&gt; to the unix slashes &lt;code&gt;pelican/themes/pelican-clean-blog&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="enabling-the-theme"&gt;Enabling the Theme&lt;/h2&gt;
+&lt;p&gt;After the files are on disk Pelican expects the theme to be enabled in the &lt;code&gt;pelicanconf.py&lt;/code&gt; file.  First you set the theme's relative path with the &lt;code&gt;THEME&lt;/code&gt; variable and then set any other auxillary theme setting with more variables:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# ####################################&lt;/span&gt;
+&lt;span class="c1"&gt;# The Theme&lt;/span&gt;
+&lt;span class="c1"&gt;# ####################################&lt;/span&gt;
+&lt;span class="n"&gt;THEME&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;pelican/themes.pelican-clean-blog&amp;#39;&lt;/span&gt;
+
+&lt;span class="c1"&gt;# ####################################&lt;/span&gt;
+&lt;span class="c1"&gt;# The Theme Specific Settings&lt;/span&gt;
+&lt;span class="c1"&gt;# ####################################&lt;/span&gt;
+&lt;span class="n"&gt;HEADER_COVER&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;images/home-bg.png&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;HEADER_COLOR&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;#004a59&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;COLOR_SCHEME_CSS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;tomorrow_night.css&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;EXTRA_PATH_METADATA&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="s1"&gt;&amp;#39;extra/favicon.ico&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;path&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;favicon.ico&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This should now be visible if the build or run the live local server:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;python -m pelican --autoreload --listen&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="theme-as-submodule"&gt;Theme as Submodule&lt;/h2&gt;
+&lt;p&gt;Like a rug, a good theme really ties the whole website together.  So I appreciate the work that goes into making one; however, the one point I can't get over is use of copying and pasting files to install the theme.  While using submodules to embed the theme is a good step towards being modular, it feels dated and the wrong tool -- especially when we're already using Python packages.   Hopefully, this is just a transition.  It looks like Pelican 4.0 did start to push for better extension organization, but the current focus is on &lt;a href="https://github.com/pelican-plugins"&gt;Pelican Plugins&lt;/a&gt;.  Most of development for the themes in the &lt;a href="https://github.com/getpelican/pelican-themes"&gt;Pelican Themes GitHub Project&lt;/a&gt; appears to be stagnant, and only a few talk about supporting Pelican 4.0, and of those even fewer publish their themes as Python package.&lt;/p&gt;</content><category term="about the blog"></category><category term="blog"></category><category term="pipeline"></category><category term="travis-ci"></category><category term="github"></category><category term="pelican"></category><category term="python"></category></entry><entry><title>How this blog works</title><link href="https://dbarsam.github.io/blog/how-this-blog-works.html" rel="alternate"></link><published>2020-09-14T01:29:08+00:00</published><updated>2020-09-14T01:29:08+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-09-14:/blog/how-this-blog-works.html</id><summary type="html">&lt;p&gt;A summary of the blog's infrastructure.&lt;/p&gt;</summary><content type="html">&lt;p&gt;This project is a blog with a pipeline.  The pipeline compiles the project's text files into static html pages and pushes them to a host which then displays it as a website.  The whole process is split along these steps:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;All content for this blog is stored as files in a project on &lt;a href="https://github.com"&gt;GitHub&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Articles (written in &lt;a href="https://daringfireball.net/projects/markdown/"&gt;Markdown&lt;/a&gt;, a plain text mark up language) are submitted as files into the project via Git, the source control of the project.&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://travis-ci.com"&gt;Travis-CI&lt;/a&gt;, which has been watching for any change by Git, creates and launches a build pipeline on one of its servers.&lt;/li&gt;
-&lt;li&gt;A stage in the build pipeline launches &lt;a href="http://docs.getpelican.com"&gt;Pelican&lt;/a&gt; and generates all html pages from the project markdown files.&lt;/li&gt;
-&lt;li&gt;Another stage &lt;a href="https://docs.travis-ci.com/user/deployment/pages/"&gt;submits the html files&lt;/a&gt; to the &lt;code&gt;gh-pages&lt;/code&gt; branch back on GitHub, where Github displays anything on the &lt;code&gt;gh-pages&lt;/code&gt; branch a static web site.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://travis-ci.com"&gt;Travis-CI&lt;/a&gt;, which has been watching the source control, reacts to any change by Git by creating and launching a build pipeline on one of its servers.&lt;/li&gt;
+&lt;li&gt;Part of the build pipeline launches &lt;a href="http://docs.getpelican.com"&gt;Pelican&lt;/a&gt; and generates all html pages from the project markdown files.&lt;/li&gt;
+&lt;li&gt;Another part &lt;a href="https://docs.travis-ci.com/user/deployment/pages/"&gt;submits the html files&lt;/a&gt; to the &lt;code&gt;gh-pages&lt;/code&gt; branch back on GitHub, where Github displays anything on the &lt;code&gt;gh-pages&lt;/code&gt; branch a static web site.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2&gt;GitHub&lt;/h2&gt;
+&lt;h2 id="github"&gt;GitHub&lt;/h2&gt;
 &lt;p&gt;This project and all of its content is stored and hosted on &lt;a href="https://github.com"&gt;GitHub&lt;/a&gt;.  There's already too much information about getting started with GitHub so this article assumes that that information is already known.  However, it is important to note that this project is using GitHub in a relatively simple way -- as a &lt;em&gt;static html site&lt;/em&gt;, hosted by &lt;a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site"&gt;GitHub Pages&lt;/a&gt; -- and does not use any of the other features that it offers.  For example, this project does not use Jekyll so any mention of that can be ignored.&lt;/p&gt;
-&lt;h2&gt;Markdown&lt;/h2&gt;
+&lt;h2 id="markdown"&gt;Markdown&lt;/h2&gt;
 &lt;p&gt;The actual content of the files is stored as &lt;a href="https://daringfireball.net/projects/markdown/"&gt;Markdown&lt;/a&gt; files all in the &lt;code&gt;content/&lt;/code&gt; folder in a flat listing.  Markdown is a markup language that is easy to read in plain text form and is popular enough that it just makes sense to use it instead of something else.&lt;/p&gt;
 &lt;p&gt;However, the blog converts markdown to html with the &lt;a href="https://python-markdown.github.io/extensions/fenced_code_blocks/"&gt;Python-Markdown&lt;/a&gt; library and uses some custom features provided by &lt;a href="https://facelessuser.github.io/pymdown-extensions/"&gt;PyMdown Extensions&lt;/a&gt;.&lt;/p&gt;
-&lt;h2&gt;Travis CI&lt;/h2&gt;
+&lt;h2 id="travis-ci"&gt;Travis CI&lt;/h2&gt;
 &lt;p&gt;This project's automated actions are executed on &lt;a href="https://travis-ci.com"&gt;Travis-CI&lt;/a&gt;.  Like GitHub, there are almost too many tutorials about how to get started with Travis; services.  This project is using Travis in a relatively simple way and most of the work is handled by the built-in &lt;a href="https://docs.travis-ci.com/user/deployment/pages/"&gt;support of GitHub Pages&lt;/a&gt;.  The &lt;code&gt;.travis-ci.yml&lt;/code&gt; file in this project defines two jobs:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;Markdown Linting with &lt;a href="https://github.com/DavidAnson/markdownlint"&gt;MarkdownLint&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;yaml
-- stage: lint
-  language: node_js
-  node_js:
-    - 12
-  install:
-    - npm install -g npm@latest
-    - npm install -g markdownlint-cli
-  script:
-    - markdownlint **/*.md&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;stage&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;lint&lt;/span&gt;
+  &lt;span class="nt"&gt;language&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;node_js&lt;/span&gt;
+  &lt;span class="nt"&gt;node_js&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;12&lt;/span&gt;
+  &lt;span class="nt"&gt;install&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;npm install -g npm@latest&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;npm install -g markdownlint-cli&lt;/span&gt;
+  &lt;span class="nt"&gt;script&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;markdownlint **/*.md&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Build with &lt;a href="http://docs.getpelican.com"&gt;Pelican&lt;/a&gt; and publish to &lt;a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site"&gt;GitHub Pages&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;yaml
-- stage: build
-  language: python
-  python:
-    - 3.6
-  install:
-    - python -m pip install --upgrade pip
-    - python -m pip install -r requirements.txt
-  script:
-    - make publish
-  deploy:
-    provider: pages
-    skip_cleanup: true
-    strategy: git
-    token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-    keep_history: true
-    local_dir: output
-    on:
-      branch: master&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;stage&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;build&lt;/span&gt;
+  &lt;span class="nt"&gt;language&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;python&lt;/span&gt;
+  &lt;span class="nt"&gt;python&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;3.6&lt;/span&gt;
+  &lt;span class="nt"&gt;install&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;python -m pip install --upgrade pip&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;python -m pip install -r requirements.txt&lt;/span&gt;
+  &lt;span class="nt"&gt;script&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;make publish&lt;/span&gt;
+  &lt;span class="nt"&gt;deploy&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;provider&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;pages&lt;/span&gt;
+    &lt;span class="nt"&gt;skip_cleanup&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;true&lt;/span&gt;
+    &lt;span class="nt"&gt;strategy&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;git&lt;/span&gt;
+    &lt;span class="nt"&gt;token&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;$GITHUB_TOKEN&lt;/span&gt;  &lt;span class="c1"&gt;# Set in the settings page of your repository, as a secure variable&lt;/span&gt;
+    &lt;span class="nt"&gt;keep_history&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;true&lt;/span&gt;
+    &lt;span class="nt"&gt;local_dir&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;output&lt;/span&gt;
+    &lt;span class="nt"&gt;on&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;branch&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;master&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;h2&gt;Pelican&lt;/h2&gt;
+&lt;h2 id="pelican"&gt;Pelican&lt;/h2&gt;
 &lt;p&gt;&lt;a href="http://docs.getpelican.com"&gt;Pelican&lt;/a&gt; is the tool that generates the static website from the markdown files.  Pelican is a Python package and is installed by Python's package manager, &lt;code&gt;pip&lt;/code&gt;.  All dependency and their respective versions are listed in the project's &lt;code&gt;requirements.txt&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Pelican's configuration files are also written in Python and Pelican's default set-up splits the configuration into two files:&lt;/p&gt;
 &lt;ol&gt;
@@ -64,6 +98,6 @@
 &lt;/ol&gt;
 &lt;p&gt;Pelican's default set-up also simplifies the execution by providing a convenience &lt;code&gt;Makefile&lt;/code&gt;.  The &lt;code&gt;Makefile&lt;/code&gt; is an standard convention that contains pre-configured commands for various tasks.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;.travis-ci.yml&lt;/code&gt; files executes all of the set-up and Pelican steps during the build and publish step.&lt;/p&gt;
-&lt;h2&gt;The &lt;code&gt;gh-pages&lt;/code&gt; branch&lt;/h2&gt;
+&lt;h2 id="the-gh-pages-branch"&gt;The &lt;code&gt;gh-pages&lt;/code&gt; branch&lt;/h2&gt;
 &lt;p&gt;GitHub Pages is one of the features that comes with every project and its only job is to display a collection of html files as a website.  Even with that scope, there's still a lot of the different ways to use that feature; a quick search on GitHub Pages will find tutorials that seem contradictory or mention seemly irrelevant or confusing configurations.  This project is creating a &lt;em&gt;project site&lt;/em&gt; (not a &lt;em&gt;user site&lt;/em&gt; or &lt;em&gt;organization&lt;/em&gt;) where the final url will be something like  &lt;code&gt;https://&amp;lt;user&amp;gt;.github.io/&amp;lt;repository&amp;gt;&lt;/code&gt;.  More information is available from the &lt;a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#types-of-github-pages-sites"&gt;GitHub Pages Documentation&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;gh-pages&lt;/code&gt; branch is a git branch named &lt;code&gt;gh-pages&lt;/code&gt;.  There is nothing special about the branch, except that &lt;code&gt;gh-pages&lt;/code&gt; is the default value for that branch that GitHub uses for as a &lt;a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#publishing-sources-for-github-pages-sites"&gt;publishing source&lt;/a&gt;.  Travis-Ci follows GitHub's lead and its publish commanded uses &lt;code&gt;gh-pages&lt;/code&gt; as a default value its &lt;code&gt;target_branch&lt;/code&gt; setting.&lt;/p&gt;</content><category term="about the blog"></category><category term="blog"></category><category term="pipeline"></category><category term="travis-ci"></category><category term="github"></category><category term="markdown"></category><category term="python"></category></entry></feed>
+&lt;p&gt;The &lt;code&gt;gh-pages&lt;/code&gt; branch is a git branch named &lt;code&gt;gh-pages&lt;/code&gt;.  There is nothing special about the branch, except that &lt;code&gt;gh-pages&lt;/code&gt; is the default value for that branch that GitHub uses for as a &lt;a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#publishing-sources-for-github-pages-sites"&gt;publishing source&lt;/a&gt;.  Travis-Ci follows GitHub's lead and its publish commanded uses &lt;code&gt;gh-pages&lt;/code&gt; as a default value its &lt;code&gt;target_branch&lt;/code&gt; setting.&lt;/p&gt;</content><category term="about the blog"></category><category term="blog"></category><category term="pipeline"></category><category term="travis-ci"></category><category term="github"></category><category term="markdown"></category><category term="python"></category><category term="pelican"></category></entry></feed>

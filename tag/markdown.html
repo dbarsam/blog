@@ -1,135 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-        <meta charset="utf-8" />
-        <meta name="generator" content="Pelican" />
-        <title>Dev Notes - markdown</title>
-        <link rel="stylesheet" href="https://dbarsam.github.io/blog/theme/css/main.css" />
-        <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Dev Notes Atom Feed" />
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>#Dev - Tag markdown</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
 </head>
 
-<body id="index" class="home">
-        <header id="banner" class="body">
-                <h1><a href="https://dbarsam.github.io/blog/">Dev Notes</a></h1>
-                <nav><ul>
-                    <li><a href="https://dbarsam.github.io/blog/category/about-the-blog.html">about the blog</a></li>
-                </ul></nav>
-        </header><!-- /#banner -->
+<body class="tag-markdown">
 
-            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="https://dbarsam.github.io/blog/how-this-blog-works.html">How this blog works</a></h1>
-<footer class="post-info">
-        <abbr class="published" title="2020-09-14T01:29:08.051000+00:00">
-                Published: Mon 14 September 2020
-        </abbr>
-		<br />
-        <abbr class="modified" title="2020-09-14T12:30:00-04:00">
-                Updated: Mon 14 September 2020
-        </abbr>
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
 
-        <address class="vcard author">
-                By                         <a class="url fn" href="https://dbarsam.github.io/blog/author/db.html">db</a>
-        </address>
-<p>In <a href="https://dbarsam.github.io/blog/category/about-the-blog.html">about the blog</a>.</p>
-<p>tags: <a href="https://dbarsam.github.io/blog/tag/blog.html">blog</a> <a href="https://dbarsam.github.io/blog/tag/pipeline.html">pipeline</a> <a href="https://dbarsam.github.io/blog/tag/travis-ci.html">travis-ci</a> <a href="https://dbarsam.github.io/blog/tag/github.html">github</a> <a href="https://dbarsam.github.io/blog/tag/markdown.html">markdown</a> <a href="https://dbarsam.github.io/blog/tag/python.html">python</a> </p>
-</footer><!-- /.post-info --><p>This project is a blog with a pipeline; the pipeline compiles the project's text files into static html pages and pushes them to a host, which displays it as a website.  The whole process is split along these steps:</p>
-<ol>
-<li>All content for this blog is stored as files in a project on <a href="https://github.com">GitHub</a>.</li>
-<li>Articles (written in <a href="https://daringfireball.net/projects/markdown/">Markdown</a>, a plain text mark up language) are submitted as files into the project via Git, the source control of the project.</li>
-<li><a href="https://travis-ci.com">Travis-CI</a>, which has been watching for any change by Git, creates and launches a build pipeline on one of its servers.</li>
-<li>A stage in the build pipeline launches <a href="http://docs.getpelican.com">Pelican</a> and generates all html pages from the project markdown files.</li>
-<li>Another stage <a href="https://docs.travis-ci.com/user/deployment/pages/">submits the html files</a> to the <code>gh-pages</code> branch back on GitHub, where Github displays anything on the <code>gh-pages</code> branch a static web site.</li>
-</ol>
-<h2>GitHub</h2>
-<p>This project and all of its content is stored and hosted on <a href="https://github.com">GitHub</a>.  There's already too much information about getting started with GitHub so this article assumes that that information is already known.  However, it is important to note that this project is using GitHub in a relatively simple way -- as a <em>static html site</em>, hosted by <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site">GitHub Pages</a> -- and does not use any of the other features that it offers.  For example, this project does not use Jekyll so any mention of that can be ignored.</p>
-<h2>Markdown</h2>
-<p>The actual content of the files is stored as <a href="https://daringfireball.net/projects/markdown/">Markdown</a> files all in the <code>content/</code> folder in a flat listing.  Markdown is a markup language that is easy to read in plain text form and is popular enough that it just makes sense to use it instead of something else.</p>
-<p>However, the blog converts markdown to html with the <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> library and uses some custom features provided by <a href="https://facelessuser.github.io/pymdown-extensions/">PyMdown Extensions</a>.</p>
-<h2>Travis CI</h2>
-<p>This project's automated actions are executed on <a href="https://travis-ci.com">Travis-CI</a>.  Like GitHub, there are almost too many tutorials about how to get started with Travis; services.  This project is using Travis in a relatively simple way and most of the work is handled by the built-in <a href="https://docs.travis-ci.com/user/deployment/pages/">support of GitHub Pages</a>.  The <code>.travis-ci.yml</code> file in this project defines two jobs:</p>
-<ol>
-<li>
-<p>Markdown Linting with <a href="https://github.com/DavidAnson/markdownlint">MarkdownLint</a>.</p>
-<p><code>yaml
-- stage: lint
-  language: node_js
-  node_js:
-    - 12
-  install:
-    - npm install -g npm@latest
-    - npm install -g markdownlint-cli
-  script:
-    - markdownlint **/*.md</code></p>
-</li>
-<li>
-<p>Build with <a href="http://docs.getpelican.com">Pelican</a> and publish to <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site">GitHub Pages</a>.</p>
-<p><code>yaml
-- stage: build
-  language: python
-  python:
-    - 3.6
-  install:
-    - python -m pip install --upgrade pip
-    - python -m pip install -r requirements.txt
-  script:
-    - make publish
-  deploy:
-    provider: pages
-    skip_cleanup: true
-    strategy: git
-    token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-    keep_history: true
-    local_dir: output
-    on:
-      branch: master</code></p>
-</li>
-</ol>
-<h2>Pelican</h2>
-<p><a href="http://docs.getpelican.com">Pelican</a> is the tool that generates the static website from the markdown files.  Pelican is a Python package and is installed by Python's package manager, <code>pip</code>.  All dependency and their respective versions are listed in the project's <code>requirements.txt</code>.</p>
-<p>Pelican's configuration files are also written in Python and Pelican's default set-up splits the configuration into two files:</p>
-<ol>
-<li>
-<p><code>pelicanconf.py</code> for local development.</p>
-</li>
-<li>
-<p><code>publishconf.py</code> for publishing (which imports <code>pelicanconf.py</code> and overrides any setting needed for publishing a website).</p>
-</li>
-</ol>
-<p>Pelican's default set-up also simplifies the execution by providing a convenience <code>Makefile</code>.  The <code>Makefile</code> is an standard convention that contains pre-configured commands for various tasks.</p>
-<p>The <code>.travis-ci.yml</code> files executes all of the set-up and Pelican steps during the build and publish step.</p>
-<h2>The <code>gh-pages</code> branch</h2>
-<p>GitHub Pages is one of the features that comes with every project and its only job is to display a collection of html files as a website.  Even with that scope, there's still a lot of the different ways to use that feature; a quick search on GitHub Pages will find tutorials that seem contradictory or mention seemly irrelevant or confusing configurations.  This project is creating a <em>project site</em> (not a <em>user site</em> or <em>organization</em>) where the final url will be something like  <code>https://&lt;user&gt;.github.io/&lt;repository&gt;</code>.  More information is available from the <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#types-of-github-pages-sites">GitHub Pages Documentation</a></p>
-<p>The <code>gh-pages</code> branch is a git branch named <code>gh-pages</code>.  There is nothing special about the branch, except that <code>gh-pages</code> is the default value for that branch that GitHub uses for as a <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#publishing-sources-for-github-pages-sites">publishing source</a>.  Travis-Ci follows GitHub's lead and its publish commanded uses <code>gh-pages</code> as a default value its <code>target_branch</code> setting.</p>                </article>
-            </aside><!-- /#featured -->
-        <section id="extras" class="body">
-                <div class="blogroll">
-                        <h2>links</h2>
-                        <ul>
-                            <li><a href="https://getpelican.com/">Pelican</a></li>
-                            <li><a href="https://www.python.org/">Python.org</a></li>
-                            <li><a href="https://palletsprojects.com/p/jinja/">Jinja2</a></li>
-                            <li><a href="#">You can modify those links in your config file</a></li>
-                        </ul>
-                </div><!-- /.blogroll -->
-                <div class="social">
-                        <h2>social</h2>
-                        <ul>
-                            <li><a href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
 
-                            <li><a href="#">You can add links in your config file</a></li>
-                            <li><a href="#">Another social link</a></li>
-                        </ul>
-                </div><!-- /.social -->
-        </section><!-- /#extras -->
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
 
-        <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="https://getpelican.com/">Pelican</a>, which takes great advantage of <a href="https://www.python.org/">Python</a>.
-                </address><!-- /#about -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog/images/home-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="page-heading">
+                        <h1>Tag markdown</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-                <p>The theme is by <a href="https://www.smashingmagazine.com/2009/08/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-        </footer><!-- /#contentinfo -->
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-preview">
+            <a href="https://dbarsam.github.io/blog/how-this-blog-works.html" rel="bookmark" title="Permalink to How this blog works">
+                <h2 class="post-title">
+                    How this blog works
+                </h2>
+            </a>
+                <p class="article-summary">
+                    A summary of the blog's infrastructure.
+                </p>
+            <p class="post-meta">Posted by
+                    <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                 on Mon 14 September 2020
+            </p>
+        </div>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
 
 </body>
+
 </html>
