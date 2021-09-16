@@ -2,7 +2,7 @@
 title: How this blog is themed
 date: 2020-09-14T01:29:08.051Z
 category: about the blog
-tags: blog,pipeline,travis-ci,github,markdown,python
+tags: blog,pipeline,travis-ci,github,pelican,python
 slug: how-this-blog-themes
 authors: db
 summary: A summary of the blog's theming infrastructure.
@@ -24,7 +24,7 @@ There's different strategies to 'embedding' a theme.  This project has added it 
 Using the [pelican-clean-blog] as an example, we first add the submodule through git:
 
 ```console
-git submodule add https://github.com/gilsondev/pelican-clean-blog pelicam/themes/pelican-clean-blog
+git submodule add https://github.com/gilsondev/pelican-clean-blog pelican/themes/pelican-clean-blog
 ```
 
 If you're working on window you'll need to watch out for file paths with slashes.  If you have any error that's like this,
@@ -62,15 +62,14 @@ This should now be visible if the build or run the live local server:
 python -m pelican --autoreload --listen
 ```
 
-## Thoughts on Theming
+## Theme as Submodule
 
-Like a rug, a good theme really ties the whole website together so I appreciate the work that goes into making one.  However, the one point I can't get over is use of copying and pasting files to install the theme.  While using submodules to embed the theme is a good step, it feels dated and even like it's the wrong tool -- especially when we're already in Python and using Python packages.
-
-Unfortunately, it seems like I have started using Pelican during a down turn.  Most of development for the themes in the [Pelican Themes GitHub Project] appear to be stagnant, only a few talk about supporting Pelican 4.0 and of those even fewer publish their themes as Python package.  That's a shame as it's pretty straight forward to set-up a simple Python package structure and build pipeline.  We've already talked about services like [Travis CI], but there's also tools like [cookiecutter] that already provide this service, which Pelican uses for its [plugins].
+Like a rug, a good theme really ties the whole website together.  So I appreciate the work that goes into making one; however, the one point I can't get over is use of copying and pasting files to install the theme.  While using submodules to embed the theme is a good step towards being modular, it feels dated and the wrong tool -- especially when we're already using Python packages.   Hopefully, this is just a transition.  It looks like Pelican 4.0 did start to push for better extension organization, but the current focus is on [Pelican Plugins].  Most of development for the themes in the [Pelican Themes GitHub Project] appears to be stagnant, and only a few talk about supporting Pelican 4.0, and of those even fewer publish their themes as Python package.
 
 [github]: https://github.com
 [travis ci]: https://travis-ci.com
 [pelican]: http://docs.getpelican.com
+[pelican plugins]: https://github.com/pelican-plugins
 [submits the html files]: https://docs.travis-ci.com/user/deployment/pages/
 [pelican-themes]: https://docs.getpelican.com/en/stable/pelican-themes.html
 [Pelican Themes GitHub Project]: https://github.com/getpelican/pelican-themes
