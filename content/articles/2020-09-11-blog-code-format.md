@@ -208,6 +208,36 @@ for i in range(10):
     print("ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 print("Goodbye")
 ```
+
+It's important to also note that this is behaving differently if there were no line numbering at all. For example, the above code block with the `linenums` attribute removed renders this code block:
+
+```python
+for i in range(10):
+    print("ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+print("Goodbye")
+```
+
+The above code block is not wrapped, but embedded in a scroll box to work around that.  The problem lies with the table mechanism used for the table column line numbering. Underneath the hood, the code block with `linenums` renders this html:
+
+```html
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
+```
+
+While the one without, renders this html (which is the same as the table cell containing the code in the above example):
+
+```html
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</pre></div>
+```
+
 [python-markdown]: https://python-markdown.github.io/extensions/fenced_code_blocks/
 [pymdown-extensions]: https://facelessuser.github.io/pymdown-extensions/
 [superfences]: https://facelessuser.github.io/pymdown-extensions/extensions/superfences/
