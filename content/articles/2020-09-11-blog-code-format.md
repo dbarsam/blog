@@ -1,7 +1,6 @@
 ---
 title: How this blog renders code samples
 date: 2020-09-14T01:29:08.051Z
-modified: 2020-09-14 12:30
 category: about the blog
 tags: blog,pipeline,
 slug: how-this-blog-renders-code-sample
@@ -9,7 +8,14 @@ authors: db
 summary: A summary about the blog's code formatting
 ---
 
-Sometimes it's easier just to show to copy and paste-able code.  Pelican doesn't handle this out of the box so we need to extend it with a couple of plugins and extensions.
+Pelican doesn't handle syntax highlighting out of the box.  You need to add that functionality, which means extending the blog with a collection of configurations, plugins, and Markdown extensions.
+
+This post is mainly a collection of notes taken from the first pass at enabling the feature.  And while that first pass really didn't conclude in a satisfying way, it did end up with this blog getting some basic code formatting functionality.  The whole exercise could be broken down into 4 different sub-topics:
+
+1. Use Markdown syntax to denote text as code blocks.
+2. Use the [codehilite] extension to render the html with the correct colour.
+3. Use the [Python-Markdown] to extend Markdown with additional Markdown syntax features.
+4. Use the correct configuration to render line numbers.
 
 ## Handling Code with Markdown
 
@@ -105,12 +111,12 @@ After that, the aboves renders as expected with the [pymdown-extensions]'s defau
 
 ## Adding line numbering
 
-Line numbering is handles by [superfences] and it's help page is great at aswering questions.  For this blog, it's important to note that out of the box, there are two options to rendering line numbers:
+Line numbering is handles by [superfences] and its help page is great at answering questions.  For this blog, it's important to note that out of the box, there are two options to rendering line numbers:
 
 1. Embedded
 2. Separate Table Column
 
-Note:  [pymdown-extensions] does add third option, `pymdownx-inline`, but that's not working with this current theme. Incidentally, this seems to be part of a larger problem of non-working extensions, like `markdown.extensions.admonition` and `pymdownx.tabbed`, and its not clear if the fault lies with the theme, Pelican, or something on the blog's configuration side.  As a result, this blog uses the separate table column as configured in thr `pelicanconf.py`, under the `pymdownx.highlight` extension:
+Note:  [pymdown-extensions] does add third option, `pymdownx-inline`, but that's not working with this current theme. Incidentally, this seems to be part of a larger problem of non-working extensions, like `markdown.extensions.admonition` and `pymdownx.tabbed`, and it's not clear if the fault lies with the theme, Pelican, or something on the blog's configuration side.  As a result, this blog uses the separate table column as configured in thr `pelicanconf.py`, under the `pymdownx.highlight` extension:
 
 ```python
 MARKDOWN = {
@@ -127,7 +133,7 @@ MARKDOWN = {
 }
 ```
 
-The `pelicanconf.py` configurat has line number disabled by default. Line numbers are enabled by adding the `linenums` attribute to each individual code block with the starting line number as its argument.
+The `pelicanconf.py` configuration has line number disabled by default. Line numbers are enabled by adding the `linenums` attribute to each individual code block with the starting line number as its argument.
 
 For example, this Markdown:
 

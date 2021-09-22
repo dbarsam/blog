@@ -9,9 +9,15 @@
     },
     "cSpell.words": [
         "backticks",
+        "codehilite",
+        "linenums",
         "monospace",
+        "pelicanconf",
+        "pymdown",
+        "pymdownx",
         "submodule",
         "submodules",
+        "superfences",
         "symlink"
     ],
 }
