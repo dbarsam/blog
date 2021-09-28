@@ -1,11 +1,11 @@
 ---
 title: How this blog renders code samples
-date: 2020-09-14T01:29:08.051Z
+date: 2020-09-11T05:15:34.051Z
 category: about the blog
-tags: blog,pipeline,
+tags: blog,markdown,codehilite,pelican
 slug: how-this-blog-renders-code-sample
 authors: db
-summary: A summary about the blog's code formatting
+summary: Notes from trying to get Pelican's code formatting feature properly configured.
 ---
 
 Pelican doesn't handle syntax highlighting out of the box.  You need to add that functionality, which means extending the blog with a collection of configurations, plugins, and Markdown extensions.
