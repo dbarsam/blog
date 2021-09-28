@@ -57,14 +57,13 @@ MARKDOWN = {
         },
         'pymdownx.highlight': {
             'legacy_no_wrap_code' : True,
+            'linenums_style': 'table',
             'css_class': 'highlight',
             'guess_lang': False,
             'pygments_style': 'default',
             'noclasses': False,
             'use_pygments': True,
-            'linenums': False,
-            'extend_pygments_lang': [],
-            'legacy_no_wrap_code' : True
+            'extend_pygments_lang': []
         },
         'pymdownx.arithmatex'  : {},
         'pymdownx.betterem' : {
@@ -76,15 +75,19 @@ MARKDOWN = {
         'pymdownx.emoji': {
             "emoji_index": pymdownx.emoji.emojione,
             "emoji_generator": pymdownx.emoji.to_png,
-
         },
         'pymdownx.inlinehilite' : {},
         'pymdownx.magiclink' : {},
         'pymdownx.mark' : {},
         'pymdownx.smartsymbols' : {},
-        'pymdownx.superfences' : {},
+        "pymdownx.superfences": {
+            # No need for magic indention-based code blocks: all ours are
+            # delimited by fences anyway.
+            "disable_indented_code_blocks": True,
+        },
         'pymdownx.tasklist' : {},
         'pymdownx.tilde' : {},
+        'pymdownx.tabbed': {},
     },
     'output_format': 'html5'
 }
@@ -149,3 +152,4 @@ COLOR_SCHEME_CSS = 'tomorrow_night.css'
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'}
 }
+SOCIAL = (('github', 'https://github.com/dbarsam'),)
