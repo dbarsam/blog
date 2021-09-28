@@ -1,11 +1,11 @@
 ---
 title: How this blog works
-date: 2020-09-14T01:29:08.051Z
+date: 2020-09-08T01:29:08.051Z
 category: about the blog
 tags: blog,pipeline,travis-ci,github,markdown,python,pelican
 slug: how-this-blog-works
 authors: db
-summary: A summary of the blog's infrastructure.
+summary: The pieces that make up this blog's backend.
 header_cover: /images/article-bg.png
 ---
 

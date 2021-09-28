@@ -1,11 +1,11 @@
 ---
 title: How this blog is themed
-date: 2020-09-14T01:29:08.051Z
+date: 2020-09-10T03:19:06.034Z
 category: about the blog
 tags: blog,pipeline,travis-ci,github,pelican,python
 slug: how-this-blog-themes
 authors: db
-summary: A summary of the blog's theming infrastructure.
+summary: The set-up of this blog's theme.
 header_cover: /images/article-bg.png
 ---
 
