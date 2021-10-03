@@ -9,7 +9,10 @@
     },
     "cSpell.words": [
         "backticks",
+        "cmdcmdline",
+        "cmder",
         "codehilite",
+        "eval",
         "linenums",
         "monospace",
         "pelicanconf",
@@ -19,5 +22,20 @@
         "submodules",
         "superfences",
         "symlink"
+    ],
+    "cSpell.languageSettings": [
+        {
+            "languageId": "python",
+            "includeRegExpList": [
+                "/#.*/",                       // In-line comments
+                "/('''|\"\"\")[^\\1]+?\\1/g"   // Block comments
+            ]
+        },
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/^```(?:.|\\s)+?^```/mig"      // Code fences
+            ]
+        }
     ],
 }
