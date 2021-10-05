@@ -34,7 +34,8 @@
         {
             "languageId": "markdown",
             "ignoreRegExpList": [
-                "/^```(?:.|\\s)+?^```/mig"      // Code fences
+                "/^```(?:.|\\s)+?^```/mig",      // Code fences
+                "/^````(?:.|\\s)+?^````/mig"     // Meta Code fences
             ]
         }
     ],
