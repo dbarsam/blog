@@ -36,9 +36,9 @@ for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$f
 
 The extra bit of magic here is that we check the result of `markdown-link-check` against the exit command with the short-circuit *or* condition (`||`):
 
-- If `markdown-link-check` is succesful, it returns `0` which is the equivaleunt of True, which then satsifies the *or* expressions, so it skips the `exit` command, continuing on with the loop.
+- If `markdown-link-check` is successful, it returns `0` which is the equivalent of True, which then satisfies the *or* expressions, so it skips the `exit` command, continuing on with the loop.
 
-- If `markdown-link-check` is not succesful, it returns the equivalent of False, so the shell evalutes the other side of the *or* expression and exits the instance with the default error value of `1`.
+- If `markdown-link-check` is not successful, it returns the equivalent of False, so the shell evaluates the other side of the *or* expression and exits the instance with the default error value of `1`.
 
 This is a fancy shell trick that makes the final travis job  nice and compact:
 
