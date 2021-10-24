@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>VSCode tasks for Pelican blogs</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="How to run Pelican commands from within Visual Studio Code.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="blog">
+        <meta name="tags" content="vscode">
+        <meta name="tags" content="pelican">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/vscode-task-pelican.html">
+	<meta property="og:title" content="VSCode tasks for Pelican blogs">
+	<meta property="article:published_time" content="2020-11-23 03:40:27.619000+00:00">
+            <meta property="og:description" content="How to run Pelican commands from within Visual Studio Code.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
+</head>
+
+<body class="article-vscode-task-pelican">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>VSCode tasks for Pelican blogs</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Mon 23 November 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>VSCode's <a href="https://code.visualstudio.com/docs/editor/tasks">tasks feature</a> is the editor's mechanism to execute building, testing, and other software development actions from the comfort of the IDE.  Most of the common tasks are built-in or provided by plugins, but it's also possible to define workspace tasks in the project's <code>tasks.json</code> file.</p>
+<p>In this Pelican powered project, we can take advantage of that flexibility and add support for two Pelican specific commands:  build and serve.</p>
+<h2 id="the-build-task">The <code>build</code> Task</h2>
+<p>The build command is pretty straight forward to adapt.  On the command line it looks like this:</p>
+<div class="highlight"><pre><span></span>python -m pelican .\content
+</pre></div>
+<p>And we can turn that into the following json block and add it to the <code>tasks.json</code> file in the project's <code>.vscode</code> folder:</p>
+<div class="highlight"><pre><span></span>    <span class="p">{</span>
+        <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;pelican-build&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;isBuildCommand&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}\\.conda\\env\\python.exe&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pelican&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;${workspaceFolder}\\content&quot;</span>
+        <span class="p">],</span>
+        <span class="nt">&quot;problemMatcher&quot;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">},</span>
+</pre></div>
+<p>We mark this task as an explicit <em>build</em> command with the <code>isBuildCommand</code> flag.  This adds it the list of commands automatically bound to VSCode's <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>b</kbd> keyboard mapping.</p>
+<p>We also add an empty <code>problemMatcher</code>.  VSCode's <a href="https://code.visualstudio.com/docs/editor/tasks#_defining-a-problem-matcher">problem matching</a> feature is how the editor converts the text output of the command into the editor's <a href="https://code.visualstudio.com/docs/editor/editingevolved#_errors-warnings">problems panel</a>, accessible via <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>m</kbd>.  Unfortunately Pelican does not output its error messages into a compatible format so we add the feature but leave it empty until a future change in either VSCode or Pelican.</p>
+<h2 id="the-serve-task">The <code>serve</code> Task</h2>
+<p>The <code>serve</code> command is also fairly simple to adapt.  Like the <code>build</code> command we take a command line and turn it into a json task entry.</p>
+<p>The serve command line:</p>
+<div class="highlight"><pre><span></span>python -m pelican --autoreload --listen
+</pre></div>
+<p>The json equivalent of the command line, added it to the <code>tasks.json</code> file in the <code>.vscode</code> folder:</p>
+<div class="highlight"><pre><span></span>    <span class="p">{</span>
+        <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;pelican-serve&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;isBackground&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="nt">&quot;runOptions&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;instanceLimit&quot;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">},</span>
+        <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}\\.conda\\env\\python.exe&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pelican&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--autoreload&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--listen&quot;</span>
+        <span class="p">],</span>
+        <span class="nt">&quot;problemMatcher&quot;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">},</span>
+</pre></div>
+<p>Since this task will be running the internal web server in the background, we mark it with the <code>isBackground</code> flag and we limit the instances to a single instance in the <code>runOptions</code>.  This allows us to launch it once from VSCode and any subsequent launch will prompt us to kill it or restart it, avoiding any awkwardness over the single HTTP port.</p>
+<p>We don't bother with a keyboard shortcuts for two reasons:</p>
+<ol>
+<li>
+<p>Unlike the build task above, there's no support for a global <em>watcher</em> task that can be overridden; VSCode only supports <em>build</em> and <em>test</em> tasks and nothing else.</p>
+</li>
+<li>
+<p>Project specific keyboard shortcuts are not possible.  See <a href="https://github.com/Microsoft/vscode/issues/23757">Issue #23757</a> for more details.</p>
+</li>
+</ol>
+<p>And of course, we also add an empty <code>problemMatcher</code> for the same reasons listed above.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/blog.html">blog</a>, <a href="https://dbarsam.github.io/blog/tag/vscode.html">vscode</a>, <a href="https://dbarsam.github.io/blog/tag/pelican.html">pelican</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>
