@@ -6,6 +6,7 @@ tags: vscode
 slug: vscode-editor-preview-sync
 authors: db
 summary: VSCode's preview synchronization is a nice feature -- when it works...
+header_cover: /images/article-bg.png
 ---
 
 VSCode has a nice preview engine that allows a side-by-side of text and rendered-text. The feature is best documented in VSCode's native [Markdown] support help, but it's available for other languages and their plugins.

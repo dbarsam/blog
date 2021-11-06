@@ -6,6 +6,7 @@ tags: ssh,git,cmd
 slug: start-ssh-agent
 authors: db
 summary: There's a small bit of inconvenience in Git's convenience script.
+header_cover: /images/article-bg.png
 ---
 
 When you install Git on Windows, the installer will also install the utility script `start-ssh-agent.cmd`.  That script isn't necessarily required to use Git, but if you fall into a narrow category of users who have a particular workflow, you can get tripped up by one of its unfortunate side effects.
