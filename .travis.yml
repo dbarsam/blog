@@ -12,6 +12,15 @@ jobs:
         - npm install -g markdownlint-cli
       script:
         - markdownlint **/*.md
+    - stage: lint
+      language: node_js
+      node_js:
+        - 12
+      install:
+        - npm install -g npm@latest
+        - npm install -g markdown-link-check
+      script:
+        - for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$file" || exit 1; done;
     - stage: build
       language: python
       python:

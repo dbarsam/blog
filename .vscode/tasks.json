@@ -30,6 +30,20 @@
                 "--listen"
             ],
             "problemMatcher": []
-        }
+        },
+        {
+            "label": "pelican-chrome",
+            "type": "process",
+            "isBackground": true,
+            "runOptions": {
+                "instanceLimit": 1
+            },
+            "command": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+            "args": [
+                "-incognito",
+                "http://localhost:8000"
+            ],
+            "problemMatcher": []
+        },
     ]
 }
