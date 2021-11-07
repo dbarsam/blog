@@ -6,6 +6,7 @@ tags: blog,markdown,codehilite,pelican
 slug: how-this-blog-renders-code-sample
 authors: db
 summary: Notes from trying to get Pelican's code formatting feature properly configured.
+header_cover: /images/article-bg.png
 ---
 
 Pelican doesn't handle syntax highlighting out of the box.  You need to add that functionality, which means extending the blog with a collection of configurations, plugins, and Markdown extensions.
