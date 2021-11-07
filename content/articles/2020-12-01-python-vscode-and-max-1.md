@@ -111,8 +111,8 @@ Behind the scenes, the editable install only modifies the virtual environment by
 
 This part of the infrastructure has only focused on the Python parts of it.  With the virtual environment complete and our project properly installed for development, it's time to move onto [Part II].  There we'll look into how we'll graft the virtual environment onto the application using the _bootstrap_ script.
 
-[chocolatey]: https://chocolatey.org/
-[conda]: https://anaconda.org
+[chocolatey]: https://chocolatey.org
+[conda]: https://docs.conda.io
 [activator section]: https://virtualenv.pypa.io/en/latest/user_guide.html#activators
 [official help]: https://virtualenv.pypa.io/en/latest/
 [command line arguments]: https://virtualenv.pypa.io/en/latest/cli_interface.html#section-activators
