@@ -108,8 +108,10 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>In VSCode, this blog use the <a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD">HTTP/s and relative link checker</a> extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin.</p>
-<p>The blog's pipeline is slightly different and in there we use the <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> npm package.  To get started with the <code>markdown-link-check</code> the site recommends using this <code>find</code> shell command:</p>
+        <p>This blog use VSCode's <a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD">HTTP/s and relative link checker</a> extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut <kbd>Alt+L</kbd>.</p>
+<p>The blog's pipeline is slightly different and our best option is the <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.</p>
+<h2 id="batch-operation">Batch Operation</h2>
+<p>The first challenge is that <code>markdown-link-check</code> only takes one file as a argument.  To handle multiple files, the website recommends using this <code>find</code> shell command:</p>
 <div class="highlight"><pre><span></span>find . -name <span class="se">\*</span>.md -exec markdown-link-check <span class="o">{}</span> <span class="se">\;</span>
 </pre></div>
 <p>However, that won't work for our Travis-CI powered pipeline.  When Travis is checking the result of that command, it only processes the exit code of the <code>find</code> command and not the result of <code>markdown-link-check</code>, which is executed by <code>find</code>'s <code>exec</code> option.</p>
@@ -124,13 +126,27 @@
 <p>The extra bit of magic here is that we check the result of <code>markdown-link-check</code> against the exit command with the short-circuit <em>or</em> condition (<code>||</code>):</p>
 <ul>
 <li>
-<p>If <code>markdown-link-check</code> is succesful, it returns <code>0</code> which is the equivaleunt of True, which then satsifies the <em>or</em> expressions, so it skips the <code>exit</code> command, continuing on with the loop.</p>
+<p>If <code>markdown-link-check</code> is successful, it returns <code>0</code> which is the equivalent of True, which then satisfies the <em>or</em> expressions, so it skips the <code>exit</code> command, continuing on with the loop.</p>
 </li>
 <li>
-<p>If <code>markdown-link-check</code> is not succesful, it returns the equivalent of False, so the shell evalutes the other side of the <em>or</em> expression and exits the instance with the default error value of <code>1</code>.</p>
+<p>If <code>markdown-link-check</code> is not successful, it returns the equivalent of False, so the shell evaluates the other side of the <em>or</em> expression and exits the instance with the default error value of <code>1</code>.</p>
 </li>
 </ul>
-<p>This is a fancy shell trick that makes the final travis job  nice and compact:</p>
+<h2 id="ignore-rules">Ignore Rules</h2>
+<p>We have another problem handling Pelican's shorthand for <a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content">local links</a>: <code>{filename}</code> and <code>{static}</code>.  These are not valid links but we create a configuration file (<code>.markdown-link-check.json</code>) and use the <code>ignorePatterns</code> option to skip those special cases:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;ignorePatterns&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;pattern&quot;</span><span class="p">:</span> <span class="s2">&quot;^{filename}&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;pattern&quot;</span><span class="p">:</span> <span class="s2">&quot;^{static}&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+<h2 id="travis-ci-integration">Travis CI Integration</h2>
+<p>We can combine the the batch operation and the configuration into a final command line that makes the job nice and compact:</p>
 <div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">stage</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">lint</span>
     <span class="l l-Scalar l-Scalar-Plain">language</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">node_js</span>
     <span class="l l-Scalar l-Scalar-Plain">node_js</span><span class="p p-Indicator">:</span>
@@ -139,7 +155,7 @@
     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">npm install -g npm@latest</span>
     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">npm install -g markdown-link-check</span>
     <span class="nt">script</span><span class="p">:</span>
-    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">for file in  $(find ./content -name \*.md); do markdown-link-check --verbose &quot;$file&quot; || exit 1; done;</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">for file in  $(find ./content -name \*.md); do markdown-link-check --config .markdown-link-check.json --verbose &quot;$file&quot; || exit 1; done;</span>
 </pre></div>
     </article>
 

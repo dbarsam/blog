@@ -1,5 +1,887 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2020-11-23T03:40:27+00:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>VSCode tasks for Pelican blogs</title><link href="https://dbarsam.github.io/blog/vscode-task-pelican.html" rel="alternate"></link><published>2020-11-23T03:40:27+00:00</published><updated>2020-11-23T03:40:27+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-23:/blog/vscode-task-pelican.html</id><summary type="html">&lt;p&gt;How to run Pelican commands from within Visual Studio Code.&lt;/p&gt;</summary><content type="html">&lt;p&gt;VSCode's &lt;a href="https://code.visualstudio.com/docs/editor/tasks"&gt;tasks feature&lt;/a&gt; is the editor's mechanism to execute building, testing, and other software development actions from the comfort of the IDE.  Most of the common tasks are built-in or provided by plugins, but it's also possible to define workspace tasks in the project's &lt;code&gt;tasks.json&lt;/code&gt; file.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2020-12-09T21:02:07-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>Set up VSCode to Debug Python in 3ds Max - V</title><link href="https://dbarsam.github.io/blog/python-vscode-max-5.html" rel="alternate"></link><published>2020-12-09T21:02:07-05:00</published><updated>2020-12-09T21:02:07-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-12-09:/blog/python-vscode-max-5.html</id><summary type="html">&lt;p&gt;Part V&amp;#58; A slight tweak to get us an VSCode auto-attach configuration&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the previous article, we established an auto-attach workflow with VSCode that was based on a passive sleep delay.  We can tweak that using the same network strategy used in the remote debugger workflow and make it more a more active connection.&lt;/p&gt;
+&lt;h2 id="a-simple-handshake"&gt;A Simple HandShake&lt;/h2&gt;
+&lt;p&gt;The current solution uses a chunk of time to delay VSCode a bit before it tries to connect to the debugging library in the remote Python environment.  VSCode doesn't provide a native delay so we take advantage of the &lt;code&gt;preLaunchTask&lt;/code&gt; attribute to sleep using a local command.  Otherwise the attach command would timeout because of a mis-alignment of VSCode's and &lt;code&gt;ptvsd&lt;/code&gt; connection requests.  The sleep works but it's an adhoc synchronization method that needs to be tuned to the application.  We can add some more precision to that using a pre-connect network connection.&lt;/p&gt;
+&lt;p&gt;We're already using a network connection for synchronization in the original &lt;code&gt;wait_and_attach&lt;/code&gt; call.  Our plan duplicates that wait and attach approach and uses the initial connection as the sleep-like synchronization device.  After the connection has been established, we don't need it anymore so we close the connection and move on with the flow, where we VSCode connects with &lt;code&gt;ptvsd&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The connection is a very simple &lt;a href="https://docs.python.org/3/howto/sockets.html"&gt;socket&lt;/a&gt; connection where the server socket waits for an connection and a client socket repeated open and closes connection until it succeeds with the awaiting the server socket.&lt;/p&gt;
+&lt;h2 id="the-listen-socket"&gt;The 'Listen' Socket&lt;/h2&gt;
+&lt;p&gt;We wrap the server socket logic into a &lt;code&gt;_listen&lt;/code&gt; function with host and port parameters.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_listen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Launches a very simple server socket on `host`, `port` to wait for a socket connection&lt;/span&gt;
+
+&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;span class="sd"&gt;        host (str): The host name.&lt;/span&gt;
+&lt;span class="sd"&gt;        port (int): The host port.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ss&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;AF_INET&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SOCK_STREAM&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setsockopt&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SOL_SOCKET&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SO_REUSEADDR&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;settimeout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;60&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bind&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="n"&gt;ss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;listen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Listening on &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;cs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;_&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;accept&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Connected to &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;cs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;ss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The key part is that we use the &lt;code&gt;socket.accept&lt;/code&gt; function to wait for the incoming connection from our client socket.  Everything else is just setting up socket to manage the connection as cleaning as possible.  We enable the &lt;code&gt;socket.SO_REUSEADDR&lt;/code&gt; option so that we can re-use the same host and port that we're using in the second network connection between VSCode and &lt;code&gt;ptvsd&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;After the server accepts the connection we make the assumptions that two processes are in sync (to a degree) so we don't need it anymore and we immediately close it.  It's important to note that after we close the connection, we sleep for an additional 1 second.  This is a basic safety measure taken so that the system can close the socket.  Otherwise the socket may remains in a &lt;code&gt;TIME_WAIT&lt;/code&gt; state that prevents its re-use by the same host, which is what we want to do later on.&lt;/p&gt;
+&lt;h2 id="the-connect-socket"&gt;The 'Connect' Socket&lt;/h2&gt;
+&lt;p&gt;We wrap the matching logic into a &lt;code&gt;_connect&lt;/code&gt; function with a host and port parameters&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Launches a very simple client socket on `host`, `port` to repeatedly try a connection.&lt;/span&gt;
+
+&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;span class="sd"&gt;        host (str): The host name.&lt;/span&gt;
+&lt;span class="sd"&gt;        port (int): The host port.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;AF_INET&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SOCK_STREAM&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setsockopt&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SOL_SOCKET&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;socket&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;SO_REUSEADDR&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;settimeout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;60&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;connected&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;connected&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Polling &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt; for connection.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+            &lt;span class="n"&gt;connected&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;True&lt;/span&gt;
+        &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;close&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Connected to &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Unlike the listen function, the client socket has no blocking &lt;code&gt;accept&lt;/code&gt; function.  Instead we enter into a perpetual loop where we repeatedly connect to the our host and port.  If the connection fails, it will raise an exception which we handle by sleeping a little bit and then trying again.  However, if the connection is successful then it sets the connected flag to &lt;code&gt;True&lt;/code&gt; and exits the loop.&lt;/p&gt;
+&lt;p&gt;After we've exited the loop, we close the socket and sleep for one more time to allow the socket to move from &lt;code&gt;TIME_WAIT&lt;/code&gt; to the proper closed state.&lt;/p&gt;
+&lt;h2 id="connect-then-wait-for-attach"&gt;Connect then Wait For Attach&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;_connect&lt;/code&gt; function is added to the &lt;code&gt;bootstrap.py&lt;/code&gt; file and specifically to the &lt;code&gt;_attach&lt;/code&gt; function. Inside that function, the &lt;code&gt;_connect&lt;/code&gt; is called before we run &lt;code&gt;ptvsd.wait_for_attach()&lt;/code&gt;.  We use the same host and port for the first handshake and the second ptvsd call.  We can do this because were careful with closing the socket after using it for the first time.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Attaches to a remote debugger on a host and port&lt;/span&gt;
+
+&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;span class="sd"&gt;        host (str): The host name.&lt;/span&gt;
+&lt;span class="sd"&gt;        port (int): The host port.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;ptvsd&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;ImportError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Could not import module `ptvsd`.  Is installed?&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Notifying IDE for auto-attach on &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;_connect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Waiting for debug client to connect on &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;enable_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;redirect_output&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait_for_attach&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Because the call to &lt;code&gt;ptvsd&lt;/code&gt; is part of the application's start-up sequence we don't know exactly when it will be called.  The new &lt;code&gt;_connect&lt;/code&gt; function loops until it makes connection to the &lt;code&gt;_listen&lt;/code&gt; function called by the &lt;code&gt;preTaskFunction&lt;/code&gt; attribute.  Since this function is part of the application's startup sequence, chances are the &lt;code&gt;listen&lt;/code&gt; will be already waiting and the initial &lt;code&gt;connect&lt;/code&gt; function will be the only connection attempted.&lt;/p&gt;
+&lt;h2 id="listen-script"&gt;Listen Script&lt;/h2&gt;
+&lt;p&gt;Because we've added &lt;code&gt;_connect&lt;/code&gt; to the bootstrap script, we keep things self contained and also add the &lt;code&gt;_listen&lt;/code&gt; function to the script.  However, that means that we need to update the main entry point to have two modes:  One for the new Python &lt;code&gt;attach&lt;/code&gt; configuration and one for the current C++ &lt;code&gt;launch&lt;/code&gt; configuration.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;socket&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Main entry point for the bootstrap script&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="n"&gt;debug_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;debug_host&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_HOST&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;debug_attach&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_AUTOATTACH&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;log_level&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DEBUG&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - start -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Initialized logging to &amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s1"&gt;&amp;quot;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;debug_attach&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;_listen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_port&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;scripts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;_exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scripts&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Could not find variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;debug_port&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_port&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Environment variable PROJECT_DEBUG_HOST/PROJECT_DEBUG_PORT do not exist or are empty.  Python debugging disabled.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - stop -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We've updated the bootstrap script with a new parameter: &lt;code&gt;PROJECT_AUTOATTACH&lt;/code&gt;.  If that value exists, the logic goes straight into the &lt;code&gt;_listen&lt;/code&gt; function, where it will call the &lt;code&gt;socket.accept()&lt;/code&gt; and wait for the first connection request.  However, if that variable doesn't exist, then the logic goes through the same logic as before.&lt;/p&gt;
+&lt;p&gt;We could have created a second script to do this new mode implementation instead of putting it into our existing bootstrap.py script.  That's perfectly valid and would be strictly adhering to the &lt;a href="https://en.wikipedia.org/wiki/Single-responsibility_principle"&gt;Single Responsibility Principle&lt;/a&gt;, but because we're putting the mode toggle on the module instead of the module's functions, it's less egregious and somewhat acceptable -- especially give how small our &lt;code&gt;bootstrap.py&lt;/code&gt; still is.&lt;/p&gt;
+&lt;h2 id="the-auto-attach-task"&gt;The Auto-Attach Task&lt;/h2&gt;
+&lt;p&gt;With our &lt;code&gt;bootstrap.py&lt;/code&gt; modified, we can now create a new VSCode task to replace the &lt;code&gt;sleep&lt;/code&gt; task.  Because we've used engineered this auto-attach with Python, we swap out the &lt;code&gt;COMSPEC&lt;/code&gt; process with the local &lt;code&gt;python.exe&lt;/code&gt; from our virtual environment and use that to call our &lt;code&gt;bootstrap.py&lt;/code&gt; file.  We toggle the mode with by defining a &lt;code&gt;PROJECT_AUTOATTACH&lt;/code&gt; and specify the &lt;code&gt;PROJECT_DEBUG_PORT&lt;/code&gt; and &lt;code&gt;PROJECT_DEBUG_HOST&lt;/code&gt; which will be passed onto the &lt;code&gt;_listen&lt;/code&gt; function.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;label&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;auto-attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;process&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;command&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${workspaceFolder}\\.env27\\Scripts\\python.exe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;args&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;${workspaceFolder}\\scripts\\bootstrap.py&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;options&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;quot;env&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;PROJECT_DEBUG_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;5678&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;PROJECT_DEBUG_HOST&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;PROJECT_AUTOATTACH&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;1&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;group&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;none&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;presentation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;quot;reveal&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;never&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;quot;showReuseMessage&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And change the &lt;code&gt;attach&lt;/code&gt; configuration's &lt;code&gt;preLaunchTask&lt;/code&gt; value from &lt;code&gt;sleep&lt;/code&gt; to &lt;code&gt;auto-attach&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Python: Remote Attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;python&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;request&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;justMyCode&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;processName&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;3dsmax.exe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;host&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;port&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;5678&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;pathMappings&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;localRoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${workspaceFolder}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;remoteRoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${workspaceFolder}&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;preLaunchTask&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;auto-attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="auto-attach-vs-sleep"&gt;Auto-Attach vs Sleep&lt;/h2&gt;
+&lt;p&gt;This socket auto attach task is a refinement that makes the overall workflow more flexible in exchange for a more complicated workflow.&lt;/p&gt;
+&lt;p&gt;The choice to use it only really matter on the complexity of the project.  For example, if the project is accessed by multiple people, across different environment, then the sleep value is a developer specific personal choice that will most likely be tuned and re-tuned. Values that are personal choices should not be checked into source control.  Otherwise, the project will have a (hopefully, cordial) fight between developers that will result in a series of meaningless back-and-forth commits or a weird ignore rule.&lt;/p&gt;
+&lt;p&gt;The socket auto attach adds a little bit of engineering for an adaptable sleep that's great for that kind of situation.  However, if the project is less complex, like a script written by one person, then the sleep attach is probably good enough.&lt;/p&gt;
+&lt;h2 id="the-final-hodge-podge-solution"&gt;The Final Hodge Podge Solution&lt;/h2&gt;
+&lt;p&gt;We now have a collection of components, assembled into something resembling a seamless debugging workflow:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Create a fresh virtual environment.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Install the project as an editable package into that virtual environment.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a startup script for the application that:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Grafts the virtual environment onto the application's Python installation with the &lt;code&gt;activate_this.py&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Configures the Python logging as needed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Invokes &lt;code&gt;ptvsd&lt;/code&gt;'s attach functions.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Configure a VSCode C++ &lt;code&gt;launch&lt;/code&gt; configuration that runs the application with the start-up script without changing any global application state (e.g. use the application's command line).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Configure a VSCode Python &lt;code&gt;attach&lt;/code&gt; configuration that attaches to the application.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a &lt;code&gt;sleep&lt;/code&gt; / &lt;code&gt;auto-attach&lt;/code&gt; task for the &lt;code&gt;attach&lt;/code&gt;'s &lt;code&gt;preLaunchTask&lt;/code&gt; attribute.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With this infrastructure in place, we now have an quasi &lt;code&gt;auto-attach&lt;/code&gt; workflow that delivers a equivalent &lt;code&gt;launch&lt;/code&gt; experience.&lt;/p&gt;
+&lt;h2 id="potential-next-steps"&gt;Potential Next Steps&lt;/h2&gt;
+&lt;p&gt;This has been a particularly exhaustive tour of a rather specific Python development workflow.  We could go on as there's always room for improvements or slight tweaks.&lt;/p&gt;
+&lt;h3 id="pythonpath"&gt;PYTHONPATH&lt;/h3&gt;
+&lt;p&gt;If you're working on a single Python script with no external package, you could skip the grafting and just configuration the &lt;code&gt;PYTHONPATH&lt;/code&gt; environment variable to include your Python script.&lt;/p&gt;
+&lt;h3 id="pip-virtualenv-alternatives"&gt;&lt;code&gt;pip&lt;/code&gt; / &lt;code&gt;virtualenv&lt;/code&gt; alternatives&lt;/h3&gt;
+&lt;p&gt;We chose &lt;code&gt;pip&lt;/code&gt; and &lt;code&gt;virtualenv&lt;/code&gt; as they were the default Python development tools.  There's nothing preventing the project from taking advantage of the &lt;code&gt;PYTHONPATH&lt;/code&gt; environment variable and use a &lt;code&gt;vendor&lt;/code&gt; folder or some other manual process to create an equivalent &lt;code&gt;site-packages&lt;/code&gt; folder.  Just be sure to include &lt;code&gt;ptvsd&lt;/code&gt; in your solution.&lt;/p&gt;
+&lt;h3 id="ptvsd-vs-debugpy"&gt;&lt;code&gt;ptvsd&lt;/code&gt; vs &lt;code&gt;debugpy&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;It has to be noted that &lt;code&gt;ptvsd&lt;/code&gt; has been deprecated in favour of the newer &lt;a href="https://pypi.org/project/debugpy/"&gt;debugpy&lt;/a&gt;.  This tutorial did not make that switch because it's a swap-able component and, embarrassingly enough, it didn't work right out of the box.  Follow &lt;code&gt;debugpy&lt;/code&gt;'s &lt;a href="https://github.com/microsoft/debugpy/issues/262]"&gt;#262&lt;/a&gt; for more information.&lt;/p&gt;
+&lt;h3 id="scalability"&gt;Scalability&lt;/h3&gt;
+&lt;p&gt;This set-up seems like a tediously manual process.  That's not wrong, but it was done that way to learn about the process instead of providing a readily available solution.  There are definitely ways to streamline the process if you need this for multiple projects. For instance, it could be incorporated into a project template, like a &lt;a href="https://cookiecutter.readthedocs.io/"&gt;cookiecutter&lt;/a&gt;, or made into an VSCode extension.&lt;/p&gt;
+&lt;h3 id="other-vscode-plugins"&gt;Other VSCode plugins&lt;/h3&gt;
+&lt;p&gt;While our example used 3ds Max, it should be general enough to adapt to another application.  These are already extensions out there solving similar problems, most notably &lt;a href="https://marketplace.visualstudio.com/items?itemName=JacquesLucke.blender-development"&gt;Blender Development&lt;/a&gt; for Blender, &lt;a href="https://marketplace.visualstudio.com/items?itemName=saviof.mayacode"&gt;MayaCode&lt;/a&gt; for Maya, and the more general &lt;a href="https://marketplace.visualstudio.com/items?itemName=benjamin-simmonds.pythoncpp-debug"&gt;Python C++ Debugger&lt;/a&gt;.  In fact, a quick survey suggests that Blender and Maya are the hot topics these days.  See &lt;a href="https://github.com/Barbarbarbarian/Blender-VScode-Debugger"&gt;Blender-VSCode-Debugger&lt;/a&gt;, &lt;a href="https://github.com/AlansCodeLog/blender-debugger-for-vscode"&gt;Blender Debugger for VS Code (and Visual Studio)&lt;/a&gt;, &lt;a href="https://marketplace.visualstudio.com/items?itemName=FXTD-Odyssey.mayapy"&gt;MayaPy&lt;/a&gt;, and &lt;a href="https://marketplace.visualstudio.com/items?itemName=JonMacey.mayaport"&gt;MayaPort&lt;/a&gt; extensions and the vast collection &lt;a href="https://googlethatforyou.com?q=vscode%20blender%20tutorial"&gt;How To VSCode and Blender&lt;/a&gt; and &lt;a href="https://googlethatforyou.com?q=vscode%20maya%20tutorial"&gt;How To VSCode and Maya&lt;/a&gt; tutorials for more examples.&lt;/p&gt;
+&lt;h3 id="pycharm"&gt;PyCharm?&lt;/h3&gt;
+&lt;p&gt;We do see you &lt;a href="https://knowledge.autodesk.com/support/3ds-max/troubleshooting/caas/screencast/Main/Details/34ab44e0-5702-473e-850c-a6b7a86b45f2.html"&gt;PyCharm&lt;/a&gt;. Maybe next time.&lt;/p&gt;</content><category term="dev setup"></category><category term="Python"></category><category term="3ds Max"></category><category term="VSCode"></category></entry><entry><title>Set up VSCode to Debug Python in 3ds Max - IV</title><link href="https://dbarsam.github.io/blog/python-vscode-max-4.html" rel="alternate"></link><published>2020-12-07T21:08:47-05:00</published><updated>2020-12-07T21:08:47-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-12-07:/blog/python-vscode-max-4.html</id><summary type="html">&lt;p&gt;Part IV&amp;#58; VSCode's compound launch configuration&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the previous article, we successful created a debugging session from connecting the various pieces of our infrastructure.  We created a Python virtual environment via &lt;code&gt;virtualenv&lt;/code&gt;, built a &lt;code&gt;bootstrap.py&lt;/code&gt; to graft it into the application and to execute &lt;code&gt;ptvsd&lt;/code&gt; at startup, and successfully make the whole contraption work, via VSCode's &lt;code&gt;Attach to Process&lt;/code&gt; remote debugging configuration. In this article, we'll look up at couple of tweaks to make that manual process into one that's automated.&lt;/p&gt;
+&lt;h2 id="attach-vs-launch"&gt;Attach vs Launch&lt;/h2&gt;
+&lt;p&gt;VSCode has two main workflows for debugging: &lt;code&gt;launch&lt;/code&gt; and &lt;code&gt;attach&lt;/code&gt;.  The &lt;code&gt;launch&lt;/code&gt; configuration could work, but it requires a very specific set up that executes something equivalent to a &lt;code&gt;python.exe&lt;/code&gt;.  That won't work in our case because the Python interpreter is buried inside a Windows application, so we're left with &lt;code&gt;attach&lt;/code&gt; workflow where we manually launch the application, switch to VSCode and execute the &lt;code&gt;attach&lt;/code&gt; configuration.&lt;/p&gt;
+&lt;p&gt;While the launch-and-attach workflow does its job, it can become tedious after a while -- especially if unhandled exceptions or crash destabilizes the application so much that the only recourse is to restart the session.  There is, however, some automation tricks that we can incorporate to our current set-up that could remove that friction.&lt;/p&gt;
+&lt;h2 id="companion-launch-configuration"&gt;Companion Launch Configuration&lt;/h2&gt;
+&lt;p&gt;The first trick is to create a &lt;code&gt;launch&lt;/code&gt; configuration, but not for Python.
+Instead we're going to create a &lt;em&gt;companion&lt;/em&gt; launch configuration for our application, which should use a debugger native to the application.&lt;/p&gt;
+&lt;p&gt;We configure the new configuration with the [cppvsdg] debugger (from VSCode's &lt;a href="https://code.visualstudio.com/docs/cpp/launch-json-reference"&gt;C/C++ debugging&lt;/a&gt; documentation) and include all the settings from our &lt;code&gt;launch.cmd&lt;/code&gt; script.  Thankfully, this is pretty straight forward:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;3ds Max 2018&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;cppvsdbg&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;request&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;launch&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;program&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;C:\\Program Files\\Autodesk\\3ds Max 2018\\3dsmax.exe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;args&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;-U&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;PythonHost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;${workspaceFolder}\\scripts\\bootstrap.py&amp;quot;&lt;/span&gt;
+    &lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;stopAtEntry&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;environment&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="err"&gt;//&lt;/span&gt; &lt;span class="err"&gt;E&lt;/span&gt;&lt;span class="kc"&gt;nsure&lt;/span&gt; &lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;ha&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="err"&gt;ds&lt;/span&gt; &lt;span class="err"&gt;Max&lt;/span&gt; &lt;span class="err"&gt;is&lt;/span&gt; &lt;span class="err"&gt;ahead&lt;/span&gt; &lt;span class="err"&gt;o&lt;/span&gt;&lt;span class="kc"&gt;f&lt;/span&gt; &lt;span class="err"&gt;a&lt;/span&gt;&lt;span class="kc"&gt;n&lt;/span&gt;&lt;span class="err"&gt;y&lt;/span&gt; &lt;span class="err"&gt;o&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;her&lt;/span&gt; &lt;span class="err"&gt;Q&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt; &lt;span class="err"&gt;based&lt;/span&gt; &lt;span class="err"&gt;applica&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;io&lt;/span&gt;&lt;span class="kc"&gt;n&lt;/span&gt;&lt;span class="err"&gt;.&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;C:\\Program Files\\Autodesk\\3ds Max 2018;${env:PATH}&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="err"&gt;//&lt;/span&gt; &lt;span class="err"&gt;PROJECT_LOG_LEVEL&lt;/span&gt; &lt;span class="err"&gt;is&lt;/span&gt; &lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;he&lt;/span&gt; &lt;span class="err"&gt;loggi&lt;/span&gt;&lt;span class="kc"&gt;n&lt;/span&gt;&lt;span class="err"&gt;g&lt;/span&gt; &lt;span class="err"&gt;levele&lt;/span&gt; &lt;span class="err"&gt;we&lt;/span&gt; &lt;span class="kc"&gt;nee&lt;/span&gt;&lt;span class="err"&gt;d&lt;/span&gt; &lt;span class="kc"&gt;f&lt;/span&gt;&lt;span class="err"&gt;or&lt;/span&gt; &lt;span class="err"&gt;developme&lt;/span&gt;&lt;span class="kc"&gt;nt&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;DEBUG&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="err"&gt;//&lt;/span&gt; &lt;span class="err"&gt;PROJECT_DEBUG_PORT&lt;/span&gt; &lt;span class="err"&gt;/&lt;/span&gt; &lt;span class="err"&gt;PROJECT_DEBUG_HOST&lt;/span&gt; &lt;span class="err"&gt;should&lt;/span&gt; &lt;span class="err"&gt;ma&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;ch&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;Remo&lt;/span&gt;&lt;span class="kc"&gt;te&lt;/span&gt; &lt;span class="err"&gt;A&lt;/span&gt;&lt;span class="kc"&gt;tta&lt;/span&gt;&lt;span class="err"&gt;ch&amp;#39;.&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;5678&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_HOST&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="err"&gt;//&lt;/span&gt; &lt;span class="err"&gt;PROJECT_SCRIPTS&lt;/span&gt; &lt;span class="err"&gt;co&lt;/span&gt;&lt;span class="kc"&gt;nta&lt;/span&gt;&lt;span class="err"&gt;i&lt;/span&gt;&lt;span class="kc"&gt;ns&lt;/span&gt; &lt;span class="err"&gt;a&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;;&amp;#39;&lt;/span&gt; &lt;span class="err"&gt;delime&lt;/span&gt;&lt;span class="kc"&gt;ter&lt;/span&gt; &lt;span class="err"&gt;lis&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt; &lt;span class="err"&gt;o&lt;/span&gt;&lt;span class="kc"&gt;f&lt;/span&gt; &lt;span class="err"&gt;Py&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;ho&lt;/span&gt;&lt;span class="kc"&gt;n&lt;/span&gt; &lt;span class="err"&gt;scrip&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt; &lt;span class="kc"&gt;t&lt;/span&gt;&lt;span class="err"&gt;o&lt;/span&gt; &lt;span class="err"&gt;ru&lt;/span&gt;&lt;span class="kc"&gt;n&lt;/span&gt; &lt;span class="err"&gt;a&lt;/span&gt;&lt;span class="kc"&gt;t&lt;/span&gt; &lt;span class="err"&gt;s&lt;/span&gt;&lt;span class="kc"&gt;tartu&lt;/span&gt;&lt;span class="err"&gt;p.&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${workspaceRoot}\\.env27\\Scripts\\activate_this.py&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This configuration replaces our &lt;code&gt;launch.cmd&lt;/code&gt; script.  It incorporate the same command line to load the &lt;code&gt;bootstrap.py&lt;/code&gt; as a start-up script while also specifying the needed environment variables for our workflow.&lt;/p&gt;
+&lt;p&gt;As a bonus, we're also addressing &lt;a href="https://dbarsam.github.io/blog/qt-dll-mismatch.html"&gt;another problem&lt;/a&gt; by updating the &lt;code&gt;PATH&lt;/code&gt; environment to ensure that 3ds Max's executable and libraries are given the top most priority.&lt;/p&gt;
+&lt;h2 id="compound-configuration"&gt;Compound Configuration&lt;/h2&gt;
+&lt;p&gt;We now have an &lt;code&gt;attach&lt;/code&gt; and &lt;code&gt;launch&lt;/code&gt; configuration and we can execute them at the same time using a &lt;a href="https://code.visualstudio.com/Docs/editor/debugging#_compound-launch-configurations"&gt;compound configuration&lt;/a&gt;.  The compound configuration is the mechanism to execute multi-target sessions, like what we have now, and it's also pretty straight forward:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;compounds&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Python 3ds Max 2018&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;configurations&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;3ds Max 2018&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="s2"&gt;&amp;quot;Python: Remote Attach&amp;quot;&lt;/span&gt;
+            &lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now hitting &lt;kbd&gt;F5&lt;/kbd&gt; will launch both the &lt;code&gt;3ds Max 2018&lt;/code&gt; and &lt;code&gt;Python: Remote Attach&lt;/code&gt;.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it initializes &lt;code&gt;ptvsd&lt;/code&gt; and calls the &lt;code&gt;ptvsd.wait_for_attach()&lt;/code&gt;.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the &lt;code&gt;attach&lt;/code&gt; call timing out before 3ds Max is ready.&lt;/p&gt;
+&lt;p&gt;The compound configuration does not support a delay so the only solution is to take advantage of the &lt;code&gt;launch.json&lt;/code&gt;'s &lt;a href="https://code.visualstudio.com/Docs/editor/debugging#_launchjson-attributes"&gt;preLaunchTask&lt;/a&gt; attribute and add an artificial delay to the &lt;code&gt;attach&lt;/code&gt; configuration.&lt;/p&gt;
+&lt;h2 id="delayed-attach-configuration"&gt;'Delayed' Attach Configuration&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;preLaunchTask&lt;/code&gt; is a generic enough to take in any &lt;a href="https://code.visualstudio.com/docs/editor/tasks"&gt;Task&lt;/a&gt;, so we create one:  &lt;code&gt;sleep&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;label&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;sleep&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;process&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;command&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${env:COMSPEC}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;args&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;/c&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;timeout&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;/t&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;30&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;&amp;quot;/nobreak&amp;quot;&lt;/span&gt;
+    &lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;group&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;none&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;presentation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;quot;reveal&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;never&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;quot;showReuseMessage&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;sleep&lt;/code&gt; task is a custom VSCode Task in our project's &lt;code&gt;tasks.json&lt;/code&gt; file that wraps around the &lt;code&gt;cmd.exe&lt;/code&gt; command &lt;a href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc754891(v=ws.11)"&gt;timeout&lt;/a&gt;.  We try to avoid any conflicts with shell settings by making this a &lt;code&gt;process&lt;/code&gt; task instead of a &lt;code&gt;shell&lt;/code&gt; task.  We explicitly name the [cmd.exe] executable, which is usually available &lt;code&gt;COMSPEC&lt;/code&gt; environment variable.&lt;/p&gt;
+&lt;p&gt;For our 3ds Max example we anecdotally select use a hardcoded a time of 30 seconds.  That time will vary on how 3ds max is configured, what's the current system specs, and even if you've launched the application for the first time.  Multiple iterations will keep the application available in memory so subsequent launches will appear shorter.&lt;/p&gt;
+&lt;p&gt;The implementation of sleep is a personal choice and it could be re-written to use any command.  Our only requirement is that the command delays the original Remote Attach task by desired amount.  After the command is written, it is then plugged into the &lt;code&gt;preLaunchTask&lt;/code&gt; attribute:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Python: Remote Attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;python&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;request&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;justMyCode&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;processName&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;3dsmax.exe&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;host&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;port&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;5678&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;pathMappings&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;localRoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;${workspaceFolder}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;remoteRoot&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;.&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;preLaunchTask&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;sleep&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="next-step"&gt;Next Step&lt;/h2&gt;
+&lt;p&gt;We now have a collection of components assembled into something that delivers a seamless debugging workflow.  In fact the workflow is good enough that we could start using it right now.  However, in the [Part V], we'll look at an alternative to the sleep command that adds a little more precision to our delay, effectively making our &lt;code&gt;sleep-attach&lt;/code&gt; workflow into an &lt;code&gt;auto-attach&lt;/code&gt; workflow.&lt;/p&gt;</content><category term="dev setup"></category><category term="Python"></category><category term="3ds Max"></category><category term="VSCode"></category></entry><entry><title>Set up VSCode to Debug Python in 3ds Max - III</title><link href="https://dbarsam.github.io/blog/python-vscode-max-3.html" rel="alternate"></link><published>2020-12-05T19:10:49-05:00</published><updated>2020-12-05T19:10:49-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-12-05:/blog/python-vscode-max-3.html</id><summary type="html">&lt;p&gt;Part III&amp;#58; VSCode's attach to process workflow&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the previous article, we had created a Python virtual environment via &lt;code&gt;virtualenv&lt;/code&gt;'s and built a &lt;code&gt;bootstrap.py&lt;/code&gt; to graft it into the application.  In this article, we'll connect that environment and script to VSCode.&lt;/p&gt;
+&lt;h2 id="attach-to-process"&gt;Attach to Process&lt;/h2&gt;
+&lt;p&gt;Developing Python packages for use in external application is a very special edge case.  The &lt;a href="https://code.visualstudio.com/docs/python/debugging"&gt;Python debug configurations in Visual Studio Code&lt;/a&gt; covers the most common Python debugging scenarios but the scenario that we'll start with is the &lt;em&gt;Attach To Process&lt;/em&gt; one, where we attach the debugger to the already-running application.&lt;/p&gt;
+&lt;p&gt;That workflow is represented as a &lt;code&gt;attach&lt;/code&gt; configuration in the &lt;code&gt;launch.json&lt;/code&gt;, which is different than the more user-friendly &lt;code&gt;launch&lt;/code&gt; configuration which launches the process and immediately attaches to it.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Python: Attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;python&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;request&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;attach&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;port&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;5678&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;host&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The attach configuration is the same configuration used for Remote Debugging.  The only real difference here is that instead of making a connection to another machine, we'll be making a network connection to the same machine, as noted by the &lt;code&gt;localhost&lt;/code&gt; host name, and communicating to another debugger on ports &lt;code&gt;5678&lt;/code&gt;, which is just the value VSCode chose as it's default port.&lt;/p&gt;
+&lt;h2 id="the-ptvsd-package"&gt;The &lt;code&gt;ptvsd&lt;/code&gt; package&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;attach&lt;/code&gt; configuration expects to connect with another piece of software running inside the application.  That means for the attach process to work, we need to install another component and have that component start a connection to VSCode after the application has start.&lt;/p&gt;
+&lt;p&gt;Unfortunately, there's nothing in 3ds Max (and most applications) that will do this out of the box, so we have to install a 3&lt;sup&gt;rd&lt;/sup&gt; party library, like the &lt;code&gt;ptvsd&lt;/code&gt; Python package to set up.&lt;/p&gt;
+&lt;p&gt;Sometime after the application has loaded, the user needs to execute the following commands:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;ptvsd&lt;/span&gt;
+&lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;enable_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;localhost&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5678&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;redirect_output&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait_for_attach&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will first enable to listening port at the same host and port in our &lt;code&gt;attach&lt;/code&gt; configuration and then forever for VSCode to make the connection.&lt;/p&gt;
+&lt;h2 id="install-ptvsd-into-the-side-car-environment"&gt;Install &lt;code&gt;ptvsd&lt;/code&gt; into the side-car environment&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;ptvsd&lt;/code&gt; is available as a standalone Python package on PyPI.  This works well for the workflow that we put into place in Part I.  There, we create a virtual environment to be grafted into the application, which we set-up by using pip:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ D:&lt;span class="se"&gt;\p&lt;/span&gt;roject&lt;span class="se"&gt;\.&lt;/span&gt;env27&lt;span class="se"&gt;\s&lt;/span&gt;cript&lt;span class="se"&gt;\a&lt;/span&gt;ctivate.bat
+&lt;span class="o"&gt;(&lt;/span&gt;.env27&lt;span class="o"&gt;)&lt;/span&gt; $ python -m pip install -r D:&lt;span class="se"&gt;\p&lt;/span&gt;roject&lt;span class="se"&gt;\r&lt;/span&gt;equirements.txt
+&lt;span class="o"&gt;(&lt;/span&gt;.env27&lt;span class="o"&gt;)&lt;/span&gt; $ python -m pip install -e D:&lt;span class="se"&gt;\p&lt;/span&gt;roject
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This means that the simplest way to instal ptvsd is to add it to the requirements.txt file&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ptvsd==4.3.2
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Note:  Do not add it as a package dependency to your project, be it in setup.py's &lt;code&gt;install_requires&lt;/code&gt; or some other mechanism.  It is not a dependency to be installed on the user's machine; it is a development tool that only has value to the development team.  There's more information about the difference in the PyPA's &lt;a href="https://packaging.python.org/discussions/install-requires-vs-requirements/"&gt;install_requires vs requirements files&lt;/a&gt; guidelines.&lt;/p&gt;
+&lt;h2 id="call-ptvsd-from-the-bootstrappy-script"&gt;Call &lt;code&gt;ptvsd&lt;/code&gt; from the &lt;code&gt;bootstrap.py&lt;/code&gt; script&lt;/h2&gt;
+&lt;p&gt;We can add the &lt;code&gt;ptvsd&lt;/code&gt; connection call to our &lt;code&gt;bootstrap.py&lt;/code&gt; so that the connection happens at startup.  We have to be careful to add it &lt;em&gt;after&lt;/em&gt; the grafting of the side-car environment, as that's where the Python package lives.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;Standalone script to attach to a remote debugging.&lt;/span&gt;
+
+&lt;span class="sd"&gt;The script will inject various sites and execute startup files in&lt;/span&gt;
+&lt;span class="sd"&gt;order to set-up the Python environment for development.&lt;/span&gt;
+
+&lt;span class="sd"&gt;In addition the script will also use `ptvsd` to remotely attach to&lt;/span&gt;
+&lt;span class="sd"&gt;a remote debugger to the current process.  In some applications this&lt;/span&gt;
+&lt;span class="sd"&gt;is the only way to debug Python code.&lt;/span&gt;
+
+&lt;span class="sd"&gt;This script expects the following environment variables:&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with&lt;/span&gt;
+&lt;span class="sd"&gt;  `exec`.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_DEBUG_HOST` The host name of the remote debugger to attach to.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_DEBUG_PORT` The port number of the remote debugger to attach to.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_LOG_LEVEL` The initial logging level this script will use.&lt;/span&gt;
+
+&lt;span class="sd"&gt;.. note::&lt;/span&gt;
+
+&lt;span class="sd"&gt;    This script does not install ptvsd and expects the module to be already installed,&lt;/span&gt;
+&lt;span class="sd"&gt;    or installed during the site injection or exec execution step.&lt;/span&gt;
+
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Main entry point for the bootstrap script&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="n"&gt;debug_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;debug_host&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_HOST&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;log_level&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DEBUG&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - start -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Initialized logging to &amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s1"&gt;&amp;quot;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;scripts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;script_paths&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;filenames&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;No scripts to execute.  Skipping script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Executing Script: &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;contents&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+            &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;contents&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+            &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;   ! &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt; failed to execute&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Could not find variable PROJECT_SCRIPTS does not exist or is empty.  Skipping Python script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;debug_host&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;debug_port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;ptvsd&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Waiting for PTVSD debug client to connect on &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;debug_port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;enable_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_port&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt; &lt;span class="n"&gt;redirect_output&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait_for_attach&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;ImportError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Could not import module `ptvsd`.  Is installed?&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Environment variable PROJECT_DEBUG_HOST/PROJECT_DEBUG_PORT do not exist or are empty.  Skipping Python remote debugging.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - stop -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In this iteration we've made a few changes things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;We've added a &lt;code&gt;PROJECT_DEBUG_PORT&lt;/code&gt; and &lt;code&gt;PROJECT_DEBUG_HOST&lt;/code&gt; environment variables to contain the respective parameters for &lt;code&gt;ptvsd&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We've add a little of extra error handling in case the &lt;code&gt;ptvsd&lt;/code&gt; module is not importable.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="code-complexity"&gt;Code Complexity&lt;/h2&gt;
+&lt;p&gt;Unfortunately, we've triggered a code complexity warning in the single &lt;code&gt;main&lt;/code&gt; function.  We'll do that by splitting up the function into &lt;code&gt;main&lt;/code&gt; and two internal function &lt;code&gt;_exec&lt;/code&gt; and &lt;code&gt;_attach&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;Standalone script to attach to a remote debugging.&lt;/span&gt;
+
+&lt;span class="sd"&gt;The script will inject various sites and execute startup files in&lt;/span&gt;
+&lt;span class="sd"&gt;order to set-up the Python environment for development.&lt;/span&gt;
+
+&lt;span class="sd"&gt;In addition the script will also use `ptvsd` to remotely attach to&lt;/span&gt;
+&lt;span class="sd"&gt;a remote debugger to the current process.  In some applications this&lt;/span&gt;
+&lt;span class="sd"&gt;is the only way to debug Python code.&lt;/span&gt;
+
+&lt;span class="sd"&gt;This script expects the following environment variables:&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with&lt;/span&gt;
+&lt;span class="sd"&gt;  `exec`.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_DEBUG_HOST` The host name of the remote debugger to attach to.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_DEBUG_PORT` The port number of the remote debugger to attach to.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_LOG_LEVEL` The initial logging level this script will use.&lt;/span&gt;
+
+&lt;span class="sd"&gt;.. note::&lt;/span&gt;
+
+&lt;span class="sd"&gt;    This script does not install ptvsd and expects the module to be already installed,&lt;/span&gt;
+&lt;span class="sd"&gt;    or installed during the site injection or exec execution step.&lt;/span&gt;
+
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filenames&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Execute a collection of Python files in the current environment&lt;/span&gt;
+
+&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;span class="sd"&gt;        scripts (list): A list of filename.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;script_paths&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;filenames&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;No scripts to execute.  Skipping script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Executing Script: &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;contents&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;contents&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+        &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;   ! &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt; failed to execute&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Attaches to a remote debugger on a host and port&lt;/span&gt;
+
+&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;span class="sd"&gt;        host (str): The host name.&lt;/span&gt;
+&lt;span class="sd"&gt;        port (int): The host port.&lt;/span&gt;
+&lt;span class="sd"&gt;    &amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;ptvsd&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;ImportError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Could not import module `ptvsd`.  Is installed?&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Waiting for PTVSD debug client to connect on &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;:&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;enable_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;redirect_output&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;ptvsd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wait_for_attach&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Main entry point for the bootstrap script&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="n"&gt;debug_port&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_PORT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;debug_host&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_DEBUG_HOST&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;log_level&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DEBUG&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - start -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Initialized logging to &amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s1"&gt;&amp;quot;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;scripts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;_exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scripts&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Could not find variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;debug_port&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;_attach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_host&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;debug_port&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Environment variable PROJECT_DEBUG_HOST/PROJECT_DEBUG_PORT do not exist or are empty.  Python debugging disabled.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - stop -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="attach-to-process-manually"&gt;Attach to Process (Manually)&lt;/h2&gt;
+&lt;p&gt;With the &lt;code&gt;ptvsd&lt;/code&gt; installed in the side-car environment and configured to run on startup via &lt;code&gt;bootstrap.py&lt;/code&gt;, we now have the minimum amount of pieces in place to start a debugging session.&lt;/p&gt;
+&lt;p&gt;First we update our launch script to include to host and the port:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;@&lt;/span&gt;&lt;span class="k"&gt;echo&lt;/span&gt; off
+&lt;span class="k"&gt;setlocal&lt;/span&gt;
+&lt;span class="k"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;%~dp0&lt;/span&gt;
+&lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL=DEBUG&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS=&lt;/span&gt;&lt;span class="nv"&gt;%CD%&lt;/span&gt;&lt;span class="s2"&gt;\.env27\Scripts\activate_this.py&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_HOST=locahost&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_PORT=5678&amp;quot;&lt;/span&gt;
+3dsmax.exe -u PythonHost bootstrap.py
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And second, we execute the VSCode's [remote debugging manual steps] to connect the &lt;code&gt;ptvsd&lt;/code&gt; instance running in the application:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Launch the application with &lt;code&gt;launch.cmd&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Wait for the application to display &lt;code&gt;Waiting for debug client to connect on localhost:5678&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Switch to VSCode.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Execute the &lt;code&gt;Python: Attach&lt;/code&gt; launch configuration from above.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;You should see the application resume its start sequence and VSCode should be in &lt;a href="https://code.visualstudio.com/Docs/editor/debugging"&gt;debugger mode&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="next-step"&gt;Next Step&lt;/h2&gt;
+&lt;p&gt;The updated &lt;code&gt;bootstrap.py&lt;/code&gt; and &lt;code&gt;launcher.cmd&lt;/code&gt; scripts completes the third part of the tutorial.  We now have a working workflow, even if it is somewhat clunky, to debug our Python package while it's running inside an embedded Python environment.  In the &lt;a href="https://dbarsam.github.io/blog/python-vscode-max-4.html"&gt;Part IV&lt;/a&gt;, we'll revisit this manual process and try out some different ways to make it automatic.&lt;/p&gt;</content><category term="dev setup"></category><category term="Python"></category><category term="3ds Max"></category><category term="VSCode"></category></entry><entry><title>Set up VSCode to Debug Python in 3ds Max - II</title><link href="https://dbarsam.github.io/blog/python-vscode-max-2.html" rel="alternate"></link><published>2020-12-03T20:23:45-05:00</published><updated>2020-12-03T20:23:45-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-12-03:/blog/python-vscode-max-2.html</id><summary type="html">&lt;p&gt;Part II&amp;#58; The bootstrap script&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the previous article, we prepared the Python development environment by first creating a Python virtual environment and then installing our Python project as an editable package.  In this article, we'll explore how we're going to graft this onto the external application.&lt;/p&gt;
+&lt;h2 id="python-activator"&gt;Python Activator&lt;/h2&gt;
+&lt;p&gt;The virtual environment that we've created is linked to the Python environment that created it.  In order to graft that environment to the application's Python installation, we're going to play around with that relationship by activating that virtual environment not in the original Python installation, but in the application's Python environment.&lt;/p&gt;
+&lt;p&gt;We can do that in a non-destructible way via a bootstrap script that is launched at application start-up.  We're really emphasizing the non-destructive nature of this because we don't want to make any permanent changes to the application and everything should be isolated to the current executing session.  The goal here is that the user should be able to launch the application without the start-up script and have the new instance co-exist without any side effects.&lt;/p&gt;
+&lt;p&gt;Fortunately, the &lt;code&gt;virtualenv&lt;/code&gt;'s Python activator option has done most of the work for us.  The Python activator produced an &lt;a href="https://github.com/pypa/virtualenv/blob/main/src/virtualenv/activation/python/activate_this.py"&gt;activate_this.py&lt;/a&gt; Python script and the the only thing that's really missing is for a way to execute within the application.&lt;/p&gt;
+&lt;p&gt;You can see this script online at GitHub.  The snapshot used for this article is available below:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# -*- coding: utf-8 -*-&lt;/span&gt;
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Activate virtualenv for current interpreter:&lt;/span&gt;
+&lt;span class="sd"&gt;Use exec(open(this_file).read(), {&amp;#39;__file__&amp;#39;: this_file}).&lt;/span&gt;
+&lt;span class="sd"&gt;This can be used when you must use an existing Python interpreter, not the virtualenv bin/python.&lt;/span&gt;
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;site&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+
+&lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;abs_file&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abspath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__file__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;NameError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;AssertionError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;You must use exec(open(this_file).read(), {&amp;#39;__file__&amp;#39;: this_file}))&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;bin_dir&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;abs_file&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;base&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;bin_dir&lt;/span&gt;&lt;span class="p"&gt;[:&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__BIN_NAME__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;  &lt;span class="c1"&gt;# strip away the bin part from the __file__, plus the path separator&lt;/span&gt;
+
+&lt;span class="c1"&gt;# prepend bin to PATH (this file is inside the bin directory)&lt;/span&gt;
+&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pathsep&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;bin_dir&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pathsep&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;VIRTUAL_ENV&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;base&lt;/span&gt;  &lt;span class="c1"&gt;# virtual env is right above bin directory&lt;/span&gt;
+
+&lt;span class="c1"&gt;# add the virtual environments libraries to the host python import mechanism&lt;/span&gt;
+&lt;span class="n"&gt;prev_length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;lib&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__LIB_FOLDERS__&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pathsep&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;realpath&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bin_dir&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lib&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="n"&gt;site&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;addsitedir&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;decode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__DECODE_PATH__&amp;quot;&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;[:]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;prev_length&lt;/span&gt;&lt;span class="p"&gt;:]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;prev_length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;real_prefix&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;prefix&lt;/span&gt;
+&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;prefix&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;base&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There are a few things that this script is doing that's important:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;This is a template file so the the strings &lt;code&gt;__LIB_FOLDERS__&lt;/code&gt;, &lt;code&gt;__BIN_NAME__&lt;/code&gt;, etc. are placeholders and are replaced with resolved values during the creation process.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The script is updating the &lt;code&gt;PATH&lt;/code&gt; environment variable.  This is important for binary components, usually DLL files on Windows.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The script is injecting additional site package locations with the &lt;a href="https://docs.python.org/3/library/site.html#site.addsitedir"&gt;addsitedir&lt;/a&gt;.  This is important, as it not only adds the respective &lt;code&gt;site-packages&lt;/code&gt; path to the &lt;a href="https://docs.python.org/3/library/sys.html#sys.path"&gt;sys.path&lt;/a&gt; but also processes the various &lt;code&gt;.pth&lt;/code&gt; files that may be added by -- but not limited to -- editable package installation.  More information about this is available on the &lt;a href="https://docs.python.org/3/library/site.html"&gt;site&lt;/a&gt; module in the Python standard lib.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="the-bootstrappy-bootstrap-script"&gt;The &lt;code&gt;bootstrap.py&lt;/code&gt; Bootstrap script&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;virtualenv&lt;/code&gt; module's &lt;code&gt;activate_this.py&lt;/code&gt; provides the core functionality that we need to graft the environment onto our application's Python environment.  The script even gives us instruction on how to execute it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;D:\project\.env27\Scripts\activate_this.py&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The problem is that we need to need to make the script portable.  If we put that code into a startup file, named &lt;code&gt;bootstrap.py&lt;/code&gt;, then we can use the &lt;code&gt;__file__&lt;/code&gt; attribute to resolve the current path and resolve the location of the &lt;code&gt;activate_this.py&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="n"&gt;root_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__file__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;root_path&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;.env27&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;Scripts&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;activate_this.py&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That's better, but how do we differentiate between potentially different Python environment?&lt;/p&gt;
+&lt;h2 id="bootstrap-environment-variables"&gt;Bootstrap Environment Variables&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;bootstrap.py&lt;/code&gt;'s &lt;code&gt;script_path&lt;/code&gt; variable is problematic for two reasons:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The hardcoded path is not portable.&lt;/li&gt;
+&lt;li&gt;The hardcoded path is not Python agnostic.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;We can punt that responsibility down the line to the user and have him pass it in as a parameter.  However, we're limited by the application in how we can communicate with the script.  One solution that seems to work around that limitation is environment variables:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;  &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;ACTIVATE_THIS_SCRIPT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Environment variables local to a process are a simple way to pass arguments down through multiple layers of code.  This is most evident when your application will give you a way to execute a script from the command line but not a way to pass in script arguments.&lt;/p&gt;
+&lt;p&gt;The alternative is to either automatically generate the script or a parameter file before launch, which is not necessarily wrong but won't work well for our particular task.  In our case it will be easier to set up the script to get it's data from environment variables.&lt;/p&gt;
+&lt;h2 id="bootstrap-safety-checks"&gt;Bootstrap Safety Checks&lt;/h2&gt;
+&lt;p&gt;We can decorate our &lt;code&gt;bootstrap.py&lt;/code&gt; with a bit more flare.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;We change the &lt;code&gt;ACTIVATE_THIS_SCRIPT&lt;/code&gt; into a &lt;code&gt;PROJECT_SCRIPTS&lt;/code&gt; environment variable that's a collection of individual scripts separated by semi-colon &lt;code&gt;;&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We add a bit more error handling to make the script as user-friendly as possible.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Since we're executing a startup script via &lt;code&gt;exec&lt;/code&gt;, we're also trapping all exceptions with the base  &lt;code&gt;Exception&lt;/code&gt;.  This is usually frowned upon as that patten tends to hide exceptions, but it's applicable in our case as we're sharing the exception to the logging console.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We wrap the entire script in a &lt;a href="https://docs.python.org/3/library/__main__.html"&gt;main scope&lt;/a&gt; out of good habit.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;Standalone set-up script&lt;/span&gt;
+
+&lt;span class="sd"&gt;The script will inject various sites and execute startup files in&lt;/span&gt;
+&lt;span class="sd"&gt;order to set-up the Python environment for development.&lt;/span&gt;
+
+&lt;span class="sd"&gt;This script expects the following environment variables:&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with&lt;/span&gt;
+&lt;span class="sd"&gt;  `exec`.&lt;/span&gt;
+
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;glob&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="c1"&gt;# Execute a list of startup scripts&lt;/span&gt;
+    &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;script_paths&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Executing Script: &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;contents&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;contents&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+        &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;   ! &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt; failed to execute&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="bootstrappy-logging"&gt;&lt;code&gt;bootstrap.py&lt;/code&gt; + Logging&lt;/h2&gt;
+&lt;p&gt;We take our basic premise one step further and replace the &lt;code&gt;prints&lt;/code&gt; with &lt;a href="https://docs.python.org/3/library/logging.html"&gt;logging&lt;/a&gt; statements.  This step is optional, but recommended as your Python tool should already be set-up to use logging instead of &lt;code&gt;print&lt;/code&gt; messages.&lt;/p&gt;
+&lt;p&gt;As a convenience we use the logging module's basic set-up function &lt;a href="https://docs.python.org/3/library/logging.html#logging.basicConfig"&gt;logging.basicConfig&lt;/a&gt; but if this is easily extended to something more advanced with the &lt;a href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig"&gt;logging.config.dictConfig&lt;/a&gt; configuration function.  And again, any parameter should be passed in via environment variables:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="sd"&gt;Standalone set-up script&lt;/span&gt;
+
+&lt;span class="sd"&gt;The script will inject various sites and execute startup files in&lt;/span&gt;
+&lt;span class="sd"&gt;order to set-up the Python environment for development.&lt;/span&gt;
+
+&lt;span class="sd"&gt;This script expects the following environment variables:&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with&lt;/span&gt;
+&lt;span class="sd"&gt;  `exec`.&lt;/span&gt;
+
+&lt;span class="sd"&gt;- `PROJECT_LOG_LEVEL` A semi-colon separated list of files to execute with&lt;/span&gt;
+&lt;span class="sd"&gt;  `exec`.&lt;/span&gt;
+
+&lt;span class="sd"&gt;.. note::&lt;/span&gt;
+
+&lt;span class="sd"&gt;    This script does not install ptvsd and expects the module to be already installed, or installed during the site injection or exec execution step.&lt;/span&gt;
+
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;glob&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;site&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="c1"&gt;# Configure the logging for the application&lt;/span&gt;
+    &lt;span class="n"&gt;log_level&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DEBUG&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - start -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Initialized logging to &amp;quot;&lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s1"&gt;&amp;quot;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;log_level&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Execute a list of startup scripts&lt;/span&gt;
+    &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getenv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;script_paths&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;sf&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;scripts&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sf&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;script_paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Executing Script: &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;contents&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;exec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;contents&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;__file__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+        &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;   ! &lt;/span&gt;&lt;span class="si"&gt;%s&lt;/span&gt;&lt;span class="s2"&gt; failed to execute&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;script_path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Python Bootstrap script - stop -&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;__main__&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="execute-the-bootstrap"&gt;Execute the Bootstrap&lt;/h2&gt;
+&lt;p&gt;With a virtual environment created and a basic bootstrap script in place, we're now ready to connect another pieces and launch our application with the side-car environment.  To ensure that we do that the most portable way possible, we look to the application's start-up process and see what methods we have to execute a script an startup.&lt;/p&gt;
+&lt;p&gt;Hopefully there is a command line or environment variable option available, but this is application specific.  From the &lt;a href="https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html"&gt;3ds Max help&lt;/a&gt;, we can execute any Python file using the &lt;code&gt;-u PythonHost&lt;/code&gt; command:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;3dsmax.exe -u PythonHost file.py
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;With that information, we can create a very rudimentary &lt;code&gt;launcher.cmd&lt;/code&gt; script to launch 3ds Max with our debug environment variables and the command line configured to launch with our bootstrap script:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;@&lt;/span&gt;&lt;span class="k"&gt;echo&lt;/span&gt; off
+&lt;span class="k"&gt;setlocal&lt;/span&gt;
+&lt;span class="k"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;%~dp0&lt;/span&gt;
+&lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_LOG_LEVEL=DEBUG&amp;quot;&lt;/span&gt;
+&lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;PROJECT_SCRIPTS=&lt;/span&gt;&lt;span class="nv"&gt;%CD%&lt;/span&gt;&lt;span class="s2"&gt;\.env27\Scripts\activate_this.py&amp;quot;&lt;/span&gt;
+3dsmax.exe -u PythonHost bootstrap.py
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Running this from the command line should launch 3ds Max and produce the following output in the 3ds Max Listener:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Welcome to MAXScript.
+
+
+Python Bootstrap script - start -
+Initialized logging to &amp;quot;DEBUG&amp;quot;
+Executing Script: D:\projects\.env27\Scripts\activate_this.py
+Python Bootstrap script - stop -
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="next-step"&gt;Next Step&lt;/h2&gt;
+&lt;p&gt;The completed &lt;code&gt;bootstrap.py&lt;/code&gt; completes the second part of the tutorial.  That file executes all of the necessary component needed to launch the application with a grafted side-car environment.  The next step, [Part III] will look into how exactly we use VSCode to launch the application with the &lt;code&gt;bootstrap.py&lt;/code&gt; script.&lt;/p&gt;</content><category term="dev setup"></category><category term="Python"></category><category term="3ds Max"></category><category term="VSCode"></category></entry><entry><title>Set up VSCode to Debug Python in 3ds Max - I</title><link href="https://dbarsam.github.io/blog/python-vscode-max-1.html" rel="alternate"></link><published>2020-12-01T19:14:45-05:00</published><updated>2020-12-01T19:14:45-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-12-01:/blog/python-vscode-max-1.html</id><summary type="html">&lt;p&gt;Part I&amp;#58; Python Side Car Environments&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the previous article, we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the conventional Python part of that infrastructure and examine how to create a &lt;em&gt;side-car&lt;/em&gt; environment for the external application.&lt;/p&gt;
+&lt;h2 id="side-car-environments"&gt;'Side Car' Environments&lt;/h2&gt;
+&lt;p&gt;While Python-enabled applications usually have some sort of Python scripting support, Python developers looking to deploy their scripts as Python packages -- or create Python scripts that use 3&lt;sup&gt;rd&lt;/sup&gt; party Python packages -- should consider setting up an external Python environment as a package host.&lt;/p&gt;
+&lt;p&gt;This external Python environment will be completely separate from the application but later on we'll connect them together by by grafting one Python environment on top of the other.&lt;/p&gt;
+&lt;p&gt;It's important to note that this separation is crucial.  Our goal here is to ensure that the local development environment (packages, scripts, settings, etc.) are kept isolated from the application's global environment.  So, while we want to use Python's native packaging features, we need to do so in a way that will not modify the global installation of the application.&lt;/p&gt;
+&lt;h2 id="keepem-separated"&gt;Keep'em separated&lt;/h2&gt;
+&lt;p&gt;There are some benefits to enforcing this barrier.  This separation ensures that the developer has the freedom to reset or even switch projects without having to selectively rollback global changes made to the application.  We can treat the side car environment as a personal sandbox and mess it up how ever we want; if we make a mistake, we can we can always reset by decoupling the environment from the application and destroying it. The alterative -- especially for those applications that don't have the most modular Python installation -- is to completely reinstall the application.&lt;/p&gt;
+&lt;p&gt;Python developers should already recognize this pattern as the concept of a &lt;em&gt;virtual environment&lt;/em&gt;.  The slight difference here for this article is that our side-car environment is created by external Python installation and grafted onto another that does not natively support virtual environments.&lt;/p&gt;
+&lt;h2 id="the-virtualenv-module"&gt;The &lt;code&gt;virtualenv&lt;/code&gt; module&lt;/h2&gt;
+&lt;p&gt;There are many tools that implement Python virtual environments, but the usual, and somewhat mature choice is &lt;code&gt;virtualenv&lt;/code&gt; module.  Python's &lt;code&gt;virtualenv&lt;/code&gt; module is a tool popular enough to warrant its own tutorials so it won't be covered here.  A good resource to keep around is the &lt;a href="https://virtualenv.pypa.io/en/latest/"&gt;official help&lt;/a&gt;, but the the important thing to note is that the &lt;code&gt;virtualenv&lt;/code&gt; module works by spawning a new environment based on its host Python installation.   This brings up a few points:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Because the &lt;code&gt;virtualenv&lt;/code&gt; module create virtual environments from a hosting Python environment, you must first install a &lt;em&gt;system&lt;/em&gt; Python environment to host &lt;code&gt;virtualenv&lt;/code&gt;.  This installation is a permanent Python solutions and we only need it to create the temporary side car environments provided by &lt;code&gt;virtualenv&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Because the &lt;code&gt;virtualenv&lt;/code&gt; module can only create virtual environments that matches its hosting Python environment, that &lt;em&gt;system&lt;/em&gt; Python should be the same version as the the application's Python installation -- or at least match it as close as possible.  This may be challenging if your application still uses Python 2 environments as that line has been discontinued.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;em&gt;system&lt;/em&gt; Python installation is usually pre-installed on Linux systems but not on Windows.  On Windows, this achieved simply by installing a Python environment from &lt;a href="https://www.python.org"&gt;https://www.python.org&lt;/a&gt; and then installing the &lt;code&gt;virtualenv&lt;/code&gt; module.  It's possible to use alternative installations methods (like &lt;a href="https://chocolatey.org"&gt;Chocolatey&lt;/a&gt;) or even alternative distribution (like &lt;a href="https://docs.conda.io"&gt;Conda&lt;/a&gt;), but that won't be covered here.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Some vendors have listened to feedback (and learning from their past handling of Python 2) so there is a chance of that the application could already provide all of the necessary support to create user virtual environments.  If that's the case for your specific application, then that makes this section joyfully obsolete.&lt;/p&gt;
+&lt;p&gt;However, if the application does not provide &lt;code&gt;virtualenv&lt;/code&gt; support directly out of the box, then we should continue to use the &lt;em&gt;system&lt;/em&gt; Python approach.  Even if the application's Python install is accessible, installing &lt;code&gt;virtualenv&lt;/code&gt; into the application's Python environment would still violate the separation policy to not touching the global installation.&lt;/p&gt;
+&lt;h2 id="venv-vs-virtualenv"&gt;&lt;code&gt;venv&lt;/code&gt; vs. &lt;code&gt;virtualenv&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;As a side note, it's probably best to explain the difference between &lt;code&gt;venv&lt;/code&gt; and &lt;code&gt;virtualenv&lt;/code&gt;.  The &lt;code&gt;virtualenv&lt;/code&gt; module was not always (and maybe still isn't to some people) the tool of choice for virtual environments. Historically, Python 2 did not contain any virtual environment tool and it wasn't until Python 3.3 that a &lt;a href="https://docs.python.org/3/library/venv.html"&gt;venv&lt;/a&gt; module became part of the standard library.&lt;/p&gt;
+&lt;p&gt;During that time, the existing &lt;code&gt;virtualenv&lt;/code&gt; was a third party module that competed with other 3&lt;sup&gt;rd&lt;/sup&gt; party modules to provide the virtual environment functionality.  However, &lt;code&gt;virtualenv&lt;/code&gt; went through a re-write in 2019 and released a second iteration in 2020 that was built upon the same base as &lt;code&gt;venv&lt;/code&gt;.  From the &lt;a href="https://virtualenv.pypa.io/en/latest/"&gt;official help&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;virtualenv&lt;/code&gt; is a tool to create isolated Python environments. Since Python &lt;code&gt;3.3&lt;/code&gt;, a subset of it has been integrated into the standard library under the venv module. The &lt;a href="https://docs.python.org/3/library/venv.html"&gt;venv module&lt;/a&gt; does not offer all features of this library, to name just a few more prominent:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;is slower (by not having the app-data seed method),&lt;/li&gt;
+&lt;li&gt;is not as extendable,&lt;/li&gt;
+&lt;li&gt;cannot create virtual environments for arbitrarily installed python versions (and automatically discover these),&lt;/li&gt;
+&lt;li&gt;is not upgrade-able via pip,&lt;/li&gt;
+&lt;li&gt;does not have as rich programmatic API (describe virtual environments without creating them).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;But even then it wasn't clear which tool to use, as the &lt;code&gt;venv&lt;/code&gt; help notes:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Deprecated since version 3.6&lt;/em&gt;: &lt;code&gt;pyvenv&lt;/code&gt; was the recommended tool for creating virtual environments for Python 3.3 and 3.4, and is &lt;a href="https://docs.python.org/dev/whatsnew/3.6.html#deprecated-features"&gt;deprecated in Python 3.6&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Changed in version 3.5&lt;/em&gt;: The use of &lt;code&gt;venv&lt;/code&gt; is now recommended for creating virtual environments.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So this article is using the shared features of both the &lt;code&gt;venv&lt;/code&gt;/&lt;code&gt;virtualenv&lt;/code&gt; modules but we've selected &lt;code&gt;virtualenv&lt;/code&gt; for its finer grain of control over the virtual environment process.&lt;/p&gt;
+&lt;h2 id="creating-virtual-environments"&gt;Creating Virtual Environments&lt;/h2&gt;
+&lt;p&gt;For this tutorial, we're assuming that you are able to execute &lt;code&gt;virtualenv&lt;/code&gt; from a vanilla Python environment that matches the Python environment in your applications.  Creating an environment from the command line should be as simple as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;python.exe -m virtualenv env27
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;But because we're on creating this as a side car environment on Windows, we can fine-tune the installation to install it within our project folder:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;python.exe -m virtualenv D:\project\.env27 --no-download --activators batch,python
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We're doing a few things here:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Creating the environment inside the project folder &lt;code&gt;D:\project&lt;/code&gt; just to keep everything local to the project.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Explicitly using the &lt;code&gt;--no-download&lt;/code&gt; option (even if it enabled by default) to speed up the creation of the environment by not downloading the seed packages of &lt;code&gt;pip&lt;/code&gt;, &lt;code&gt;setuptools&lt;/code&gt; and &lt;code&gt;wheel&lt;/code&gt; packages from the internet.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Explicitly creating the &lt;code&gt;batch&lt;/code&gt; and &lt;code&gt;python&lt;/code&gt; activators instead of the full suite of activators (introduced in version &lt;code&gt;20&lt;/code&gt;).  For more information about activators, check out the &lt;a href="https://virtualenv.pypa.io/en/latest/user_guide.html#activators"&gt;activator section&lt;/a&gt; and the &lt;a href="https://virtualenv.pypa.io/en/latest/cli_interface.html#section-activators"&gt;command line arguments&lt;/a&gt; from the &lt;a href="https://virtualenv.pypa.io/en/latest/"&gt;official help&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The batch activator allows us to activate the environment from the &lt;code&gt;cmd&lt;/code&gt; shell which will be the shell of our choice.  If you have a different shell preference, like &lt;code&gt;powershell&lt;/code&gt;, then select that instead of &lt;code&gt;batch&lt;/code&gt;.  The shell activator doesn't really matter as we're more interested in the &lt;code&gt;python&lt;/code&gt; activator.  That's the mechanism that will make this virtual environment a 3ds max side car environment.&lt;/p&gt;
+&lt;h2 id="editable-installs"&gt;Editable installs&lt;/h2&gt;
+&lt;p&gt;After the virtual environment is created, we now make the first connection in our development puzzle.  Fortunately, this is fairly straight forward and we'll use the standard module &lt;code&gt;pip&lt;/code&gt; &lt;a href="https://pip.pypa.io/en/stable/cli/pip_install/#local-project-installs"&gt;editable install&lt;/a&gt; to install the Python package in the side-car environment:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ D:\project\.env27\script\activate.bat
+&lt;span class="p"&gt;(&lt;/span&gt;.env27&lt;span class="p"&gt;)&lt;/span&gt; $ python -m pip install -r D:\project\requirements.txt
+&lt;span class="p"&gt;(&lt;/span&gt;.env27&lt;span class="p"&gt;)&lt;/span&gt; $ python -m pip install -e D:\project
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We're doing three things here:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;We activate the virtual environment before executing the pip install command.  Otherwise you might be installing the package into the global installation.  The &lt;code&gt;virtualenv&lt;/code&gt; usually modifies the prompt with the &lt;code&gt;virtualenv&lt;/code&gt;'s name or path on disk.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We then instal our project's &lt;code&gt;requirement.txt&lt;/code&gt; file.  If your project has any 3&lt;sup&gt;rd&lt;/sup&gt; party dependencies, then you should store them in the &lt;code&gt;requirements.txt&lt;/code&gt; file.  It's important to not rely on the project's setup.py's &lt;code&gt;install_requires&lt;/code&gt; to do this for us as that serves a slightly different purpose.  There's more information about the difference in the PyPA's [install_requires vs requirements files] guidelines.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;We then install our own project as an editable install.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This step relies solely on project structure to succeed, so this should still work even if your project imports the application's Python API package (such as &lt;code&gt;pymxs&lt;/code&gt; for 3ds Max).  We're not executing any code here; instead we're simply setting up the various hooks we need to execute the package in the virtual environment in an editable way.&lt;/p&gt;
+&lt;p&gt;Behind the scenes, the editable install only modifies the virtual environment by creating a &lt;code&gt;pth&lt;/code&gt; file.  These &lt;code&gt;pth&lt;/code&gt; files contain the paths to locations outside of the environment and are processed by the [site] module during Python initialization.  There's more functionality here, as described by the [site] module's help page, but for the purpose of the editable installs this is what we care about.&lt;/p&gt;
+&lt;h2 id="next-steps"&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;This part of the infrastructure has only focused on the Python parts of it.  With the virtual environment complete and our project properly installed for development, it's time to move onto &lt;a href="https://dbarsam.github.io/blog/python-vscode-max-2.html"&gt;Part II&lt;/a&gt;.  There we'll look into how we'll graft the virtual environment onto the application using the &lt;em&gt;bootstrap&lt;/em&gt; script.&lt;/p&gt;</content><category term="dev setup"></category><category term="Python"></category><category term="3ds Max"></category><category term="VSCode"></category></entry><entry><title>Set up VSCode to Debug Python in 3ds Max</title><link href="https://dbarsam.github.io/blog/python-vscode-max.html" rel="alternate"></link><published>2020-11-30T10:10:46-05:00</published><updated>2020-11-30T10:10:46-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-30:/blog/python-vscode-max.html</id><summary type="html">&lt;p&gt;A multipart article describing how to debug an application's embedded Python environment.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Unfortunately, not every application embeds Python the same way and this leads to an awkward challenge when trying to develop Python tools for those applications.  Some applications obfuscate the interpreter it by compiling directly it into the application, while others take a more modular approach and ship a complete Python installation -- including an equivalent &lt;code&gt;python.exe&lt;/code&gt; and &lt;code&gt;site-package&lt;/code&gt; folder -- in a folder next to the application's exe.&lt;/p&gt;
+&lt;p&gt;But even ignoring the differences in how the environment was embedded, there's usually one or two additional design choices that makes developing Python plugins harder than they need to be. It's almost as if the applications' vendors embed Python as an afterthought, slating it as an auxillary scripting language that's only there to implement a few automation macros.  Developing anything complex often takes on a journey of connecting mismatched puzzle pieces and ends up with a somewhat unsatisfying solution.&lt;/p&gt;
+&lt;p&gt;This is a multipart article that tries to come up with a somewhat satisfactory solution, working through the various puzzle pieces and coming up the necessary glue to make them work together.  In order to keep us focus, we'll develop this solution with a specific goal of using VSCode to debug a local Python package in an application's embedded Python environment.  Most of this workflow is pretty general, but the few cases where it isn't, we'll use the example of running 3ds max on Windows to explain the specificities.&lt;/p&gt;
+&lt;h2 id="the-infrastructure"&gt;The Infrastructure&lt;/h2&gt;
+&lt;p&gt;Breaking it down, we are going to set-up a workflow with the following components:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;A &lt;em&gt;side-car&lt;/em&gt; virtual environment.&lt;/li&gt;
+&lt;li&gt;A &lt;em&gt;bootstrap&lt;/em&gt; script to temporarily graft the side-car virtual environment onto the application.&lt;/li&gt;
+&lt;li&gt;A Python &lt;em&gt;debugging library&lt;/em&gt; that can handle remote debugging.&lt;/li&gt;
+&lt;li&gt;An &lt;em&gt;auto-attach&lt;/em&gt; workflow that gives the user a seamless debugging experience in VSCode.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="the-tutorials"&gt;The tutorials&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="https://dbarsam.github.io/blog/python-vscode-max-1.html"&gt;Part I&lt;/a&gt;: The Python side-car environments&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dbarsam.github.io/blog/python-vscode-max-2.html"&gt;Part II&lt;/a&gt;: The bootstrap script&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dbarsam.github.io/blog/python-vscode-max-3.html"&gt;Part III&lt;/a&gt;: The Python debugger library&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dbarsam.github.io/blog/python-vscode-max-4.html"&gt;Part IV&lt;/a&gt;:  The Attach-To-Process launcher in VSCode&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dbarsam.github.io/blog/python-vscode-max-5.html"&gt;Part V&lt;/a&gt;: The Auto-Attach-To-Process launcher in VSCode&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This series starts with &lt;a href="https://dbarsam.github.io/blog/python-vscode-max-1.html"&gt;Part I&lt;/a&gt; by repurposing a very basic component of Python development, the virtual environment.&lt;/p&gt;</content><category term="dev setup"></category><category term="Python"></category><category term="3ds Max"></category><category term="VSCode"></category></entry><entry><title>VSCode tasks for Pelican blogs</title><link href="https://dbarsam.github.io/blog/vscode-task-pelican.html" rel="alternate"></link><published>2020-11-23T03:40:27+00:00</published><updated>2020-11-23T03:40:27+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-23:/blog/vscode-task-pelican.html</id><summary type="html">&lt;p&gt;How to run Pelican commands from within Visual Studio Code.&lt;/p&gt;</summary><content type="html">&lt;p&gt;VSCode's &lt;a href="https://code.visualstudio.com/docs/editor/tasks"&gt;tasks feature&lt;/a&gt; is the editor's mechanism to execute building, testing, and other software development actions from the comfort of the IDE.  Most of the common tasks are built-in or provided by plugins, but it's also possible to define workspace tasks in the project's &lt;code&gt;tasks.json&lt;/code&gt; file.&lt;/p&gt;
 &lt;p&gt;In this Pelican powered project, we can take advantage of that flexibility and add support for two Pelican specific commands:  build and serve.&lt;/p&gt;
 &lt;h2 id="the-build-task"&gt;The &lt;code&gt;build&lt;/code&gt; Task&lt;/h2&gt;
 &lt;p&gt;The build command is pretty straight forward to adapt.  On the command line it looks like this:&lt;/p&gt;
@@ -54,8 +936,10 @@
 &lt;p&gt;Project specific keyboard shortcuts are not possible.  See &lt;a href="https://github.com/Microsoft/vscode/issues/23757"&gt;Issue #23757&lt;/a&gt; for more details.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;And of course, we also add an empty &lt;code&gt;problemMatcher&lt;/code&gt; for the same reasons listed above.&lt;/p&gt;</content><category term="about the blog"></category><category term="blog"></category><category term="vscode"></category><category term="pelican"></category></entry><entry><title>How this blog detects broken links</title><link href="https://dbarsam.github.io/blog/how-this-blog-detects-broken-links.html" rel="alternate"></link><published>2020-11-08T21:25:04+00:00</published><updated>2020-11-08T21:25:04+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-08:/blog/how-this-blog-detects-broken-links.html</id><summary type="html">&lt;p&gt;How to validate local and internet links in markdown files.&lt;/p&gt;</summary><content type="html">&lt;p&gt;In VSCode, this blog use the &lt;a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD"&gt;HTTP/s and relative link checker&lt;/a&gt; extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin.&lt;/p&gt;
-&lt;p&gt;The blog's pipeline is slightly different and in there we use the &lt;a href="https://github.com/tcort/markdown-link-check"&gt;markdown-link-check&lt;/a&gt; npm package.  To get started with the &lt;code&gt;markdown-link-check&lt;/code&gt; the site recommends using this &lt;code&gt;find&lt;/code&gt; shell command:&lt;/p&gt;
+&lt;p&gt;And of course, we also add an empty &lt;code&gt;problemMatcher&lt;/code&gt; for the same reasons listed above.&lt;/p&gt;</content><category term="about the blog"></category><category term="blog"></category><category term="vscode"></category><category term="pelican"></category></entry><entry><title>How this blog detects broken links</title><link href="https://dbarsam.github.io/blog/how-this-blog-detects-broken-links.html" rel="alternate"></link><published>2020-11-08T21:25:04+00:00</published><updated>2020-11-08T21:25:04+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-08:/blog/how-this-blog-detects-broken-links.html</id><summary type="html">&lt;p&gt;How to validate local and internet links in markdown files.&lt;/p&gt;</summary><content type="html">&lt;p&gt;This blog use VSCode's &lt;a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD"&gt;HTTP/s and relative link checker&lt;/a&gt; extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut &lt;kbd&gt;Alt+L&lt;/kbd&gt;.&lt;/p&gt;
+&lt;p&gt;The blog's pipeline is slightly different and our best option is the &lt;a href="https://github.com/tcort/markdown-link-check"&gt;markdown-link-check&lt;/a&gt; npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.&lt;/p&gt;
+&lt;h2 id="batch-operation"&gt;Batch Operation&lt;/h2&gt;
+&lt;p&gt;The first challenge is that &lt;code&gt;markdown-link-check&lt;/code&gt; only takes one file as a argument.  To handle multiple files, the website recommends using this &lt;code&gt;find&lt;/code&gt; shell command:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find . -name &lt;span class="se"&gt;\*&lt;/span&gt;.md -exec markdown-link-check &lt;span class="o"&gt;{}&lt;/span&gt; &lt;span class="se"&gt;\;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;However, that won't work for our Travis-CI powered pipeline.  When Travis is checking the result of that command, it only processes the exit code of the &lt;code&gt;find&lt;/code&gt; command and not the result of &lt;code&gt;markdown-link-check&lt;/code&gt;, which is executed by &lt;code&gt;find&lt;/code&gt;'s &lt;code&gt;exec&lt;/code&gt; option.&lt;/p&gt;
@@ -70,13 +954,27 @@
 &lt;p&gt;The extra bit of magic here is that we check the result of &lt;code&gt;markdown-link-check&lt;/code&gt; against the exit command with the short-circuit &lt;em&gt;or&lt;/em&gt; condition (&lt;code&gt;||&lt;/code&gt;):&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;If &lt;code&gt;markdown-link-check&lt;/code&gt; is succesful, it returns &lt;code&gt;0&lt;/code&gt; which is the equivaleunt of True, which then satsifies the &lt;em&gt;or&lt;/em&gt; expressions, so it skips the &lt;code&gt;exit&lt;/code&gt; command, continuing on with the loop.&lt;/p&gt;
+&lt;p&gt;If &lt;code&gt;markdown-link-check&lt;/code&gt; is successful, it returns &lt;code&gt;0&lt;/code&gt; which is the equivalent of True, which then satisfies the &lt;em&gt;or&lt;/em&gt; expressions, so it skips the &lt;code&gt;exit&lt;/code&gt; command, continuing on with the loop.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;If &lt;code&gt;markdown-link-check&lt;/code&gt; is not succesful, it returns the equivalent of False, so the shell evalutes the other side of the &lt;em&gt;or&lt;/em&gt; expression and exits the instance with the default error value of &lt;code&gt;1&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;If &lt;code&gt;markdown-link-check&lt;/code&gt; is not successful, it returns the equivalent of False, so the shell evaluates the other side of the &lt;em&gt;or&lt;/em&gt; expression and exits the instance with the default error value of &lt;code&gt;1&lt;/code&gt;.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;This is a fancy shell trick that makes the final travis job  nice and compact:&lt;/p&gt;
+&lt;h2 id="ignore-rules"&gt;Ignore Rules&lt;/h2&gt;
+&lt;p&gt;We have another problem handling Pelican's shorthand for &lt;a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content"&gt;local links&lt;/a&gt;: &lt;code&gt;{filename}&lt;/code&gt; and &lt;code&gt;{static}&lt;/code&gt;.  These are not valid links but we create a configuration file (&lt;code&gt;.markdown-link-check.json&lt;/code&gt;) and use the &lt;code&gt;ignorePatterns&lt;/code&gt; option to skip those special cases:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;quot;ignorePatterns&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;pattern&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;^{filename}&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;quot;pattern&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;^{static}&amp;quot;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="travis-ci-integration"&gt;Travis CI Integration&lt;/h2&gt;
+&lt;p&gt;We can combine the the batch operation and the configuration into a final command line that makes the job nice and compact:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;stage&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;lint&lt;/span&gt;
     &lt;span class="l l-Scalar l-Scalar-Plain"&gt;language&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;node_js&lt;/span&gt;
     &lt;span class="l l-Scalar l-Scalar-Plain"&gt;node_js&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;
@@ -85,7 +983,7 @@
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;npm install -g npm@latest&lt;/span&gt;
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;npm install -g markdown-link-check&lt;/span&gt;
     &lt;span class="nt"&gt;script&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;for file in  $(find ./content -name \*.md); do markdown-link-check --verbose &amp;quot;$file&amp;quot; || exit 1; done;&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;for file in  $(find ./content -name \*.md); do markdown-link-check --config .markdown-link-check.json --verbose &amp;quot;$file&amp;quot; || exit 1; done;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;</content><category term="about the blog"></category><category term="blog"></category><category term="markdown"></category><category term="travis"></category><category term="bash"></category></entry><entry><title>Headless Qt?</title><link href="https://dbarsam.github.io/blog/headless-qt.html" rel="alternate"></link><published>2020-11-06T10:14:45+00:00</published><updated>2020-11-06T10:14:45+00:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-06:/blog/headless-qt.html</id><summary type="html">&lt;p&gt;Can you configure Qt to work in systems with no UI?&lt;/p&gt;</summary><content type="html">&lt;p&gt;This isn't a real article.  Instead, it's more of an annotated bookmark of this &lt;a href="https://www.qcad.org/bugtracker/index.php?do=details&amp;amp;task_id=1534"&gt;post&lt;/a&gt;, which was used in some research on how to configure Qt applications to run in Docker Windows containers -- and that Docker task is part of another, work-in-progress project that may not ever be completed. So, there are no solutions here.  Sorry.&lt;/p&gt;
 &lt;p&gt;The &lt;a href="https://www.qcad.org/bugtracker/index.php?do=details&amp;amp;task_id=1534"&gt;post&lt;/a&gt;, archived here, says this:&lt;/p&gt;
 &lt;blockquote&gt;

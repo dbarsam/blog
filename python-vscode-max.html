@@ -2,14 +2,15 @@
 <html lang="en">
 
 <head>
-        <meta charset="utf-8">
+            <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-        <title>#Dev - Authors</title>
+        <title>Set up VSCode to Debug Python in 3ds Max</title>
 
             <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
         <!-- Bootstrap Core CSS -->
         <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
 
@@ -32,10 +33,30 @@
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-                <meta property="og:locale" content="">
+
+
+        <meta name="description" content="A multipart article describing how to debug an application's embedded Python environment.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="Python">
+        <meta name="tags" content="3ds Max">
+        <meta name="tags" content="VSCode">
+
+	                <meta property="og:locale" content="">
 		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/python-vscode-max.html">
+	<meta property="og:title" content="Set up VSCode to Debug Python in 3ds Max">
+	<meta property="article:published_time" content="2020-11-30 10:10:46.120000-05:00">
+            <meta property="og:description" content="A multipart article describing how to debug an application's embedded Python environment.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
 </head>
 
+<body class="article-python-vscode-max">
 
     <!-- Navigation -->
     <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
@@ -63,12 +84,17 @@
     </nav>
 
     <!-- Page Header -->
-        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog/images/home-bg.png')">
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
-                        <h1>Articles by </h1>
+                        <h1>Set up VSCode to Debug Python in 3ds Max</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Mon 30 November 2020
+                        </span>
+                        
                     </div>
                 </div>
             </div>
@@ -79,14 +105,36 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <div class="post-preview">
-            <a href="https://dbarsam.github.io/blog/author/db.html" rel="bookmark">
-                <h2 class="post-title">
-                    db (15)
-                </h2>
-            </a>
+    <!-- Post Content -->
+    <article>
+        <p>Unfortunately, not every application embeds Python the same way and this leads to an awkward challenge when trying to develop Python tools for those applications.  Some applications obfuscate the interpreter it by compiling directly it into the application, while others take a more modular approach and ship a complete Python installation -- including an equivalent <code>python.exe</code> and <code>site-package</code> folder -- in a folder next to the application's exe.</p>
+<p>But even ignoring the differences in how the environment was embedded, there's usually one or two additional design choices that makes developing Python plugins harder than they need to be. It's almost as if the applications' vendors embed Python as an afterthought, slating it as an auxillary scripting language that's only there to implement a few automation macros.  Developing anything complex often takes on a journey of connecting mismatched puzzle pieces and ends up with a somewhat unsatisfying solution.</p>
+<p>This is a multipart article that tries to come up with a somewhat satisfactory solution, working through the various puzzle pieces and coming up the necessary glue to make them work together.  In order to keep us focus, we'll develop this solution with a specific goal of using VSCode to debug a local Python package in an application's embedded Python environment.  Most of this workflow is pretty general, but the few cases where it isn't, we'll use the example of running 3ds max on Windows to explain the specificities.</p>
+<h2 id="the-infrastructure">The Infrastructure</h2>
+<p>Breaking it down, we are going to set-up a workflow with the following components:</p>
+<ol>
+<li>A <em>side-car</em> virtual environment.</li>
+<li>A <em>bootstrap</em> script to temporarily graft the side-car virtual environment onto the application.</li>
+<li>A Python <em>debugging library</em> that can handle remote debugging.</li>
+<li>An <em>auto-attach</em> workflow that gives the user a seamless debugging experience in VSCode.</li>
+</ol>
+<h2 id="the-tutorials">The tutorials</h2>
+<ol>
+<li><a href="https://dbarsam.github.io/blog/python-vscode-max-1.html">Part I</a>: The Python side-car environments</li>
+<li><a href="https://dbarsam.github.io/blog/python-vscode-max-2.html">Part II</a>: The bootstrap script</li>
+<li><a href="https://dbarsam.github.io/blog/python-vscode-max-3.html">Part III</a>: The Python debugger library</li>
+<li><a href="https://dbarsam.github.io/blog/python-vscode-max-4.html">Part IV</a>:  The Attach-To-Process launcher in VSCode</li>
+<li><a href="https://dbarsam.github.io/blog/python-vscode-max-5.html">Part V</a>: The Auto-Attach-To-Process launcher in VSCode</li>
+</ol>
+<p>This series starts with <a href="https://dbarsam.github.io/blog/python-vscode-max-1.html">Part I</a> by repurposing a very basic component of Python development, the virtual environment.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/python.html">Python</a>, <a href="https://dbarsam.github.io/blog/tag/3ds-max.html">3ds Max</a>, <a href="https://dbarsam.github.io/blog/tag/vscode.html">VSCode</a></p>
         </div>
-        <hr>
+
+    <hr>
+
             </div>
         </div>
     </div>

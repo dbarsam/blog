@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Set up VSCode to Debug Python in 3ds Max - II</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Part II: The bootstrap script">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="Python">
+        <meta name="tags" content="3ds Max">
+        <meta name="tags" content="VSCode">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/python-vscode-max-2.html">
+	<meta property="og:title" content="Set up VSCode to Debug Python in 3ds Max - II">
+	<meta property="article:published_time" content="2020-12-03 20:23:45.120000-05:00">
+            <meta property="og:description" content="Part II: The bootstrap script">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
+</head>
+
+<body class="article-python-vscode-max-2">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Set up VSCode to Debug Python in 3ds Max - II</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Thu 03 December 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In the previous article, we prepared the Python development environment by first creating a Python virtual environment and then installing our Python project as an editable package.  In this article, we'll explore how we're going to graft this onto the external application.</p>
+<h2 id="python-activator">Python Activator</h2>
+<p>The virtual environment that we've created is linked to the Python environment that created it.  In order to graft that environment to the application's Python installation, we're going to play around with that relationship by activating that virtual environment not in the original Python installation, but in the application's Python environment.</p>
+<p>We can do that in a non-destructible way via a bootstrap script that is launched at application start-up.  We're really emphasizing the non-destructive nature of this because we don't want to make any permanent changes to the application and everything should be isolated to the current executing session.  The goal here is that the user should be able to launch the application without the start-up script and have the new instance co-exist without any side effects.</p>
+<p>Fortunately, the <code>virtualenv</code>'s Python activator option has done most of the work for us.  The Python activator produced an <a href="https://github.com/pypa/virtualenv/blob/main/src/virtualenv/activation/python/activate_this.py">activate_this.py</a> Python script and the the only thing that's really missing is for a way to execute within the application.</p>
+<p>You can see this script online at GitHub.  The snapshot used for this article is available below:</p>
+<div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Activate virtualenv for current interpreter:</span>
+<span class="sd">Use exec(open(this_file).read(), {&#39;__file__&#39;: this_file}).</span>
+<span class="sd">This can be used when you must use an existing Python interpreter, not the virtualenv bin/python.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">site</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">abs_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;You must use exec(open(this_file).read(), {&#39;__file__&#39;: this_file}))&quot;</span><span class="p">)</span>
+
+<span class="n">bin_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">abs_file</span><span class="p">)</span>
+<span class="n">base</span> <span class="o">=</span> <span class="n">bin_dir</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;__BIN_NAME__&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># strip away the bin part from the __file__, plus the path separator</span>
+
+<span class="c1"># prepend bin to PATH (this file is inside the bin directory)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">bin_dir</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">))</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VIRTUAL_ENV&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span>  <span class="c1"># virtual env is right above bin directory</span>
+
+<span class="c1"># add the virtual environments libraries to the host python import mechanism</span>
+<span class="n">prev_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="s2">&quot;__LIB_FOLDERS__&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bin_dir</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+    <span class="n">site</span><span class="o">.</span><span class="n">addsitedir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;__DECODE_PATH__&quot;</span> <span class="k">else</span> <span class="n">path</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="n">prev_length</span><span class="p">:]</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">prev_length</span><span class="p">]</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">real_prefix</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">prefix</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">base</span>
+</pre></div>
+<p>There are a few things that this script is doing that's important:</p>
+<ol>
+<li>
+<p>This is a template file so the the strings <code>__LIB_FOLDERS__</code>, <code>__BIN_NAME__</code>, etc. are placeholders and are replaced with resolved values during the creation process.</p>
+</li>
+<li>
+<p>The script is updating the <code>PATH</code> environment variable.  This is important for binary components, usually DLL files on Windows.</p>
+</li>
+<li>
+<p>The script is injecting additional site package locations with the <a href="https://docs.python.org/3/library/site.html#site.addsitedir">addsitedir</a>.  This is important, as it not only adds the respective <code>site-packages</code> path to the <a href="https://docs.python.org/3/library/sys.html#sys.path">sys.path</a> but also processes the various <code>.pth</code> files that may be added by -- but not limited to -- editable package installation.  More information about this is available on the <a href="https://docs.python.org/3/library/site.html">site</a> module in the Python standard lib.</p>
+</li>
+</ol>
+<h2 id="the-bootstrappy-bootstrap-script">The <code>bootstrap.py</code> Bootstrap script</h2>
+<p>The <code>virtualenv</code> module's <code>activate_this.py</code> provides the core functionality that we need to graft the environment onto our application's Python environment.  The script even gives us instruction on how to execute it:</p>
+<div class="highlight"><pre><span></span><span class="n">script_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;D:\project\.env27\Scripts\activate_this.py&quot;</span>
+<span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+</pre></div>
+<p>The problem is that we need to need to make the script portable.  If we put that code into a startup file, named <code>bootstrap.py</code>, then we can use the <code>__file__</code> attribute to resolve the current path and resolve the location of the <code>activate_this.py</code>.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">script_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;.env27&quot;</span><span class="p">,</span> <span class="s2">&quot;Scripts&quot;</span><span class="p">,</span> <span class="s2">&quot;activate_this.py&quot;</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+</pre></div>
+<p>That's better, but how do we differentiate between potentially different Python environment?</p>
+<h2 id="bootstrap-environment-variables">Bootstrap Environment Variables</h2>
+<p>The <code>bootstrap.py</code>'s <code>script_path</code> variable is problematic for two reasons:</p>
+<ol>
+<li>The hardcoded path is not portable.</li>
+<li>The hardcoded path is not Python agnostic.</li>
+</ol>
+<p>We can punt that responsibility down the line to the user and have him pass it in as a parameter.  However, we're limited by the application in how we can communicate with the script.  One solution that seems to work around that limitation is environment variables:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">script_path</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ACTIVATE_THIS_SCRIPT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+</pre></div>
+<p>Environment variables local to a process are a simple way to pass arguments down through multiple layers of code.  This is most evident when your application will give you a way to execute a script from the command line but not a way to pass in script arguments.</p>
+<p>The alternative is to either automatically generate the script or a parameter file before launch, which is not necessarily wrong but won't work well for our particular task.  In our case it will be easier to set up the script to get it's data from environment variables.</p>
+<h2 id="bootstrap-safety-checks">Bootstrap Safety Checks</h2>
+<p>We can decorate our <code>bootstrap.py</code> with a bit more flare.</p>
+<ol>
+<li>
+<p>We change the <code>ACTIVATE_THIS_SCRIPT</code> into a <code>PROJECT_SCRIPTS</code> environment variable that's a collection of individual scripts separated by semi-colon <code>;</code>.</p>
+</li>
+<li>
+<p>We add a bit more error handling to make the script as user-friendly as possible.</p>
+</li>
+<li>
+<p>Since we're executing a startup script via <code>exec</code>, we're also trapping all exceptions with the base  <code>Exception</code>.  This is usually frowned upon as that patten tends to hide exceptions, but it's applicable in our case as we're sharing the exception to the logging console.</p>
+</li>
+<li>
+<p>We wrap the entire script in a <a href="https://docs.python.org/3/library/__main__.html">main scope</a> out of good habit.</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone set-up script</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Execute a list of startup scripts</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">scripts</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">script_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span> <span class="o">%</span> <span class="n">script_path</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<h2 id="bootstrappy-logging"><code>bootstrap.py</code> + Logging</h2>
+<p>We take our basic premise one step further and replace the <code>prints</code> with <a href="https://docs.python.org/3/library/logging.html">logging</a> statements.  This step is optional, but recommended as your Python tool should already be set-up to use logging instead of <code>print</code> messages.</p>
+<p>As a convenience we use the logging module's basic set-up function <a href="https://docs.python.org/3/library/logging.html#logging.basicConfig">logging.basicConfig</a> but if this is easily extended to something more advanced with the <a href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig">logging.config.dictConfig</a> configuration function.  And again, any parameter should be passed in via environment variables:</p>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone set-up script</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">- `PROJECT_LOG_LEVEL` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">    This script does not install ptvsd and expects the module to be already installed, or installed during the site injection or exec execution step.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">site</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Configure the logging for the application</span>
+    <span class="n">log_level</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - start -&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized logging to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
+
+    <span class="c1"># Execute a list of startup scripts</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">scripts</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - stop -&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<h2 id="execute-the-bootstrap">Execute the Bootstrap</h2>
+<p>With a virtual environment created and a basic bootstrap script in place, we're now ready to connect another pieces and launch our application with the side-car environment.  To ensure that we do that the most portable way possible, we look to the application's start-up process and see what methods we have to execute a script an startup.</p>
+<p>Hopefully there is a command line or environment variable option available, but this is application specific.  From the <a href="https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html">3ds Max help</a>, we can execute any Python file using the <code>-u PythonHost</code> command:</p>
+<div class="highlight"><pre><span></span>3dsmax.exe -u PythonHost file.py
+</pre></div>
+<p>With that information, we can create a very rudimentary <code>launcher.cmd</code> script to launch 3ds Max with our debug environment variables and the command line configured to launch with our bootstrap script:</p>
+<div class="highlight"><pre><span></span><span class="p">@</span><span class="k">echo</span> off
+<span class="k">setlocal</span>
+<span class="k">cd</span> <span class="nv">%~dp0</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_LOG_LEVEL=DEBUG&quot;</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_SCRIPTS=</span><span class="nv">%CD%</span><span class="s2">\.env27\Scripts\activate_this.py&quot;</span>
+3dsmax.exe -u PythonHost bootstrap.py
+</pre></div>
+<p>Running this from the command line should launch 3ds Max and produce the following output in the 3ds Max Listener:</p>
+<div class="highlight"><pre><span></span>Welcome to MAXScript.
+
+
+Python Bootstrap script - start -
+Initialized logging to &quot;DEBUG&quot;
+Executing Script: D:\projects\.env27\Scripts\activate_this.py
+Python Bootstrap script - stop -
+</pre></div>
+<h2 id="next-step">Next Step</h2>
+<p>The completed <code>bootstrap.py</code> completes the second part of the tutorial.  That file executes all of the necessary component needed to launch the application with a grafted side-car environment.  The next step, [Part III] will look into how exactly we use VSCode to launch the application with the <code>bootstrap.py</code> script.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/python.html">Python</a>, <a href="https://dbarsam.github.io/blog/tag/3ds-max.html">3ds Max</a>, <a href="https://dbarsam.github.io/blog/tag/vscode.html">VSCode</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>
