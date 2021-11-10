@@ -25,6 +25,7 @@
         "linenums",
         "monospace",
         "pelicanconf",
+        "Podge",
         "ptvsd",
         "pymdown",
         "pymdownx",

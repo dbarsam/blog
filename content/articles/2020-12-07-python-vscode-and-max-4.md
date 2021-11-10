@@ -9,20 +9,19 @@ summary: Part IV&#58; VSCode's compound launch configuration
 header_cover: /images/article-bg.png
 ---
 
-In the previous article, we successful created a debugging session from connecting the various pieces of our infrastructure.  We created a Python virtual environment via `virtualenv`, built a `bootstrap.py` to graft it into the application and to execute `ptvsd` at startup, and successfully make the whole contraption work, via VSCode's `Attach to Process` remote debugging configuration. In this article, we'll look up at couple of tweaks to make that manual process into one that's automated.
+In the [previous article], we successful created a debugging session from connecting various pieces of our infrastructure.  We created a Python virtual environment via `virtualenv`, built a `bootstrap.py` to graft it into the application, executed `ptvsd` at startup, and successfully made the whole contraption work, via VSCode's `Attach to Process` remote debugging configuration. In this article, we'll look up at couple of tweaks to automate that manual process.
 
 ## Attach vs Launch
 
-VSCode has two main workflows for debugging: `launch` and `attach`.  The `launch` configuration could work, but it requires a very specific set up that executes something equivalent to a `python.exe`.  That won't work in our case because the Python interpreter is buried inside a Windows application, so we're left with `attach` workflow where we manually launch the application, switch to VSCode and execute the `attach` configuration.
+VSCode has two main workflows for debugging: `launch` and `attach`.  While we want to use the `launch` configuration, it requires a very specific set up that needs to point to a `python.exe` (or equivalent).  That doesn't work in our case because the Python interpreter is buried inside a Windows application.  So we're left with an `attach` workflow where we manually launch the application, switch to VSCode and execute the `attach` configuration.
 
-While the launch-and-attach workflow does its job, it can become tedious after a while -- especially if unhandled exceptions or crash destabilizes the application so much that the only recourse is to restart the session.  There is, however, some automation tricks that we can incorporate to our current set-up that could remove that friction.
+While this launch-and-attach workflow does its job, it can become tedious after a while -- especially if unhandled exceptions or crashes destabilizes the application so much that the only recourse is to restart the session.  There is, however, some automation tricks that we can incorporate to our current set-up that could remove that friction and make the `attach` into a `auto-attach` configuration.
 
 ## Companion Launch Configuration
 
-The first trick is to create a `launch` configuration, but not for Python.
-Instead we're going to create a *companion* launch configuration for our application, which should use a debugger native to the application.
+The first trick is to create a `launch` configuration, but not for Python.  Instead we're going to create a *companion* launch configuration for our application, which should use a debugger native to the application.
 
-We configure the new configuration with the [cppvsdg] debugger (from VSCode's [C/C++ debugging] documentation) and include all the settings from our `launch.cmd` script.  Thankfully, this is pretty straight forward:
+Since we're targeting Windows `exe` files, we configure the new configuration with the [cppvsdg] debugger (from VSCode's [C/C++ debugging] documentation) and include all the settings from our `launch.cmd` script.  Thankfully, this is pretty straight forward:
 
 ```json
 {
@@ -71,7 +70,7 @@ As a bonus, we're also addressing [another problem] by updating the `PATH` envir
 
 ## Compound Configuration
 
-We now have an `attach` and `launch` configuration and we can execute them at the same time using a [compound configuration].  The compound configuration is the mechanism to execute multi-target sessions, like what we have now, and it's also pretty straight forward:
+We now have an `attach` and `launch` configuration and we can execute them at the same time using a [compound configuration].  The compound configuration is the VSCode mechanism to execute multi-target sessions, which is what we have now:
 
 ```json
 {
@@ -87,13 +86,13 @@ We now have an `attach` and `launch` configuration and we can execute them at th
 }
 ```
 
-Now hitting <kbd>F5</kbd> will launch both the `3ds Max 2018` and `Python: Remote Attach`.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it initializes `ptvsd` and calls the `ptvsd.wait_for_attach()`.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the `attach` call timing out before 3ds Max is ready.
+Now, selecting `Python 3ds Max 2018` and hitting <kbd>F5</kbd> will launch both the `3ds Max 2018` and `Python: Remote Attach`.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it gets to processing `bootstrap.py` script and calling the `ptvsd.wait_for_attach()` line.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the `attach` call timing out before 3ds Max is ready.
 
-The compound configuration does not support a delay so the only solution is to take advantage of the `launch.json`'s [preLaunchTask] attribute and add an artificial delay to the `attach` configuration.
+We need to delay the `attach` until our application is ready to establish the debugger connection.  There is no native delay mechanism in VSCode's launch configurations, but we can take advantage of the [preLaunchTask] attribute and add an artificial delay to the `attach` configuration.
 
 ## 'Delayed' Attach Configuration
 
-The `preLaunchTask` is a generic enough to take in any [Task], so we create one:  `sleep`.
+The `preLaunchTask` is a generic enough to take in any [Task], so we create one:
 
 ```json
 {
@@ -117,23 +116,23 @@ The `preLaunchTask` is a generic enough to take in any [Task], so we create one:
 
 The `sleep` task is a custom VSCode Task in our project's `tasks.json` file that wraps around the `cmd.exe` command [timeout].  We try to avoid any conflicts with shell settings by making this a `process` task instead of a `shell` task.  We explicitly name the [cmd.exe] executable, which is usually available `COMSPEC` environment variable.
 
-For our 3ds Max example we anecdotally select use a hardcoded a time of 30 seconds.  That time will vary on how 3ds max is configured, what's the current system specs, and even if you've launched the application for the first time.  Multiple iterations will keep the application available in memory so subsequent launches will appear shorter.
+For our 3ds Max example we anecdotally select use a hardcoded a time of 30 seconds.  That time will vary on how a collection of factors, like how 3ds max is configured, what's the current system specs, and even if you've launched the application for the first time.  Even with everything the same, multiple iterations will keep the application available in memory so subsequent launches will appear shorter.
 
-The implementation of sleep is a personal choice and it could be re-written to use any command.  Our only requirement is that the command delays the original Remote Attach task by desired amount.  After the command is written, it is then plugged into the `preLaunchTask` attribute:
+The implementation of `sleep` is a personal choice and it could be re-written to use any command.  Our only requirement is that the command delays the original `Remote Attach` task by desired amount.  After the command is written, it is then plugged into the `preLaunchTask` attribute:
 
 ```json
 {
     "name": "Python: Remote Attach",
     "type": "python",
     "request": "attach",
-    "justMyCode": false,
+    "justMyCode": true,
     "processName": "3dsmax.exe",
     "host": "localhost",
     "port": 5678,
     "pathMappings": [
         {
             "localRoot": "${workspaceFolder}",
-            "remoteRoot": "."
+            "remoteRoot": "${workspaceFolder}"
         }
     ],
     "preLaunchTask": "sleep",
@@ -156,5 +155,7 @@ We now have a collection of components assembled into something that delivers a 
 [another problem]: {filename}2020-10-29-qt-dll-mismatch.md
 [prelaunchtask]: https://code.visualstudio.com/Docs/editor/debugging#_launchjson-attributes
 [task]: https://code.visualstudio.com/docs/editor/tasks
-[timeout]: https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/cc754891(v=ws.11)
+[timeout]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/timeout
 [cmd]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
+[previous article]: {filename}2020-12-05-python-vscode-and-max-3.md
+[part v]: {filename}2020-12-09-python-vscode-and-max-5.md

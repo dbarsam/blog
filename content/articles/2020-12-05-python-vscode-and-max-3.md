@@ -9,33 +9,50 @@ summary: Part III&#58; VSCode's attach to process workflow
 header_cover: /images/article-bg.png
 ---
 
-In the previous article, we had created a Python virtual environment via `virtualenv`'s and built a `bootstrap.py` to graft it into the application.  In this article, we'll connect that environment and script to VSCode.
+In the [previous article], we had created a Python virtual environment via `virtualenv`'s and built a `bootstrap.py` to graft it into the application.  In this article, we'll take a first pass at incorporating VSCode into our workflow.
 
 ## Attach to Process
 
-Developing Python packages for use in external application is a very special edge case.  The [Python debug configurations in Visual Studio Code](https://code.visualstudio.com/docs/python/debugging) covers the most common Python debugging scenarios but the scenario that we'll start with is the *Attach To Process* one, where we attach the debugger to the already-running application.
+Developing Python packages for use in external application is a very special edge case.  The [Python debug configurations in Visual Studio Code](https://code.visualstudio.com/docs/python/debugging) only covers the most common Python debugging scenarios and we'll be incorporating the *Attach To Process* one, where we attach the debugger to the already-running application.
 
-That workflow is represented as a `attach` configuration in the `launch.json`, which is different than the more user-friendly `launch` configuration which launches the process and immediately attaches to it.
+That workflow is represented as a `attach` configuration request in the `launch.json`, which is different than the more workflow-friendly `launch` configuration, which launches the process and immediately attaches to it.  The VSCode Python plugin provides an auto-generated `attach` configuration under the `Python: Remote Attach` template:
 
-```json
+```python
 {
-    "name": "Python: Attach",
+    "name": "Python: Remote Attach",
     "type": "python",
     "request": "attach",
+    "justMyCode": true,
+    "host": "localhost",
     "port": 5678,
-    "host": "localhost"
+    "pathMappings": [
+        {
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "${workspaceFolder}"
+        }
+    ],
 },
 ```
 
-The attach configuration is the same configuration used for Remote Debugging.  The only real difference here is that instead of making a connection to another machine, we'll be making a network connection to the same machine, as noted by the `localhost` host name, and communicating to another debugger on ports `5678`, which is just the value VSCode chose as it's default port.
+This `attach` configuration is the same configuration used for *Remote Debugging*.  The only real difference here is that instead of making a connection to another machine, we'll be making a network connection to the same machine that we're running on.  That means a few different things:
+
+1. The loopback connection is denoted by using the `localhost` host name.
+
+2. The loopback connection will communicate to another VSCode-compatible debugger on the local `5678` port.
+
+   This is the value VSCode chose as its default port.  A port is a single use communication channel, so if you're planning on doing anything more complex, like maybe debugging multiple applications side by side, you'll need to select a different port to avoid port-in-use conflicts.
+
+3. We've toggled `justMyCode` to `true` so we're not debugging the standard lib.
+
+4. We've configured `pathMapping` to make `localRoot` and `remoteRoot` point to the same path.  Other remote workflows will have different values in that mapping, but because we're on the same machine and debugging the same project, we simply use use project's root path, stored in the `${workspaceFolder}` variable.
 
 ## The `ptvsd` package
 
-The `attach` configuration expects to connect with another piece of software running inside the application.  That means for the attach process to work, we need to install another component and have that component start a connection to VSCode after the application has start.
+The `attach` configuration expects to connect with VSCode-compatible debugger running inside the application.  That means for the attach process to work, we need to activate that software component and have that component start a connection to VSCode after the application has start.
 
-Unfortunately, there's nothing in 3ds Max (and most applications) that will do this out of the box, so we have to install a 3rd party library, like the `ptvsd` Python package to set up.
+Unfortunately, there's nothing in 3ds Max (and most applications) that will do this out of the box.  To work around this, we'll need to install a 3rd party library, like the `ptvsd` Python package, and activate it at start-up.
 
-Sometime after the application has loaded, the user needs to execute the following commands:
+The activation is straight forward.  Sometime after the application has loaded, the user needs to execute the following commands:
 
 ```python
 import ptvsd
@@ -43,11 +60,11 @@ ptvsd.enable_attach(address=('localhost', 5678), redirect_output=True)
 ptvsd.wait_for_attach()
 ```
 
-This will first enable to listening port at the same host and port in our `attach` configuration and then forever for VSCode to make the connection.
+The `enable_attach` function will enable the port at the same `localhost:5678` address our `attach` configuration is using.  And the `wait_for_attach` function will wait forever, freezing the application in a busy loop, until VSCode completes the connection.  After the connection is made, VSCode is now attached and the application continues on its way.
 
 ## Install `ptvsd` into the side-car environment
 
-The `ptvsd` is available as a standalone Python package on PyPI.  This works well for the workflow that we put into place in Part I.  There, we create a virtual environment to be grafted into the application, which we set-up by using pip:
+There are different ways to handle installing the `ptvsd` package.  But because it is available as a standalone Python package on PyPI, we can leverage our existing workflow that we put into place in [Part I].  There, we created a virtual environment to be grafted into the application, which we set-up by using `pip`:
 
 ```shell
 $ D:\project\.env27\script\activate.bat
@@ -55,17 +72,17 @@ $ D:\project\.env27\script\activate.bat
 (.env27) $ python -m pip install -e D:\project
 ```
 
-This means that the simplest way to instal ptvsd is to add it to the requirements.txt file
+This means that the simplest way to instal ptvsd is to add it to the `requirements.txt` file
 
 ```text
 ptvsd==4.3.2
 ```
 
-Note:  Do not add it as a package dependency to your project, be it in setup.py's `install_requires` or some other mechanism.  It is not a dependency to be installed on the user's machine; it is a development tool that only has value to the development team.  There's more information about the difference in the PyPA's [install_requires vs requirements files] guidelines.
+Note:  Do not add it as a package dependency to your project, be it in setup.py's `install_requires` or some other mechanism.  It is not a dependency to be installed on the user's machine when the user installs your project; it is a development tool that only has value to the development team.  There's more information about the difference in the PyPA's [install_requires vs requirements files] guidelines.
 
 ## Call `ptvsd` from the `bootstrap.py` script
 
-We can add the `ptvsd` connection call to our `bootstrap.py` so that the connection happens at startup.  We have to be careful to add it *after* the grafting of the side-car environment, as that's where the Python package lives.
+We can also leverage the components we created in [Part II] and add the `ptvsd` connection call to our `bootstrap.py`. This will make the connection at startup, but we have to be careful to add it *after* the grafting of the side-car environment, as that's where the Python package lives.
 
 ```python
 """
@@ -148,7 +165,7 @@ if __name__ == "__main__":
 
 In this iteration we've made a few changes things:
 
-1. We've added a `PROJECT_DEBUG_PORT` and `PROJECT_DEBUG_HOST` environment variables to contain the respective parameters for `ptvsd`.
+1. We've added `PROJECT_DEBUG_PORT` and `PROJECT_DEBUG_HOST` environment variables to contain the respective parameters for `ptvsd`.
 
 2. We've add a little of extra error handling in case the `ptvsd` module is not importable.
 
@@ -288,9 +305,12 @@ You should see the application resume its start sequence and VSCode should be in
 
 ## Next Step
 
-The updated `bootstrap.py` and `launcher.cmd` scripts completes the third part of the tutorial.  We now have a working workflow, even if it is somewhat clunky, to debug our Python package while it's running inside an embedded Python environment.  In the [Part IV], we'll revisit this manual process and try out some different ways to make it automatic.
+The updated `bootstrap.py` and `launcher.cmd` scripts completes the third part of the tutorial and we now have a complete workflow (even if it is somewhat clunky) to debug our Python package while it's running inside an embedded Python environment.  In the [Part IV], we'll start the refinement phase and start looking at different way to make this manual process an automatic one.
 
 [install_requires vs requirements files]: https://packaging.python.org/discussions/install-requires-vs-requirements/
 [debugger mode]: https://code.visualstudio.com/Docs/editor/debugging
 [part iv]: {filename}2020-12-07-python-vscode-and-max-4.md
 [remote debugging steps]: https://code.visualstudio.com/docs/python/debugging#_remote-script-debugging-with-ssh
+[previous article]: {filename}2020-12-03-python-vscode-and-max-2.md
+[part i]: {filename}2020-12-01-python-vscode-and-max-1.md
+[part ii]: {filename}2020-12-03-python-vscode-and-max-2.md
