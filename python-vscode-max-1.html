@@ -107,16 +107,17 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>In the previous article, we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the conventional Python part of that infrastructure and examine how to create a <em>side-car</em> environment for the external application.</p>
+        <p>In the <a href="https://dbarsam.github.io/blog/python-vscode-max.html">previous article</a>, we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the Python part and talk about set up a <em>side-car</em> environment for the external application.</p>
 <h2 id="side-car-environments">'Side Car' Environments</h2>
-<p>While Python-enabled applications usually have some sort of Python scripting support, Python developers looking to deploy their scripts as Python packages -- or create Python scripts that use 3<sup>rd</sup> party Python packages -- should consider setting up an external Python environment as a package host.</p>
-<p>This external Python environment will be completely separate from the application but later on we'll connect them together by by grafting one Python environment on top of the other.</p>
-<p>It's important to note that this separation is crucial.  Our goal here is to ensure that the local development environment (packages, scripts, settings, etc.) are kept isolated from the application's global environment.  So, while we want to use Python's native packaging features, we need to do so in a way that will not modify the global installation of the application.</p>
+<p>While Python-enabled applications usually have some sort of Python scripting support, Python developers looking to deploy their scripts as Python packages -- or create Python scripts that use 3<sup>rd</sup> party Python packages from a <a href="https://pypi.org/">PyPI</a> -- should consider setting up an external Python environment.</p>
+<p>This external Python environment will be completely separate from the application.  Its only role is to be the installation location for all of the Python packages we need to support our plugin, which will also be wrapped up as a Python package.  Also, this environment does nothing different and uses all of the established conventions used by the Python community.</p>
+<p>In <a href="https://dbarsam.github.io/blog/python-vscode-max-2.html">Part II</a>, we'll make this external Python environment into a <em>side-car</em> Python environment by grafting it onto our target application with a little bit of coding glue.  But before we get to that, it's important to talk about this separation.</p>
+<p>Our goal here is to ensure that the local development environment (packages, scripts, settings, etc.) are kept isolated from the application's global environment.  This side-car environment will let us use Python's native packaging features, but in a way that will not modify the global installation of the application.</p>
 <h2 id="keepem-separated">Keep'em separated</h2>
-<p>There are some benefits to enforcing this barrier.  This separation ensures that the developer has the freedom to reset or even switch projects without having to selectively rollback global changes made to the application.  We can treat the side car environment as a personal sandbox and mess it up how ever we want; if we make a mistake, we can we can always reset by decoupling the environment from the application and destroying it. The alterative -- especially for those applications that don't have the most modular Python installation -- is to completely reinstall the application.</p>
+<p>There are some benefits to enforcing this barrier.  This separation ensures that the developer has the freedom to reset or even switch projects without having to selectively rollback global changes made to the application.  We can treat the side-car environment as a personal sandbox and mess it up how ever we want; if we make a mistake, we can we can always reset by decoupling the environment from the application and destroying it. The alterative -- especially for those applications that don't have the most modular Python installation -- is to completely reinstall the application.</p>
 <p>Python developers should already recognize this pattern as the concept of a <em>virtual environment</em>.  The slight difference here for this article is that our side-car environment is created by external Python installation and grafted onto another that does not natively support virtual environments.</p>
 <h2 id="the-virtualenv-module">The <code>virtualenv</code> module</h2>
-<p>There are many tools that implement Python virtual environments, but the usual, and somewhat mature choice is <code>virtualenv</code> module.  Python's <code>virtualenv</code> module is a tool popular enough to warrant its own tutorials so it won't be covered here.  A good resource to keep around is the <a href="https://virtualenv.pypa.io/en/latest/">official help</a>, but the the important thing to note is that the <code>virtualenv</code> module works by spawning a new environment based on its host Python installation.   This brings up a few points:</p>
+<p>There are many tools that implement Python virtual environments, but the usual, and maybe mature choice is the <code>virtualenv</code> module.  Python's <code>virtualenv</code> module is a tool popular enough to warrant its own tutorials so it won't be covered here.  A good resource to keep around is the <a href="https://virtualenv.pypa.io/en/latest/">official help</a>, but the the important thing to note is that the <code>virtualenv</code> module works by spawning a new environment based on its host Python installation.   This brings up a few points:</p>
 <ol>
 <li>
 <p>Because the <code>virtualenv</code> module create virtual environments from a hosting Python environment, you must first install a <em>system</em> Python environment to host <code>virtualenv</code>.  This installation is a permanent Python solutions and we only need it to create the temporary side car environments provided by <code>virtualenv</code>.</p>
@@ -128,11 +129,11 @@
 <p>The <em>system</em> Python installation is usually pre-installed on Linux systems but not on Windows.  On Windows, this achieved simply by installing a Python environment from <a href="https://www.python.org">https://www.python.org</a> and then installing the <code>virtualenv</code> module.  It's possible to use alternative installations methods (like <a href="https://chocolatey.org">Chocolatey</a>) or even alternative distribution (like <a href="https://docs.conda.io">Conda</a>), but that won't be covered here.</p>
 </li>
 </ol>
-<p>Some vendors have listened to feedback (and learning from their past handling of Python 2) so there is a chance of that the application could already provide all of the necessary support to create user virtual environments.  If that's the case for your specific application, then that makes this section joyfully obsolete.</p>
-<p>However, if the application does not provide <code>virtualenv</code> support directly out of the box, then we should continue to use the <em>system</em> Python approach.  Even if the application's Python install is accessible, installing <code>virtualenv</code> into the application's Python environment would still violate the separation policy to not touching the global installation.</p>
+<p>Some vendors have listened to feedback (and learning from their past handling of Python 2) so there is a chance of that the application could already provide all of the necessary support to create user virtual environments.  If that's the case for your specific application, then that makes this section joyfully redundant.</p>
+<p>However, if the application does not provide <code>virtualenv</code> support directly out of the box, then we should continue with this side-car plan and use a <em>system</em> Python.  Even if the application's Python installation is accessible, installing <code>virtualenv</code> into the application's Python environment would still violate our separation policy.</p>
 <h2 id="venv-vs-virtualenv"><code>venv</code> vs. <code>virtualenv</code></h2>
-<p>As a side note, it's probably best to explain the difference between <code>venv</code> and <code>virtualenv</code>.  The <code>virtualenv</code> module was not always (and maybe still isn't to some people) the tool of choice for virtual environments. Historically, Python 2 did not contain any virtual environment tool and it wasn't until Python 3.3 that a <a href="https://docs.python.org/3/library/venv.html">venv</a> module became part of the standard library.</p>
-<p>During that time, the existing <code>virtualenv</code> was a third party module that competed with other 3<sup>rd</sup> party modules to provide the virtual environment functionality.  However, <code>virtualenv</code> went through a re-write in 2019 and released a second iteration in 2020 that was built upon the same base as <code>venv</code>.  From the <a href="https://virtualenv.pypa.io/en/latest/">official help</a>:</p>
+<p>As a side note, it's probably best to explain the difference between <code>venv</code> and <code>virtualenv</code>, but if you already know the difference, then please skip this section.</p>
+<p>The <code>virtualenv</code> module was not always (and maybe still isn't to some people) the tool of choice for virtual environments. Historically, Python 2 did not contain any virtual environment tool and it wasn't until Python 3.3 that a <a href="https://docs.python.org/3/library/venv.html">venv</a> module became part of the standard library.  During that time, the existing <code>virtualenv</code> was a third party module that competed with other 3<sup>rd</sup> party modules to provide the virtual environment functionality.  However, <code>virtualenv</code> went through a re-write in 2019 and released a second iteration in 2020 that was built upon the same base as <code>venv</code>.  From the <a href="https://virtualenv.pypa.io/en/latest/">official help</a>:</p>
 <blockquote>
 <p><code>virtualenv</code> is a tool to create isolated Python environments. Since Python <code>3.3</code>, a subset of it has been integrated into the standard library under the venv module. The <a href="https://docs.python.org/3/library/venv.html">venv module</a> does not offer all features of this library, to name just a few more prominent:</p>
 <ul>
@@ -154,19 +155,23 @@
 <div class="highlight"><pre><span></span>python.exe -m virtualenv env27
 </pre></div>
 <p>But because we're on creating this as a side car environment on Windows, we can fine-tune the installation to install it within our project folder:</p>
-<div class="highlight"><pre><span></span>python.exe -m virtualenv D:\project\.env27 --no-download --activators batch,python
+<div class="highlight"><pre><span></span>python.exe -m virtualenv D:\project\.env27 --no-download --no-periodic-update --activators batch,python
 </pre></div>
 <p>We're doing a few things here:</p>
 <ol>
 <li>
-<p>Creating the environment inside the project folder <code>D:\project</code> just to keep everything local to the project.</p>
+<p>Creating the environment inside out example project folder <code>D:\project</code> to keep everything local to the project.</p>
 </li>
 <li>
-<p>Explicitly using the <code>--no-download</code> option (even if it enabled by default) to speed up the creation of the environment by not downloading the seed packages of <code>pip</code>, <code>setuptools</code> and <code>wheel</code> packages from the internet.</p>
+<p>Explicitly using the <code>--no-download</code> option (even if it enabled by default) to speed up the creation of the environment by not downloading the <a href="https://virtualenv.pypa.io/en/latest/user_guide.html#seeders">seed packages</a> of <code>pip</code>, <code>setuptools</code> and <code>wheel</code> packages from the internet.</p>
 </li>
 <li>
-<p>Explicitly creating the <code>batch</code> and <code>python</code> activators instead of the full suite of activators (introduced in version <code>20</code>).  For more information about activators, check out the <a href="https://virtualenv.pypa.io/en/latest/user_guide.html#activators">activator section</a> and the <a href="https://virtualenv.pypa.io/en/latest/cli_interface.html#section-activators">command line arguments</a> from the <a href="https://virtualenv.pypa.io/en/latest/">official help</a></p>
+<p>Explicitly using the <code>--no-periodic-update</code> option to avoid updating the embedded wheels.</p>
 </li>
+</ol>
+<p>This is a well-intentioned feature, but because we're not installing fresh <a href="https://virtualenv.pypa.io/en/latest/user_guide.html#seeders">seed packages</a> with the <code>--no-download</code>, we don't want <code>virtualenv</code> to sneak in an update 14 days later.  That will prevent a unnecessary internet download sometime in the future <em>and</em> keep our versions of <code>pip</code>, <code>wheel</code>, <code>setuptools</code> to the same version that was shipped with the version of <code>virtualenv</code> when we first downloaded it.</p>
+<ol>
+<li>Explicitly creating the <code>batch</code> and <code>python</code> activators instead of the full suite of activators (introduced in version <code>20</code>).  For more information about activators, check out the <a href="https://virtualenv.pypa.io/en/latest/user_guide.html#activators">activator section</a> and the <a href="https://virtualenv.pypa.io/en/latest/cli_interface.html#section-activators">command line arguments</a> from the <a href="https://virtualenv.pypa.io/en/latest/">official help</a>.</li>
 </ol>
 <p>The batch activator allows us to activate the environment from the <code>cmd</code> shell which will be the shell of our choice.  If you have a different shell preference, like <code>powershell</code>, then select that instead of <code>batch</code>.  The shell activator doesn't really matter as we're more interested in the <code>python</code> activator.  That's the mechanism that will make this virtual environment a 3ds max side car environment.</p>
 <h2 id="editable-installs">Editable installs</h2>
@@ -181,13 +186,14 @@
 <p>We activate the virtual environment before executing the pip install command.  Otherwise you might be installing the package into the global installation.  The <code>virtualenv</code> usually modifies the prompt with the <code>virtualenv</code>'s name or path on disk.</p>
 </li>
 <li>
-<p>We then instal our project's <code>requirement.txt</code> file.  If your project has any 3<sup>rd</sup> party dependencies, then you should store them in the <code>requirements.txt</code> file.  It's important to not rely on the project's setup.py's <code>install_requires</code> to do this for us as that serves a slightly different purpose.  There's more information about the difference in the PyPA's [install_requires vs requirements files] guidelines.</p>
-</li>
-<li>
-<p>We then install our own project as an editable install.</p>
+<p>We then instal our project's <code>requirement.txt</code> file.  <a href="https://pip.pypa.io/en/latest/reference/requirements-file-format/">Requirement files</a> are a feature native to <code>pip</code> and is pretty much ubiquitous across all Python projects.  If your project has any 3<sup>rd</sup> party dependencies, then you should store them in the <code>requirements.txt</code> file.</p>
 </li>
 </ol>
-<p>This step relies solely on project structure to succeed, so this should still work even if your project imports the application's Python API package (such as <code>pymxs</code> for 3ds Max).  We're not executing any code here; instead we're simply setting up the various hooks we need to execute the package in the virtual environment in an editable way.</p>
+<p>It's important to not rely on the project's <code>setup.py</code>'s <code>install_requires</code> parameter to do this for us.  That serves a slightly different purpose and there's more information about the difference in the PyPA's [install_requires vs requirements files] guidelines.</p>
+<ol>
+<li>We then install our own project as an editable install.</li>
+</ol>
+<p>That last step relies solely on project structure to succeed, so this should still work even if your project imports the application's Python API package (such as <code>pymxs</code> for 3ds Max).  We're not executing any code here; instead we're simply setting up the various hooks we need to execute the package in the virtual environment in an editable way.</p>
 <p>Behind the scenes, the editable install only modifies the virtual environment by creating a <code>pth</code> file.  These <code>pth</code> files contain the paths to locations outside of the environment and are processed by the [site] module during Python initialization.  There's more functionality here, as described by the [site] module's help page, but for the purpose of the editable installs this is what we care about.</p>
 <h2 id="next-steps">Next Steps</h2>
 <p>This part of the infrastructure has only focused on the Python parts of it.  With the virtual environment complete and our project properly installed for development, it's time to move onto <a href="https://dbarsam.github.io/blog/python-vscode-max-2.html">Part II</a>.  There we'll look into how we'll graft the virtual environment onto the application using the <em>bootstrap</em> script.</p>

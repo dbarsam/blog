@@ -107,12 +107,11 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>In the previous article, we prepared the Python development environment by first creating a Python virtual environment and then installing our Python project as an editable package.  In this article, we'll explore how we're going to graft this onto the external application.</p>
+        <p>In the <a href="https://dbarsam.github.io/blog/python-vscode-max-1.html">previous article</a>, we set up a conventional Python development environment with a Python virtual environment and our Python plugin as an editable package.  In this article, we'll make that virtual environment a side-car environment by grafting it onto the external application.</p>
 <h2 id="python-activator">Python Activator</h2>
-<p>The virtual environment that we've created is linked to the Python environment that created it.  In order to graft that environment to the application's Python installation, we're going to play around with that relationship by activating that virtual environment not in the original Python installation, but in the application's Python environment.</p>
-<p>We can do that in a non-destructible way via a bootstrap script that is launched at application start-up.  We're really emphasizing the non-destructive nature of this because we don't want to make any permanent changes to the application and everything should be isolated to the current executing session.  The goal here is that the user should be able to launch the application without the start-up script and have the new instance co-exist without any side effects.</p>
-<p>Fortunately, the <code>virtualenv</code>'s Python activator option has done most of the work for us.  The Python activator produced an <a href="https://github.com/pypa/virtualenv/blob/main/src/virtualenv/activation/python/activate_this.py">activate_this.py</a> Python script and the the only thing that's really missing is for a way to execute within the application.</p>
-<p>You can see this script online at GitHub.  The snapshot used for this article is available below:</p>
+<p>The virtual environment that we've created is linked to the <em>system</em> Python environment that created it.  In order to graft that environment onto the application's Python installation, we're going to play around with that relationship by activating that virtual environment not in the original Python installation, but in the application's Python environment.</p>
+<p>We can do that in a non-destructible way via a bootstrap script that is launched at application start-up.  We're really emphasizing the non-destructive nature of this because we don't want to make any permanent changes to the application.  In fact, everything should be isolated to the current executing session.  The goal here is that the user should be able to launch the application without the start-up script and have the new instance co-exist without any side effects.</p>
+<p>Fortunately, the <code>virtualenv</code>'s Python activator option has done most of the work for us in its <a href="https://github.com/pypa/virtualenv/blob/main/src/virtualenv/activation/python/activate_this.py">activate_this.py</a> Python script.  You can see this script online at GitHub.  The snapshot used for this article is available below:</p>
 <div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Activate virtualenv for current interpreter:</span>
 <span class="sd">Use exec(open(this_file).read(), {&#39;__file__&#39;: this_file}).</span>
@@ -144,7 +143,7 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">real_prefix</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">prefix</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">base</span>
 </pre></div>
-<p>There are a few things that this script is doing that's important:</p>
+<p>The Python activator is designed to be executed from within the application.  When we do that, the <code>activate_this.py</code> script will be making some low-level changes, so it's important to note the following things:</p>
 <ol>
 <li>
 <p>This is a template file so the the strings <code>__LIB_FOLDERS__</code>, <code>__BIN_NAME__</code>, etc. are placeholders and are replaced with resolved values during the creation process.</p>
@@ -161,26 +160,26 @@
 <div class="highlight"><pre><span></span><span class="n">script_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;D:\project\.env27\Scripts\activate_this.py&quot;</span>
 <span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
 </pre></div>
-<p>The problem is that we need to need to make the script portable.  If we put that code into a startup file, named <code>bootstrap.py</code>, then we can use the <code>__file__</code> attribute to resolve the current path and resolve the location of the <code>activate_this.py</code>.</p>
+<p>The problem here is that we need to make the script portable.  If we put that code into a startup file, named <code>bootstrap.py</code>, then we can use the <code>__file__</code> attribute to resolve the current path and resolve the location of the <code>activate_this.py</code>.</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="n">script_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;.env27&quot;</span><span class="p">,</span> <span class="s2">&quot;Scripts&quot;</span><span class="p">,</span> <span class="s2">&quot;activate_this.py&quot;</span><span class="p">)</span>
 <span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
 </pre></div>
-<p>That's better, but how do we differentiate between potentially different Python environment?</p>
+<p>That's better, but it still not as portable as it needs to be.</p>
 <h2 id="bootstrap-environment-variables">Bootstrap Environment Variables</h2>
 <p>The <code>bootstrap.py</code>'s <code>script_path</code> variable is problematic for two reasons:</p>
 <ol>
 <li>The hardcoded path is not portable.</li>
 <li>The hardcoded path is not Python agnostic.</li>
 </ol>
-<p>We can punt that responsibility down the line to the user and have him pass it in as a parameter.  However, we're limited by the application in how we can communicate with the script.  One solution that seems to work around that limitation is environment variables:</p>
+<p>We can punt that responsibility down the line to the user and have him pass the correct path in as a parameter.  However, the application's design will most definitely limit our ability to pass parameters to the script.  While the application's command line will probably include a way to execute a Python script, chances are good that any subsequence command line arguments will be processed by the application instead of being passed through to the Python script.</p>
+<p>One solution that seems to work around those limitations is environment variables:</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="n">script_path</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ACTIVATE_THIS_SCRIPT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 <span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
 </pre></div>
-<p>Environment variables local to a process are a simple way to pass arguments down through multiple layers of code.  This is most evident when your application will give you a way to execute a script from the command line but not a way to pass in script arguments.</p>
-<p>The alternative is to either automatically generate the script or a parameter file before launch, which is not necessarily wrong but won't work well for our particular task.  In our case it will be easier to set up the script to get it's data from environment variables.</p>
+<p>Environment variables local to a process are a simple way to pass arguments down through multiple layers of code.  They're the equivalent to global variables and can be made local to the running instance of the application.  The alternative is to either automatically generate the script or a parameter file before launch -- which is not necessarily wrong, but won't work well for our particular task.  In our case it will be easier to set up the script to get it's data from environment variables.</p>
 <h2 id="bootstrap-safety-checks">Bootstrap Safety Checks</h2>
 <p>We can decorate our <code>bootstrap.py</code> with a bit more flare.</p>
 <ol>
@@ -188,14 +187,15 @@
 <p>We change the <code>ACTIVATE_THIS_SCRIPT</code> into a <code>PROJECT_SCRIPTS</code> environment variable that's a collection of individual scripts separated by semi-colon <code>;</code>.</p>
 </li>
 <li>
-<p>We add a bit more error handling to make the script as user-friendly as possible.</p>
+<p>We add a bit more error handling to make failures easier to debug.</p>
 </li>
 <li>
-<p>Since we're executing a startup script via <code>exec</code>, we're also trapping all exceptions with the base  <code>Exception</code>.  This is usually frowned upon as that patten tends to hide exceptions, but it's applicable in our case as we're sharing the exception to the logging console.</p>
+<p>Since we're executing a startup script via <code>exec</code>, we're also trapping all exceptions with the base  <code>Exception</code>.</p>
 </li>
-<li>
-<p>We wrap the entire script in a <a href="https://docs.python.org/3/library/__main__.html">main scope</a> out of good habit.</p>
-</li>
+</ol>
+<p>Conventionally, this is frowned upon because it hides <em>all</em> exceptions as a side effect instead of explicitly dealing known exceptions.  However, there's a case for it here because we're executing generic code and if we do catch an exception, we're sharing the exception info to the logging console.</p>
+<ol>
+<li>We wrap the entire script in a <a href="https://docs.python.org/3/library/__main__.html">main scope</a> out of good habit.</li>
 </ol>
 <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Standalone set-up script</span>
@@ -209,7 +209,6 @@
 <span class="sd">  `exec`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
@@ -231,9 +230,9 @@
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
-<h2 id="bootstrappy-logging"><code>bootstrap.py</code> + Logging</h2>
+<h2 id="bootstrap-logging">Bootstrap Logging</h2>
 <p>We take our basic premise one step further and replace the <code>prints</code> with <a href="https://docs.python.org/3/library/logging.html">logging</a> statements.  This step is optional, but recommended as your Python tool should already be set-up to use logging instead of <code>print</code> messages.</p>
-<p>As a convenience we use the logging module's basic set-up function <a href="https://docs.python.org/3/library/logging.html#logging.basicConfig">logging.basicConfig</a> but if this is easily extended to something more advanced with the <a href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig">logging.config.dictConfig</a> configuration function.  And again, any parameter should be passed in via environment variables:</p>
+<p>As a convenience we use the logging module's basic set-up function <a href="https://docs.python.org/3/library/logging.html#logging.basicConfig">logging.basicConfig</a>.  This can be easily extended to something more advanced with the <a href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig">logging.config.dictConfig</a> configuration function.  And again, any parameter should be passed in via environment variables:</p>
 <div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Standalone set-up script</span>
 
@@ -253,7 +252,6 @@
 <span class="sd">    This script does not install ptvsd and expects the module to be already installed, or installed during the site injection or exec execution step.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">site</span>
@@ -287,11 +285,10 @@
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 <h2 id="execute-the-bootstrap">Execute the Bootstrap</h2>
-<p>With a virtual environment created and a basic bootstrap script in place, we're now ready to connect another pieces and launch our application with the side-car environment.  To ensure that we do that the most portable way possible, we look to the application's start-up process and see what methods we have to execute a script an startup.</p>
-<p>Hopefully there is a command line or environment variable option available, but this is application specific.  From the <a href="https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html">3ds Max help</a>, we can execute any Python file using the <code>-u PythonHost</code> command:</p>
+<p>With a virtual environment created and a basic bootstrap script in place, we're now ready to launch our application with its side-car environment.  To ensure that we do that the most portable way possible, we look to the application's start-up process and see what methods we have to execute a script an startup.  This will be application-specific, but usually it will involve a command line argument or environment variable.  From the <a href="https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html">3ds Max help</a>, we're lucky enough that we can execute any Python file using the <code>-u PythonHost</code> command:</p>
 <div class="highlight"><pre><span></span>3dsmax.exe -u PythonHost file.py
 </pre></div>
-<p>With that information, we can create a very rudimentary <code>launcher.cmd</code> script to launch 3ds Max with our debug environment variables and the command line configured to launch with our bootstrap script:</p>
+<p>With that information, we can create a very rudimentary <code>launcher.cmd</code> script to launch 3ds Max with both our project environment variables and the command line configured to launch with our bootstrap script:</p>
 <div class="highlight"><pre><span></span><span class="p">@</span><span class="k">echo</span> off
 <span class="k">setlocal</span>
 <span class="k">cd</span> <span class="nv">%~dp0</span>
@@ -309,7 +306,8 @@ Executing Script: D:\projects\.env27\Scripts\activate_this.py
 Python Bootstrap script - stop -
 </pre></div>
 <h2 id="next-step">Next Step</h2>
-<p>The completed <code>bootstrap.py</code> completes the second part of the tutorial.  That file executes all of the necessary component needed to launch the application with a grafted side-car environment.  The next step, [Part III] will look into how exactly we use VSCode to launch the application with the <code>bootstrap.py</code> script.</p>
+<p>The final <code>bootstrap.py</code>  <code>launcher.cmd</code> scripts execute all of the necessary steps needed to launch the application with a grafted side-car environment.
+The next step, <a href="https://dbarsam.github.io/blog/python-vscode-max-3.html">Part III</a>, will look into how exactly we can incorporate VSCode and extend this workflow with debugging capabilities.</p>
     </article>
 
         <div class="tags">

@@ -107,11 +107,11 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>In the previous article, we established an auto-attach workflow with VSCode that was based on a passive sleep delay.  We can tweak that using the same network strategy used in the remote debugger workflow and make it more a more active connection.</p>
-<h2 id="a-simple-handshake">A Simple HandShake</h2>
-<p>The current solution uses a chunk of time to delay VSCode a bit before it tries to connect to the debugging library in the remote Python environment.  VSCode doesn't provide a native delay so we take advantage of the <code>preLaunchTask</code> attribute to sleep using a local command.  Otherwise the attach command would timeout because of a mis-alignment of VSCode's and <code>ptvsd</code> connection requests.  The sleep works but it's an adhoc synchronization method that needs to be tuned to the application.  We can add some more precision to that using a pre-connect network connection.</p>
-<p>We're already using a network connection for synchronization in the original <code>wait_and_attach</code> call.  Our plan duplicates that wait and attach approach and uses the initial connection as the sleep-like synchronization device.  After the connection has been established, we don't need it anymore so we close the connection and move on with the flow, where we VSCode connects with <code>ptvsd</code>.</p>
-<p>The connection is a very simple <a href="https://docs.python.org/3/howto/sockets.html">socket</a> connection where the server socket waits for an connection and a client socket repeated open and closes connection until it succeeds with the awaiting the server socket.</p>
+        <p>In the <a href="https://dbarsam.github.io/blog/python-vscode-max-4.html">previous article</a>, we established an auto-attach workflow with VSCode that was based on a passive sleep delay.  Now we'll refine that process by using the same network strategy used by the remote debugger.</p>
+<h2 id="preliminary-connection">Preliminary Connection</h2>
+<p>The current solution synchronizes VSCode and <code>ptvsd</code> by making VSCode sleep before it attempts the connection.  VSCode doesn't provide a native delay so we take advantage of the <code>preLaunchTask</code> attribute to sleep using a local command.  Otherwise the <code>attach</code> configuration will timeout because of a misalignment of VSCode's and <code>ptvsd</code> connection requests.  The sleep works around the misalignment, but it's an adhoc synchronization that needs to be tuned to for each environment.</p>
+<p>Instead, we can replace that passive sleep with a more active, on-demand, pre-connect network handshake.  The remote debugging workflow already synchronizes VSCode and <code>ptvsd</code> with a network connection in the original <code>wait_and_attach</code> call.  Our plan duplicates that same approach and uses another connection request as a waiting mechanism.</p>
+<p>This <em>preliminary</em> connection is a very simple <a href="https://docs.python.org/3/howto/sockets.html">socket</a> connection.  The server socket waits for a connection and the client socket repeatedly makes connection requests until it succeeds.  After the connection has been established, we can assumed some level of synchronization between the server and client and simply close the connection.  The execution continues and, shortly afterwards, VSCode makes the <em>real</em> connection to <code>ptvsd</code> the same as before.</p>
 <h2 id="the-listen-socket">The 'Listen' Socket</h2>
 <p>We wrap the server socket logic into a <code>_listen</code> function with host and port parameters.</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -140,10 +140,20 @@
     <span class="n">ss</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
-<p>The key part is that we use the <code>socket.accept</code> function to wait for the incoming connection from our client socket.  Everything else is just setting up socket to manage the connection as cleaning as possible.  We enable the <code>socket.SO_REUSEADDR</code> option so that we can re-use the same host and port that we're using in the second network connection between VSCode and <code>ptvsd</code>.</p>
-<p>After the server accepts the connection we make the assumptions that two processes are in sync (to a degree) so we don't need it anymore and we immediately close it.  It's important to note that after we close the connection, we sleep for an additional 1 second.  This is a basic safety measure taken so that the system can close the socket.  Otherwise the socket may remains in a <code>TIME_WAIT</code> state that prevents its re-use by the same host, which is what we want to do later on.</p>
+<p>There are a few things to note:</p>
+<ol>
+<li>
+<p>The main part of this function is the <code>socket.accept</code> function, which will wait for the incoming connection from our client socket.  Everything else is just setting up socket to manage the connection as cleaning as possible.</p>
+</li>
+<li>
+<p>We're using the same host and port in both the preliminary and real connections so we also enable the <code>socket.SO_REUSEADDR</code> option.</p>
+</li>
+<li>
+<p>After we close the connection, we <code>time.sleep</code> for an additional 1 second.  This is a basic safety measure taken so that the system can close the socket.  Otherwise the socket may remains in a <code>TIME_WAIT</code> state that prevents its re-use by the same host, which is what we want to do later on.</p>
+</li>
+</ol>
 <h2 id="the-connect-socket">The 'Connect' Socket</h2>
-<p>We wrap the matching logic into a <code>_connect</code> function with a host and port parameters</p>
+<p>We wrap the request logic into a <code>_connect</code> function with a pair of host and port parameters:</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -172,10 +182,10 @@
     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Connected to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
 </pre></div>
-<p>Unlike the listen function, the client socket has no blocking <code>accept</code> function.  Instead we enter into a perpetual loop where we repeatedly connect to the our host and port.  If the connection fails, it will raise an exception which we handle by sleeping a little bit and then trying again.  However, if the connection is successful then it sets the connected flag to <code>True</code> and exits the loop.</p>
+<p>Unlike the listen function, the client socket has no blocking <code>accept</code> function.  Instead we enter into a perpetual loop where we repeatedly connect to the host and port.  If the connection fails, it will raise an exception which we handle by sleeping a little bit and then trying again.  However, if the connection is successful then it sets the connected flag to <code>True</code> and exits the loop.</p>
 <p>After we've exited the loop, we close the socket and sleep for one more time to allow the socket to move from <code>TIME_WAIT</code> to the proper closed state.</p>
 <h2 id="connect-then-wait-for-attach">Connect then Wait For Attach</h2>
-<p>The <code>_connect</code> function is added to the <code>bootstrap.py</code> file and specifically to the <code>_attach</code> function. Inside that function, the <code>_connect</code> is called before we run <code>ptvsd.wait_for_attach()</code>.  We use the same host and port for the first handshake and the second ptvsd call.  We can do this because were careful with closing the socket after using it for the first time.</p>
+<p>The <code>_connect</code> function is added to the same <code>bootstrap.py</code> file that we've been using and specifically to the <code>_attach</code> function. Inside that function, the <code>_connect</code> is called before we run <code>ptvsd.wait_for_attach()</code>.  We use the same host and port for both the preliminary and real connections, which we can do because we're careful with closing the socket connection after using it for the first time.</p>
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_attach</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Attaches to a remote debugger on a host and port</span>
 
@@ -197,7 +207,7 @@
     <span class="n">ptvsd</span><span class="o">.</span><span class="n">enable_attach</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">),</span> <span class="n">redirect_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">ptvsd</span><span class="o">.</span><span class="n">wait_for_attach</span><span class="p">()</span>
 </pre></div>
-<p>Because the call to <code>ptvsd</code> is part of the application's start-up sequence we don't know exactly when it will be called.  The new <code>_connect</code> function loops until it makes connection to the <code>_listen</code> function called by the <code>preTaskFunction</code> attribute.  Since this function is part of the application's startup sequence, chances are the <code>listen</code> will be already waiting and the initial <code>connect</code> function will be the only connection attempted.</p>
+<p>Because the call to <code>ptvsd</code> is part of the application's start-up sequence we don't know exactly when it will be called.  The new <code>_connect</code> function loops until it makes connection to the respective <code>_listen</code> function called by the <code>preTaskFunction</code> attribute.  Since this function is part of the application's startup sequence, chances are the <code>listen</code> will be already waiting and the initial <code>connect</code> function will be the only connection attempted.</p>
 <h2 id="listen-script">Listen Script</h2>
 <p>Because we've added <code>_connect</code> to the bootstrap script, we keep things self contained and also add the <code>_listen</code> function to the script.  However, that means that we need to update the main entry point to have two modes:  One for the new Python <code>attach</code> configuration and one for the current C++ <code>launch</code> configuration.</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -238,9 +248,9 @@
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 <p>We've updated the bootstrap script with a new parameter: <code>PROJECT_AUTOATTACH</code>.  If that value exists, the logic goes straight into the <code>_listen</code> function, where it will call the <code>socket.accept()</code> and wait for the first connection request.  However, if that variable doesn't exist, then the logic goes through the same logic as before.</p>
-<p>We could have created a second script to do this new mode implementation instead of putting it into our existing bootstrap.py script.  That's perfectly valid and would be strictly adhering to the <a href="https://en.wikipedia.org/wiki/Single-responsibility_principle">Single Responsibility Principle</a>, but because we're putting the mode toggle on the module instead of the module's functions, it's less egregious and somewhat acceptable -- especially give how small our <code>bootstrap.py</code> still is.</p>
+<p>We could have created a second script to handle this new mode implementation instead of putting it into our existing <code>bootstrap.py</code> script.  That's perfectly valid and would be strictly adhering to the <a href="https://en.wikipedia.org/wiki/Single-responsibility_principle">Single Responsibility Principle</a>, but because we're putting the mode toggle on the module instead of the module's functions, it's less egregious and somewhat acceptable -- especially give how small our <code>bootstrap.py</code> still is.</p>
 <h2 id="the-auto-attach-task">The Auto-Attach Task</h2>
-<p>With our <code>bootstrap.py</code> modified, we can now create a new VSCode task to replace the <code>sleep</code> task.  Because we've used engineered this auto-attach with Python, we swap out the <code>COMSPEC</code> process with the local <code>python.exe</code> from our virtual environment and use that to call our <code>bootstrap.py</code> file.  We toggle the mode with by defining a <code>PROJECT_AUTOATTACH</code> and specify the <code>PROJECT_DEBUG_PORT</code> and <code>PROJECT_DEBUG_HOST</code> which will be passed onto the <code>_listen</code> function.</p>
+<p>With our <code>bootstrap.py</code> modified, we can now create a new VSCode task to replace the <code>sleep</code> task.  Because we've engineered this auto-attach with Python, we swap out the <code>COMSPEC</code> process with the local <code>python.exe</code> from our virtual environment and use that to call our <code>bootstrap.py</code> file.  We toggle the mode with by defining a <code>PROJECT_AUTOATTACH</code> and specify the <code>PROJECT_DEBUG_PORT</code> and <code>PROJECT_DEBUG_HOST</code> which will be passed onto the <code>_listen</code> function.</p>
 <div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;auto-attach&quot;</span><span class="p">,</span>
     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
@@ -267,7 +277,7 @@
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Python: Remote Attach&quot;</span><span class="p">,</span>
     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
     <span class="nt">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;attach&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;justMyCode&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nt">&quot;justMyCode&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
     <span class="nt">&quot;processName&quot;</span><span class="p">:</span> <span class="s2">&quot;3dsmax.exe&quot;</span><span class="p">,</span>
     <span class="nt">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
     <span class="nt">&quot;port&quot;</span><span class="p">:</span> <span class="mi">5678</span><span class="p">,</span>
@@ -281,11 +291,11 @@
 <span class="p">},</span>
 </pre></div>
 <h2 id="auto-attach-vs-sleep">Auto-Attach vs Sleep</h2>
-<p>This socket auto attach task is a refinement that makes the overall workflow more flexible in exchange for a more complicated workflow.</p>
-<p>The choice to use it only really matter on the complexity of the project.  For example, if the project is accessed by multiple people, across different environment, then the sleep value is a developer specific personal choice that will most likely be tuned and re-tuned. Values that are personal choices should not be checked into source control.  Otherwise, the project will have a (hopefully, cordial) fight between developers that will result in a series of meaningless back-and-forth commits or a weird ignore rule.</p>
-<p>The socket auto attach adds a little bit of engineering for an adaptable sleep that's great for that kind of situation.  However, if the project is less complex, like a script written by one person, then the sleep attach is probably good enough.</p>
+<p>This socket auto-attach task is a refinement that makes the overall workflow more flexible in exchange for a more complicated workflow.</p>
+<p>The choice to use it will matter on the complexity of the project.  For example, if the project is accessed by multiple people, across different environments, then the sleep value is a developer specific personal choice, one that will most likely be tuned and re-tuned. Values that are personal choices should not be checked into source control.  Otherwise, the project will have a (hopefully, cordial) fight between developers that will result in a series of meaningless back-and-forth commits or a weird ignore rule.</p>
+<p>The socket auto-attach adds a little bit of engineering for an adaptable sleep that's great for that kind of situation.  However, if the project is less complex, like a script written by one person, then the sleep attach is probably good enough.</p>
 <h2 id="the-final-hodge-podge-solution">The Final Hodge Podge Solution</h2>
-<p>We now have a collection of components, assembled into something resembling a seamless debugging workflow:</p>
+<p>Finally, we now have a collection of components, assembled into something resembling a seamless debugging workflow:</p>
 <ol>
 <li>
 <p>Create a fresh virtual environment.</p>
@@ -316,8 +326,290 @@
 <li>
 <p>Create a <code>sleep</code> / <code>auto-attach</code> task for the <code>attach</code>'s <code>preLaunchTask</code> attribute.</p>
 </li>
+<li>
+<p>Create a compound configuration that launches both the <code>launch</code> and the <code>auto-attach</code> configuration at the same time.</p>
+</li>
 </ol>
-<p>With this infrastructure in place, we now have an quasi <code>auto-attach</code> workflow that delivers a equivalent <code>launch</code> experience.</p>
+<p>This infrastructure yields a quasi <code>auto-attach</code> workflow that delivers a equivalent <code>launch</code> experience with the <kbd>F5</kbd> key.</p>
+<h3 id="the-final-bootstrappy-file">The final <code>bootstrap.py</code> file</h3>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone script to attach to a remote debugging.</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">In addition the script will also use `ptvsd` to remotely attach to</span>
+<span class="sd">a remote debugger to the current process.  In some applications this</span>
+<span class="sd">is the only way to debug Python code.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">- `PROJECT_DEBUG_HOST` The host name of the remote debugger to attach to.</span>
+
+<span class="sd">- `PROJECT_DEBUG_PORT` The port number of the remote debugger to attach to.</span>
+
+<span class="sd">- `PROJECT_LOG_LEVEL` The initial logging level this script will use.</span>
+
+<span class="sd">- `PROJECT_AUTOATTACH` Flag to toggle auto-attach mode.  Enable when used pre-launch task.</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">    This script does not install ptvsd and expects the module to be already installed,</span>
+<span class="sd">    or installed during the site injection or exec execution step.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<span class="k">def</span> <span class="nf">_connect</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Launches a very simple client socket on `host`, `port` to repeatedly try a connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        host (str): The host name.</span>
+<span class="sd">        port (int): The host port.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span> <span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">connected</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">connected</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Polling </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> for connection.&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+            <span class="n">connected</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Connected to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_listen</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Launches a very simple server socket on `host`, `port` to wait for a socket connection</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        host (str): The host name.</span>
+<span class="sd">        port (int): The host port.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+    <span class="n">ss</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ss</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">ss</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+    <span class="n">ss</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Listening on </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">cs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Connected to </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+    <span class="n">cs</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">ss</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_exec</span><span class="p">(</span><span class="n">filenames</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute a collection of Python files in the current environment</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scripts (list): A list of filename.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;User provided not scripts to execute.  Skipping script execution.&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_attach</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Attaches to a remote debugger on a host and port</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        host (str): The host name.</span>
+<span class="sd">        port (int): The host port.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">ptvsd</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Could not import module `ptvsd`.  Is installed?&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Notifying IDE for auto-attach on </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">_connect</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waiting for debug client to connect on </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">ptvsd</span><span class="o">.</span><span class="n">enable_attach</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">),</span> <span class="n">redirect_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ptvsd</span><span class="o">.</span><span class="n">wait_for_attach</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Main entry point for the bootstrap script&quot;&quot;&quot;</span>
+
+    <span class="n">debug_port</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">debug_host</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">debug_attach</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_AUTOATTACH&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">log_level</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - start -&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized logging to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug_attach</span><span class="p">:</span>
+        <span class="n">_listen</span><span class="p">(</span><span class="n">debug_host</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">debug_port</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scripts</span><span class="p">:</span>
+            <span class="n">_exec</span><span class="p">(</span><span class="n">scripts</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not find variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">debug_port</span> <span class="ow">and</span> <span class="n">debug_host</span><span class="p">:</span>
+            <span class="n">_attach</span><span class="p">(</span><span class="n">debug_host</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">debug_port</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_DEBUG_HOST/PROJECT_DEBUG_PORT do not exist or are empty.  Python debugging disabled.&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - stop -&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<h3 id="the-final-launchjson-file">The final <code>launch.json</code> file</h3>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">//</span> <span class="err">Use</span> <span class="err">I</span><span class="kc">ntell</span><span class="err">iSe</span><span class="kc">nse</span> <span class="kc">t</span><span class="err">o</span> <span class="err">lear</span><span class="kc">n</span> <span class="err">abou</span><span class="kc">t</span> <span class="err">possible</span> <span class="err">a</span><span class="kc">ttr</span><span class="err">ibu</span><span class="kc">tes</span><span class="err">.</span>
+    <span class="err">//</span> <span class="err">Hover</span> <span class="kc">t</span><span class="err">o</span> <span class="err">view</span> <span class="err">descrip</span><span class="kc">t</span><span class="err">io</span><span class="kc">ns</span> <span class="err">o</span><span class="kc">f</span> <span class="err">exis</span><span class="kc">t</span><span class="err">i</span><span class="kc">n</span><span class="err">g</span> <span class="err">a</span><span class="kc">ttr</span><span class="err">ibu</span><span class="kc">tes</span><span class="err">.</span>
+    <span class="err">//</span> <span class="err">For</span> <span class="err">more</span> <span class="err">i</span><span class="kc">nf</span><span class="err">orma</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="p">,</span> <span class="err">visi</span><span class="kc">t</span><span class="p">:</span> <span class="err">h</span><span class="kc">tt</span><span class="err">ps</span><span class="p">:</span><span class="err">//go.microso</span><span class="kc">ft</span><span class="err">.com/</span><span class="kc">f</span><span class="err">wli</span><span class="kc">n</span><span class="err">k/?li</span><span class="kc">n</span><span class="err">kid=</span><span class="mi">830387</span>
+    <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;configurations&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Max 2018&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;cppvsdbg&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;launch&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;${env:ProgramW6432}\\Autodesk\\3ds Max 2018\\3dsmax.exe&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;-U&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;PythonHost&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;${workspaceFolder}\\scripts\\bootstrap.py&quot;</span>
+            <span class="p">],</span>
+            <span class="nt">&quot;stopAtEntry&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nt">&quot;cwd&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;environment&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="err">//</span> <span class="err">E</span><span class="kc">nsure</span> <span class="kc">t</span><span class="err">ha</span><span class="kc">t</span> <span class="mi">3</span><span class="err">ds</span> <span class="err">Max</span> <span class="err">is</span> <span class="err">ahead</span> <span class="err">o</span><span class="kc">f</span> <span class="err">a</span><span class="kc">n</span><span class="err">y</span> <span class="err">o</span><span class="kc">t</span><span class="err">her</span> <span class="err">Q</span><span class="kc">t</span> <span class="err">based</span> <span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">.</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PATH&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;C:\\Program Files\\Autodesk\\3ds Max 2018;${env:PATH}&quot;</span>
+                <span class="p">},</span>
+                <span class="err">//</span> <span class="err">PROJECT_SCRIPTS</span> <span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ns</span> <span class="err">a</span> <span class="err">`;`</span> <span class="err">separa</span><span class="kc">te</span><span class="err">d</span> <span class="err">lis</span><span class="kc">t</span> <span class="err">o</span><span class="kc">f</span> <span class="kc">f</span><span class="err">ile</span><span class="kc">na</span><span class="err">mes</span> <span class="kc">t</span><span class="err">o</span> <span class="err">ru</span><span class="kc">n</span> <span class="err">a</span><span class="kc">t</span> <span class="err">s</span><span class="kc">tartu</span><span class="err">p</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceRoot}\\.env27\\Scripts\\activate_this.py&quot;</span>
+                <span class="p">},</span>
+                <span class="err">//</span> <span class="err">PROJECT_DEBUG_PORT</span> <span class="err">/</span> <span class="err">PROJECT_DEBUG_HOST</span> <span class="err">should</span> <span class="err">ma</span><span class="kc">t</span><span class="err">ch</span> <span class="err">&#39;Remo</span><span class="kc">te</span> <span class="err">A</span><span class="kc">tta</span><span class="err">ch&#39;</span> <span class="err">below.</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;5678&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span>
+                <span class="p">},</span>
+                <span class="err">//</span> <span class="err">PROJECT_LOG_LEVEL</span> <span class="kc">f</span><span class="err">or</span> <span class="kc">t</span><span class="err">he</span> <span class="err">level</span> <span class="err">o</span><span class="kc">f</span> <span class="err">`loggi</span><span class="kc">n</span><span class="err">g`</span> <span class="err">s</span><span class="kc">tate</span><span class="err">me</span><span class="kc">nts</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;DEBUG&quot;</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Python: Remote Attach&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;attach&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;justMyCode&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;port&quot;</span><span class="p">:</span> <span class="mi">5678</span><span class="p">,</span>
+            <span class="nt">&quot;pathMappings&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;localRoot&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;remoteRoot&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}&quot;</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">&quot;preLaunchTask&quot;</span><span class="p">:</span> <span class="s2">&quot;auto-attach&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;compounds&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Python Max 2018&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;configurations&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;Max 2018&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Python: Remote Attach&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+<h3 id="the-final-tasksjson-file">The final <code>tasks.json</code> file</h3>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">//</span> <span class="err">See</span> <span class="err">h</span><span class="kc">tt</span><span class="err">ps</span><span class="p">:</span><span class="err">//go.microso</span><span class="kc">ft</span><span class="err">.com/</span><span class="kc">f</span><span class="err">wli</span><span class="kc">n</span><span class="err">k/?Li</span><span class="kc">n</span><span class="err">kId=</span><span class="mi">733558</span>
+    <span class="err">//</span> <span class="kc">f</span><span class="err">or</span> <span class="kc">t</span><span class="err">he</span> <span class="err">docume</span><span class="kc">ntat</span><span class="err">io</span><span class="kc">n</span> <span class="err">abou</span><span class="kc">t</span> <span class="kc">t</span><span class="err">he</span> <span class="kc">tas</span><span class="err">ks.jso</span><span class="kc">n</span> <span class="kc">f</span><span class="err">orma</span><span class="kc">t</span>
+    <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;2.0.0&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;tasks&quot;</span><span class="p">:</span> <span class="p">[{</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;sleep&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;${env:COMSPEC}&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;/c&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;timeout&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;/t&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;30&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;/nobreak&quot;</span>
+            <span class="p">],</span>
+            <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;presentation&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;reveal&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;showReuseMessage&quot;</span><span class="p">:</span> <span class="kc">false</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;auto-attach&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}\\.env27\\Scripts\\python.exe&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;${workspaceFolder}\\.vscode\\bootstrap.py&quot;</span>
+            <span class="p">],</span>
+            <span class="nt">&quot;options&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;env&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">:</span> <span class="s2">&quot;5678&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;PROJECT_AUTOATTACH&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;presentation&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;reveal&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;showReuseMessage&quot;</span><span class="p">:</span> <span class="kc">false</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
 <h2 id="potential-next-steps">Potential Next Steps</h2>
 <p>This has been a particularly exhaustive tour of a rather specific Python development workflow.  We could go on as there's always room for improvements or slight tweaks.</p>
 <h3 id="pythonpath">PYTHONPATH</h3>
