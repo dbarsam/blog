@@ -1,12 +1,15 @@
 ---
 title: How this blog detects broken links
-date: 2020-11-08T21:25:04.051Z
-category: about the blog
-tags: blog,markdown,travis,bash
+date: 2020-11-08 21:25
+tags: markdown, travis, bash
 slug: how-this-blog-detects-broken-links
 authors: db
 summary: How to validate local and internet links in markdown files.
 header_cover: /images/article-bg.png
+status: published
+categories: about the blog
+category: about the blog
+type: article
 ---
 
 This blog use VSCode's [HTTP/s and relative link checker] extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++Alt+L++.

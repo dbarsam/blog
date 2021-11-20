@@ -1,12 +1,15 @@
 ---
 title: Qt DLLs in the Windows PATH
-date: 2020-10-29T11:27:02.031Z
-category: Troubleshooting
-tags: Python,Qt,DLL
+date: 2020-10-29 11:27
+tags: python, qt, dll
 slug: qt-dll-mismatch
 authors: db
 summary: How to recognize a particular PySide's DLL load failure error in Windows.
 header_cover: /images/article-bg.png
+status: published
+categories: troubleshooting stories
+category: troubleshooting stories
+type: article
 ---
 
 Every couple of months we'll get a report of some Python tool magically failing with a mysterious -- and unhelpful -- `DLL load failed` error message.  The error is unfortunately too generic to be helpful, but if the Python tool is a PySide application, then there might be a workaround to solve this problem.

@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in 3ds Max - I
-date: 2020-12-01T19:14:45.12
-category: dev setup
-tags: Python,3ds Max,VSCode
+date: 2020-12-01 19:14
+tags: python, 3ds max, vscode
 slug: python-vscode-max-1
 authors: db
 summary: Part I&#58; Python Side Car Environments
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 In the [previous article], we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the Python part and talk about set up a *side-car* environment for the external application.

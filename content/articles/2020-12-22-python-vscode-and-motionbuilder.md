@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in MotionBuilder
-date: 2020-12-22T11:45:25.08
-category: dev setup
-tags: Python,MotionBuilder,VSCode
+date: 2020-12-22 11:45
+tags: python, motionbuilder, vscode
 slug: python-vscode-motionbuilder
 authors: db
 summary: A small tweak to adapt the VSCode auto-attach to work with MotionBuilder
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 In the [previous series of articles], we built a quasi auto-attach workflow to debug 3ds Max's Python scripts with VSCode.  We recently tweaked it for Maya and we can easily tweak it again for MotionBuilder.

@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in 3ds Max - V
-date: 2020-12-09T21:02:07.07
-category: dev setup
-tags: Python,3ds Max,VSCode
+date: 2020-12-09 21:02
+tags: 3ds max, python, vscode
 slug: python-vscode-max-5
 authors: db
 summary: Part V&#58; A slight tweak to get us an VSCode auto-attach configuration
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 In the [previous article], we established an auto-attach workflow with VSCode that was based on a passive sleep delay.  Now we'll refine that process by using the same network strategy used by the remote debugger.

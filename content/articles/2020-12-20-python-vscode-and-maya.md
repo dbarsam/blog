@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in Maya
-date: 2020-12-20T10:04:07.02
-category: dev setup
-tags: Python,Maya,VSCode
+date: 2020-12-20 10:04
+tags: python, maya, vscode
 slug: python-vscode-maya
 authors: db
 summary: A small tweak to adapt the VSCode auto-attach to work with Maya
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 In the [previous series of articles], we built a quasi auto-attach workflow to debug 3ds Max's Python scripts with VSCode.  Fortunately, that workflow was general enough that trying to apply that to Maya only requires some slight tweaking.
