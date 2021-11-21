@@ -57,15 +57,69 @@
             ]
         }
     ],
-    "frontMatter.content.pageFolders": [
-        {
-            "title": "Articles",
-            "path": "[[workspace]]/content/articles"
-        }
-    ],
     "frontMatter.preview.host": "http://localhost:8000/",
     "frontMatter.content.autoUpdateDate": true,
     "frontMatter.taxonomy.modifiedField": "modified",
+    "frontMatter.taxonomy.seoDescriptionField": "summary",
+    "frontMatter.taxonomy.commaSeparatedFields": [
+        "tags",
+        "categories"
+    ],
+    "frontMatter.taxonomy.noPropertyValueQuotes": [
+        "tags",
+        "categories",
+        "modified",
+        "date",
+        "title"
+    ],
+    "frontMatter.content.draftField": {
+        "name": "draft",
+        "type": "choice",
+        "choices": ["draft", "hidden", "published"]
+    },
+    "frontMatter.taxonomy.contentTypes": [
+        {
+            "name": "default",
+            "fields": [
+                {
+                    "title": "Title",
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "title": "Description",
+                    "name": "summary",
+                    "type": "string"
+                },
+                {
+                    "title": "Publishing date",
+                    "name": "date",
+                    "type": "datetime"
+                },
+                {
+                    "title": "Last modified date",
+                    "name": "modified",
+                    "type": "datetime"
+                },
+                {
+                    "title": "Status",
+                    "name": "status",
+                    "type": "draft"
+                },
+                {
+                    "title": "Tags",
+                    "name": "tags",
+                    "type": "tags"
+                },
+                {
+                    "title": "Category",
+                    "name": "category",
+                    "type": "categories"
+                },
+
+            ]
+        },
+    ],
     "markdown.preview.scrollEditorWithPreview": false,
     "[markdown]": {
         "editor.fontSize": 14,
