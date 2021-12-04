@@ -91,7 +91,7 @@
     },
     "frontMatter.taxonomy.contentTypes": [
         {
-            "name": "default",
+            "name": "article",
             "fields": [
                 {
                     "title": "Title",
