@@ -73,6 +73,7 @@
         "date",
         "title"
     ],
+    "frontMatter.taxonomy.dateFormat": "YYYY-MM-DD H:mm",
     "frontMatter.content.draftField": {
         "name": "draft",
         "type": "choice",
