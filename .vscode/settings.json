@@ -63,7 +63,8 @@
     "frontMatter.taxonomy.seoDescriptionField": "summary",
     "frontMatter.taxonomy.commaSeparatedFields": [
         "tags",
-        "categories"
+        "categories",
+        "keywords"
     ],
     "frontMatter.taxonomy.noPropertyValueQuotes": [
         "tags",
