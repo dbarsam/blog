@@ -115,7 +115,12 @@
                 {
                     "title": "Category",
                     "name": "category",
-                    "type": "categories"
+                    "type": "string",
+                },
+                {
+                    "title": "Categories",
+                    "name": "categories",
+                    "type": "categories",
                 },
 
             ]
