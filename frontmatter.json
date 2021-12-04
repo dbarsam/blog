@@ -1,15 +1,5 @@
 {
   "$schema": "https://frontmatter.codes/frontmatter.schema.json",
-  "frontMatter.content.pageFolders": [
-    {
-      "title": "pages",
-      "path": "[[workspace]]/content/pages"
-    },
-    {
-      "title": "articles",
-      "path": "[[workspace]]/content/articles"
-    }
-  ],
   "frontMatter.taxonomy.tags": [
     "3ds max",
     "bash",
