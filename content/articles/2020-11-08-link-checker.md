@@ -9,7 +9,7 @@ summary: How to validate local and internet links in markdown files.
 header_cover: /images/article-bg.png
 ---
 
-This blog use VSCode's [HTTP/s and relative link checker] extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut <kbd>Alt+L</kbd>.
+This blog use VSCode's [HTTP/s and relative link checker] extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++Alt+L++.
 
 The blog's pipeline is slightly different and our best option is the [markdown-link-check] npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.
 

@@ -38,9 +38,9 @@ And we can turn that into the following json block and add it to the `tasks.json
     },
 ```
 
-We mark this task as an explicit *build* command with the `isBuildCommand` flag.  This adds it the list of commands automatically bound to VSCode's <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>b</kbd> keyboard mapping.
+We mark this task as an explicit *build* command with the `isBuildCommand` flag.  This adds it the list of commands automatically bound to VSCode's ++ctrl+shift+b++ keyboard mapping.
 
-We also add an empty `problemMatcher`.  VSCode's [problem matching] feature is how the editor converts the text output of the command into the editor's [problems panel], accessible via <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>m</kbd>.  Unfortunately Pelican does not output its error messages into a compatible format so we add the feature but leave it empty until a future change in either VSCode or Pelican.
+We also add an empty `problemMatcher`.  VSCode's [problem matching] feature is how the editor converts the text output of the command into the editor's [problems panel], accessible via ++ctrl+shift+m++.  Unfortunately Pelican does not output its error messages into a compatible format so we add the feature but leave it empty until a future change in either VSCode or Pelican.
 
 ## The `serve` Task
 

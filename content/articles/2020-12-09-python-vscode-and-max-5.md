@@ -254,7 +254,7 @@ Finally, we now have a collection of components, assembled into something resemb
 
 7. Create a compound configuration that launches both the `launch` and the `auto-attach` configuration at the same time.
 
-This infrastructure yields a quasi `auto-attach` workflow that delivers a equivalent `launch` experience with the <kbd>F5</kbd> key.
+This infrastructure yields a quasi `auto-attach` workflow that delivers a equivalent `launch` experience with the ++F5++ key.
 
 ### The final `bootstrap.py` file
 
