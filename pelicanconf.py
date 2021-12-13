@@ -43,6 +43,7 @@ LOAD_CONTENT_CACHE = False
 # Extra configuration settings for the Markdown processor.
 MARKDOWN = {
     "extension_configs": {
+        "markdown.extensions.attr_list": {},
         "markdown.extensions.codehilite": {
             "css_class": "highlight",  # highlight provided by pymdown-extensions
         },
