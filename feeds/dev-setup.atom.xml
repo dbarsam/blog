@@ -345,7 +345,7 @@ for( $python_file in $python_files )
 &lt;p&gt;Create a compound configuration that launches both the &lt;code&gt;launch&lt;/code&gt; and the &lt;code&gt;auto-attach&lt;/code&gt; configuration at the same time.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;This infrastructure yields a quasi &lt;code&gt;auto-attach&lt;/code&gt; workflow that delivers a equivalent &lt;code&gt;launch&lt;/code&gt; experience with the &lt;kbd&gt;F5&lt;/kbd&gt; key.&lt;/p&gt;
+&lt;p&gt;This infrastructure yields a quasi &lt;code&gt;auto-attach&lt;/code&gt; workflow that delivers a equivalent &lt;code&gt;launch&lt;/code&gt; experience with the ++F5++ key.&lt;/p&gt;
 &lt;h3 id="the-final-bootstrappy-file"&gt;The final &lt;code&gt;bootstrap.py&lt;/code&gt; file&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
 &lt;span class="sd"&gt;Standalone script to attach to a remote debugging.&lt;/span&gt;
@@ -700,7 +700,7 @@ for( $python_file in $python_files )
     &lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Now, selecting &lt;code&gt;Python 3ds Max 2018&lt;/code&gt; and hitting &lt;kbd&gt;F5&lt;/kbd&gt; will launch both the &lt;code&gt;3ds Max 2018&lt;/code&gt; and &lt;code&gt;Python: Remote Attach&lt;/code&gt;.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it gets to processing &lt;code&gt;bootstrap.py&lt;/code&gt; script and calling the &lt;code&gt;ptvsd.wait_for_attach()&lt;/code&gt; line.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the &lt;code&gt;attach&lt;/code&gt; call timing out before 3ds Max is ready.&lt;/p&gt;
+&lt;p&gt;Now, selecting &lt;code&gt;Python 3ds Max 2018&lt;/code&gt; and hitting ++F5++ will launch both the &lt;code&gt;3ds Max 2018&lt;/code&gt; and &lt;code&gt;Python: Remote Attach&lt;/code&gt;.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it gets to processing &lt;code&gt;bootstrap.py&lt;/code&gt; script and calling the &lt;code&gt;ptvsd.wait_for_attach()&lt;/code&gt; line.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the &lt;code&gt;attach&lt;/code&gt; call timing out before 3ds Max is ready.&lt;/p&gt;
 &lt;p&gt;We need to delay the &lt;code&gt;attach&lt;/code&gt; until our application is ready to establish the debugger connection.  There is no native delay mechanism in VSCode's launch configurations, but we can take advantage of the &lt;a href="https://code.visualstudio.com/Docs/editor/debugging#_launchjson-attributes"&gt;preLaunchTask&lt;/a&gt; attribute and add an artificial delay to the &lt;code&gt;attach&lt;/code&gt; configuration.&lt;/p&gt;
 &lt;h2 id="delayed-attach-configuration"&gt;'Delayed' Attach Configuration&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;preLaunchTask&lt;/code&gt; is a generic enough to take in any &lt;a href="https://code.visualstudio.com/docs/editor/tasks"&gt;Task&lt;/a&gt;, so we create one:&lt;/p&gt;

@@ -108,7 +108,7 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>This blog use VSCode's <a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD">HTTP/s and relative link checker</a> extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut <kbd>Alt+L</kbd>.</p>
+        <p>This blog use VSCode's <a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD">HTTP/s and relative link checker</a> extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++Alt+L++.</p>
 <p>The blog's pipeline is slightly different and our best option is the <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.</p>
 <h2 id="batch-operation">Batch Operation</h2>
 <p>The first challenge is that <code>markdown-link-check</code> only takes one file as a argument.  To handle multiple files, the website recommends using this <code>find</code> shell command:</p>
