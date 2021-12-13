@@ -54,6 +54,7 @@ COLOR_SCHEME_CSS = 'tomorrow_night.css'
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'}
 }
+CSS_OVERRIDE = 'extra/css/custom.css'
 ```
 
 This should now be visible if the build or run the live local server:
