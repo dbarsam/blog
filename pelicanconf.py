@@ -79,6 +79,7 @@ MARKDOWN = {
         'pymdownx.inlinehilite' : {},
         'pymdownx.magiclink' : {},
         'pymdownx.mark' : {},
+        'pymdownx.keys' : {},
         'pymdownx.smartsymbols' : {},
         "pymdownx.superfences": {
             # No need for magic indention-based code blocks: all ours are

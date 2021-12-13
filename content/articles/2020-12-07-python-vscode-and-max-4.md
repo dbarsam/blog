@@ -86,7 +86,7 @@ We now have an `attach` and `launch` configuration and we can execute them at th
 }
 ```
 
-Now, selecting `Python 3ds Max 2018` and hitting <kbd>F5</kbd> will launch both the `3ds Max 2018` and `Python: Remote Attach`.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it gets to processing `bootstrap.py` script and calling the `ptvsd.wait_for_attach()` line.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the `attach` call timing out before 3ds Max is ready.
+Now, selecting `Python 3ds Max 2018` and hitting ++F5++ will launch both the `3ds Max 2018` and `Python: Remote Attach`.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it gets to processing `bootstrap.py` script and calling the `ptvsd.wait_for_attach()` line.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the `attach` call timing out before 3ds Max is ready.
 
 We need to delay the `attach` until our application is ready to establish the debugger connection.  There is no native delay mechanism in VSCode's launch configurations, but we can take advantage of the [preLaunchTask] attribute and add an artificial delay to the `attach` configuration.
 
