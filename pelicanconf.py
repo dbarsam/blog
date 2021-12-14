@@ -43,6 +43,7 @@ LOAD_CONTENT_CACHE = False
 # Extra configuration settings for the Markdown processor.
 MARKDOWN = {
     "extension_configs": {
+        "markdown.extensions.attr_list": {},
         "markdown.extensions.codehilite": {
             "css_class": "highlight",  # highlight provided by pymdown-extensions
         },
@@ -153,4 +154,7 @@ COLOR_SCHEME_CSS = 'tomorrow_night.css'
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'}
 }
-SOCIAL = (('github', 'https://github.com/dbarsam'),)
+CSS_OVERRIDE = 'extra/css/custom.css'
+SOCIAL = [
+    ('github', 'https://github.com/dbarsam'),
+]
