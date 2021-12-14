@@ -1,5 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - about the blog</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/about-the-blog.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-01-14T17:48:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>How this blog styles keyboard keys</title><link href="https://dbarsam.github.io/blog/blog-keyboard-keys.html" rel="alternate"></link><published>2021-01-14T17:48:00-05:00</published><updated>2021-01-14T17:48:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-01-14:/blog/blog-keyboard-keys.html</id><summary type="html">&lt;p&gt;An quick example of one of how this blog uses PyMdown Extensions' 'keys' feature to render keyboard keys&lt;/p&gt;</summary><content type="html">&lt;p&gt;One of the features this blog uses from the &lt;a href="https://facelessuser.github.io/pymdown-extensions"&gt;PyMdown Extensions&lt;/a&gt; extension is the &lt;a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/"&gt;Keys&lt;/a&gt; option.  That options enables &lt;code&gt;++&lt;/code&gt; as Markdown syntax and converts it to HTML5's &lt;code&gt;&amp;lt;kbd&amp;gt;&amp;lt;/kbd&amp;gt;&lt;/code&gt; html.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - about the blog</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/about-the-blog.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-01-15T18:45:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>How this blog centers images</title><link href="https://dbarsam.github.io/blog/how-this-blog-centers-images.html" rel="alternate"></link><published>2021-01-15T18:45:00-05:00</published><updated>2021-01-15T18:45:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-01-15:/blog/how-this-blog-centers-images.html</id><summary type="html">&lt;p&gt;One of the many ways to center an image with Markdown and CSS in a Pelican blog.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Here is a common question that has almost an infinite number of answers:  &lt;a href="https://stackoverflow.com/questions/3912694/using-markdown-how-do-i-center-an-image-and-its-caption"&gt;How do I center an image in Markdown&lt;/a&gt;?&lt;/p&gt;
+&lt;p&gt;The solution (for this blog, at least) comes in two parts:  CSS and Markdown Attributes.&lt;/p&gt;
+&lt;h2 id="css-classes"&gt;CSS Classes&lt;/h2&gt;
+&lt;p&gt;We skip over any embedded HTML shenanigans and go for the CSS option.  There, we define two new CSS classes.  One will handle images and another one to handle text:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nc"&gt;center-image&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="kc"&gt;auto&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;display&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;block&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nc"&gt;center-text&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;text-align&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;center&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We write them in the site's &lt;code&gt;custom.css&lt;/code&gt; file (&lt;code&gt;extra/css/custom.css&lt;/code&gt;) and we inject that into the current &lt;a href="https://github.com/gilsondev/pelican-clean-blog"&gt;theme&lt;/a&gt; via its &lt;a href="https://github.com/gilsondev/pelican-clean-blog#user-defined-css"&gt;CSS_OVERRIDE&lt;/a&gt; setting:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;CSS_OVERRIDE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;extra/css/custom.css&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This configuration expose the CSS class names for the Markdown parser to later manipulate.&lt;/p&gt;
+&lt;h2 id="attributes"&gt;Attributes&lt;/h2&gt;
+&lt;p&gt;With the classes defined, we link them to the Markdown element via attributes.  Attributes are a non-standard feature, provided by Python Markdown's &lt;a href="https://python-markdown.github.io/extensions/attr_list"&gt;attr_list&lt;/a&gt; extension, that makes CSS attributes accessible in Markdown syntax.  Without attributes, we would have to resort to embedding raw HTML in the Markdown files.  But with them, we have a cleaner syntax to add HTML style and class names to the Markdown content.&lt;/p&gt;
+&lt;h3 id="installation"&gt;Installation&lt;/h3&gt;
+&lt;p&gt;We first install the Python package into Pelican's Python environment:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;pip install markdown&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="configuration"&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;And then we enable it in the &lt;code&gt;pelicanconf.py&lt;/code&gt; file, in the &lt;code&gt;MARKDOWN&lt;/code&gt; variable:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# Extra configuration settings for the Markdown processor.&lt;/span&gt;
+&lt;span class="n"&gt;MARKDOWN&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;extension_configs&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="o"&gt;....&lt;/span&gt;
+         &lt;span class="s2"&gt;&amp;quot;markdown.extensions.attr_list&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{},&lt;/span&gt;
+        &lt;span class="o"&gt;....&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="s1"&gt;&amp;#39;output_format&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;html5&amp;#39;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The extension is also bundled with the &lt;a href="https://python-markdown.github.io/extensions/extra/"&gt;extra&lt;/a&gt; extension, so enabling that extension will have the same effect -- but watch out for the conflict if you're also going to use &lt;a href="https://facelessuser.github.io/pymdown-extensions/extensions/extra/"&gt;PyMdown Extensions&lt;/a&gt;' own version of &lt;code&gt;extra&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id="no-attributes"&gt;No Attributes&lt;/h3&gt;
+&lt;p&gt;The vanilla version of our content consists of a simple image and paragraph:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;![pelican-logo]
+
+This is a logo.
+
+[&lt;span class="nl"&gt;pelican-logo&lt;/span&gt;]: &lt;span class="na"&gt;https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And that renders out as this:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="pelican-logo" src="https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png"&gt;&lt;/p&gt;
+&lt;p&gt;This is a logo.&lt;/p&gt;
+&lt;h3 id="centered-attributes"&gt;Centered Attributes&lt;/h3&gt;
+&lt;p&gt;We now update the content with our image and text attributes:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;![pelican-logo]{: .center-image}
+
+This is a logo.
+{: .center-text}
+
+[&lt;span class="nl"&gt;pelican-logo&lt;/span&gt;]: &lt;span class="na"&gt;https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Note: The &lt;code&gt;{: .center-text}&lt;/code&gt; attribute goes at the end of the element because the text paragraph is a &lt;em&gt;block level element&lt;/em&gt;.  More information is available from the official &lt;a href="https://python-markdown.github.io/extensions/attr_list/#block-level"&gt;Python-Markdown help&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The above renders out as this:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="pelican-logo" class="center-image" src="https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png"&gt;&lt;/p&gt;
+&lt;p class="center-text"&gt;This is a logo.&lt;/p&gt;</content><category term="about the blog"></category><category term="markdown"></category><category term="pelican"></category><category term="python"></category><category term="css"></category><category term="pymdown extensions"></category></entry><entry><title>How this blog styles keyboard keys</title><link href="https://dbarsam.github.io/blog/blog-keyboard-keys.html" rel="alternate"></link><published>2021-01-14T17:48:00-05:00</published><updated>2021-01-14T17:48:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-01-14:/blog/blog-keyboard-keys.html</id><summary type="html">&lt;p&gt;An quick example of one of how this blog uses PyMdown Extensions' 'keys' feature to render keyboard keys&lt;/p&gt;</summary><content type="html">&lt;p&gt;One of the features this blog uses from the &lt;a href="https://facelessuser.github.io/pymdown-extensions"&gt;PyMdown Extensions&lt;/a&gt; extension is the &lt;a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/"&gt;Keys&lt;/a&gt; option.  That options enables &lt;code&gt;++&lt;/code&gt; as Markdown syntax and converts it to HTML5's &lt;code&gt;&amp;lt;kbd&amp;gt;&amp;lt;/kbd&amp;gt;&lt;/code&gt; html.&lt;/p&gt;
 &lt;p&gt;This means that &lt;code&gt;++ctrl+alt+delete++&lt;/code&gt; renders out as &lt;span class="keys"&gt;&lt;kbd class="key-control"&gt;Ctrl&lt;/kbd&gt;&lt;span&gt;+&lt;/span&gt;&lt;kbd class="key-alt"&gt;Alt&lt;/kbd&gt;&lt;span&gt;+&lt;/span&gt;&lt;kbd class="key-delete"&gt;Del&lt;/kbd&gt;&lt;/span&gt;.  Better information is available on the official &lt;a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/"&gt;help&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id="installation"&gt;Installation&lt;/h2&gt;
 &lt;p&gt;Install the Python package into Pelican's Python environment:&lt;/p&gt;
@@ -328,6 +389,7 @@ print(&amp;quot;Goodbye&amp;quot;)
 &lt;span class="n"&gt;EXTRA_PATH_METADATA&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="s1"&gt;&amp;#39;extra/favicon.ico&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;path&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;favicon.ico&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="n"&gt;CSS_OVERRIDE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;extra/css/custom.css&amp;#39;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;This should now be visible if the build or run the live local server:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;python -m pelican --autoreload --listen&lt;/span&gt;

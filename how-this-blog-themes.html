@@ -20,6 +20,8 @@
         <!-- Code highlight color scheme -->
             <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
 
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
 
         <!-- Custom Fonts -->
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -139,6 +141,7 @@
 <span class="n">EXTRA_PATH_METADATA</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;extra/favicon.ico&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="s1">&#39;favicon.ico&#39;</span><span class="p">}</span>
 <span class="p">}</span>
+<span class="n">CSS_OVERRIDE</span> <span class="o">=</span> <span class="s1">&#39;extra/css/custom.css&#39;</span>
 </pre></div>
 <p>This should now be visible if the build or run the live local server:</p>
 <div class="highlight"><pre><span></span><span class="go">python -m pelican --autoreload --listen</span>

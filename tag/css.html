@@ -2,15 +2,14 @@
 <html lang="en">
 
 <head>
-            <meta charset="utf-8">
+        <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-        <title>VSCode's Word Wrap vs. Preview Sync</title>
+        <title>#Dev - Tag css</title>
 
             <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
-            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
         <!-- Bootstrap Core CSS -->
         <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
 
@@ -35,28 +34,11 @@
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-
-
-        <meta name="description" content="VSCode's preview synchronization is a nice feature -- when it works...">
-
-        <meta name="author" content="db">
-
-        <meta name="tags" content="vscode">
-
-	                <meta property="og:locale" content="">
+                <meta property="og:locale" content="">
 		<meta property="og:site_name" content="#Dev">
-
-	<meta property="og:type" content="article">
-            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
-	<meta property="og:url" content="https://dbarsam.github.io/blog/vscode-editor-preview-sync.html">
-	<meta property="og:title" content="VSCode's Word Wrap vs. Preview Sync">
-	<meta property="article:published_time" content="2020-10-15 09:15:23.051000+00:00">
-            <meta property="og:description" content="VSCode's preview synchronization is a nice feature -- when it works...">
-
-            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
 </head>
 
-<body class="article-vscode-editor-preview-sync">
+<body class="tag-css">
 
     <!-- Navigation -->
     <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
@@ -83,18 +65,12 @@
         <!-- /.container -->
     </nav>
 
-    <!-- Page Header -->
-        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog/images/home-bg.png')">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <div class="post-heading">
-                        <h1>VSCode's Word Wrap vs. Preview Sync</h1>
-                        <span class="meta">Posted by
-                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
-                             on Thu 15 October 2020
-                        </span>
-                        
+                    <div class="page-heading">
+                        <h1>Tag css</h1>
                     </div>
                 </div>
             </div>
@@ -105,27 +81,20 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-    <!-- Post Content -->
-    <article>
-        <p>VSCode has a nice preview engine that allows a side-by-side of text and rendered-text. The feature is best documented in VSCode's native <a href="https://code.visualstudio.com/Docs/languages/markdown">Markdown</a> support help, but it's available for other languages and their plugins.</p>
-<p>Within that help page is the section on <a href="https://code.visualstudio.com/Docs/languages/markdown#_editor-and-preview-synchronization">Editor and Preview Synchronization</a>.  This is a nice feature but suffers from a locked up, sync-cycle battle between the editor pane and preview pane that leaves the user frustrated and fighting for control of the editor.</p>
-<p>The fun starts when there's a big discrepancy between the screen space  taken by the text editor's monospace text and the previewer's html-looking rendered text.  There are various ways to make this happen, but the one way that seems to be consistent, is to enable the preview and word wrapping at the same time.</p>
-<p>When both options are enabled, the synchronization seems to struggle with the concept of word wrap; after the cursor goes 'below the fold' of the bottom terminal panels, the sync (for some reason) decides to scroll the editor back to top of the file.  But because you're in the middle of typing, the editor then immediately jumps back down to bottom, where the cursor is.  Of course, the synchronization is still active, so the editor jumps back up to the top and the cycle repeats for every keyboard click.</p>
-<p><img alt="vscode-editor-preview-sync.gif" src="..\images\articles\2020-10-15-vscode-preview-fights\vscode-example.gif"></p>
-<p>This is seems like the same issue described in Visual Code issues #<a href="https://github.com/microsoft/vscode/issues/108582">108582</a>, but the comments suggest that people are still suffering from it.  Until it's properly fixed, the best answer is to disable that feature by setting the <code>markdown.preview.scrollEditorWithPreview</code> setting to <code>false</code>:</p>
-<div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="err">....</span>
-    <span class="nt">&quot;markdown.preview.scrollEditorWithPreview&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-    <span class="err">....</span>
-<span class="p">}</span>
-</pre></div>
-    </article>
-
-        <div class="tags">
-            <p>tags: <a href="https://dbarsam.github.io/blog/tag/vscode.html">vscode</a></p>
+        <div class="post-preview">
+            <a href="https://dbarsam.github.io/blog/how-this-blog-centers-images.html" rel="bookmark" title="Permalink to How this blog centers images">
+                <h2 class="post-title">
+                    How this blog centers images
+                </h2>
+            </a>
+                <p class="article-summary">
+                    One of the many ways to center an image with Markdown and CSS in a Pelican blog.
+                </p>
+            <p class="post-meta">Posted by
+                    <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                 on Fri 15 January 2021
+            </p>
         </div>
-
-    <hr>
 
             </div>
         </div>
