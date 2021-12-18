@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in 3ds Max - III
-date: 2020-12-05T19:10:49.04
-category: dev setup
-tags: Python,3ds Max,VSCode
+date: 2020-12-05 19:10
+tags: python, 3ds max, vscode
 slug: python-vscode-max-3
 authors: db
-summary: Part III&#58; VSCode's attach to process workflow
+summary: Part III&#58; VSCode's attach to process workflow'
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 In the [previous article], we had created a Python virtual environment via `virtualenv`'s and built a `bootstrap.py` to graft it into the application.  In this article, we'll take a first pass at incorporating VSCode into our workflow.

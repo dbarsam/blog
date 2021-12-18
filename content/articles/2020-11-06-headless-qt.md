@@ -1,12 +1,15 @@
 ---
 title: Headless Qt?
-date: 2020-11-06T10:14:45.031Z
-category:
-tags: Python,Qt,Docker,GUI
+date: 2020-11-06 10:14
+tags: python, qt, docker, gui
 slug: headless-qt
 authors: db
 summary: Can you configure Qt to work in systems with no UI?
 header_cover: /images/article-bg.png
+status: published
+categories: application development
+category: application development
+type: article
 ---
 
 This isn't a real article.  Instead, it's more of an annotated bookmark of this [post], which was used in some research on how to configure Qt applications to run in Docker Windows containers -- and that Docker task is part of another, work-in-progress project that may not ever be completed. So, there are no solutions here.  Sorry.

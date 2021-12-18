@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in 3ds Max - IV
-date: 2020-12-07T21:08:47.02
-category: dev setup
-tags: Python,3ds Max,VSCode
+date: 2020-12-07 21:08
+tags: python, 3ds max, vscode
 slug: python-vscode-max-4
 authors: db
-summary: Part IV&#58; VSCode's compound launch configuration
+summary: Part IV&#58; VSCode's compound launch configuration'
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 In the [previous article], we successful created a debugging session from connecting various pieces of our infrastructure.  We created a Python virtual environment via `virtualenv`, built a `bootstrap.py` to graft it into the application, executed `ptvsd` at startup, and successfully made the whole contraption work, via VSCode's `Attach to Process` remote debugging configuration. In this article, we'll look up at couple of tweaks to automate that manual process.

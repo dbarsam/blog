@@ -10,8 +10,10 @@
             "request": "launch",
             "module": "pelican",
             "args": [
+                "--debug",
                 "${workspaceFolder}\\content"
             ],
+            "justMyCode": false,
             "cwd": "${workspaceFolder}",
             "python": "${workspaceFolder}\\.conda\\env\\python.exe"
         }

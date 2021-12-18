@@ -1,12 +1,15 @@
 ---
 title: VSCode tasks for Pelican blogs
-date: 2020-11-23T03:40:27.619Z
-category: about the blog
-tags: blog,vscode,pelican
+date: 2020-11-23 03:40
+tags: vscode, pelican
 slug: vscode-task-pelican
 authors: db
 summary: How to run Pelican commands from within Visual Studio Code.
 header_cover: /images/article-bg.png
+status: published
+categories: about the blog
+category: about the blog
+type: article
 ---
 
 VSCode's [tasks feature] is the editor's mechanism to execute building, testing, and other software development actions from the comfort of the IDE.  Most of the common tasks are built-in or provided by plugins, but it's also possible to define workspace tasks in the project's `tasks.json` file.

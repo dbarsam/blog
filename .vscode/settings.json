@@ -57,4 +57,111 @@
             ]
         }
     ],
+    "frontMatter.preview.host": "http://localhost:8000/",
+    "frontMatter.content.autoUpdateDate": true,
+    "frontMatter.taxonomy.modifiedField": "modified",
+    "frontMatter.taxonomy.seoDescriptionField": "summary",
+    "frontMatter.taxonomy.commaSeparatedFields": [
+        "tags",
+        "categories",
+        "keywords"
+    ],
+    "frontMatter.taxonomy.noPropertyValueQuotes": [
+        "tags",
+        "categories",
+        "modified",
+        "date",
+        "title"
+    ],
+    "frontMatter.content.pageFolders": [
+        {
+          "title": "pages",
+          "path": "[[workspace]]/content/pages"
+        },
+        {
+          "title": "articles",
+          "path": "[[workspace]]/content/articles"
+        }
+    ],
+    "frontMatter.taxonomy.dateFormat": "YYYY-MM-DD H:mm",
+    "frontMatter.content.draftField": {
+        "name": "draft",
+        "type": "choice",
+        "choices": ["draft", "hidden", "published"]
+    },
+    "frontMatter.taxonomy.contentTypes": [
+        {
+            "name": "article",
+            "fields": [
+                {
+                    "title": "Title",
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "title": "Description",
+                    "name": "summary",
+                    "type": "string"
+                },
+                {
+                    "title": "Publishing date",
+                    "name": "date",
+                    "type": "datetime"
+                },
+                {
+                    "title": "Last modified date",
+                    "name": "modified",
+                    "type": "datetime"
+                },
+                {
+                    "title": "Status",
+                    "name": "status",
+                    "type": "draft"
+                },
+                {
+                    "title": "Tags",
+                    "name": "tags",
+                    "type": "tags"
+                },
+                {
+                    "title": "Category",
+                    "name": "category",
+                    "type": "string",
+                },
+                {
+                    "title": "Categories",
+                    "name": "categories",
+                    "type": "categories",
+                },
+                {
+                    "title": "Header Image",
+                    "name": "header_cover",
+                    "type": "choice",
+                    "choices": [
+                        { "id": "/images/article-bg.png", "title": "Article Header" },
+                        { "id": "/images/home-bg.png", "title": "Home Header" }
+                    ]
+                }
+            ]
+        },
+    ],
+    "markdown.preview.scrollEditorWithPreview": false,
+    "[yaml]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "gitlens.codeLens.scopes": [
+            "document"
+        ]
+    },
+    "[markdown]": {
+        "editor.fontSize": 14,
+        "editor.lineHeight": 26,
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 64,
+        "editor.lineNumbers": "off",
+        "editor.quickSuggestions": false,
+        "editor.minimap.enabled": false
+    },
+
 }

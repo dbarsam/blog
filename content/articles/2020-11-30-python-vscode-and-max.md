@@ -1,12 +1,15 @@
 ---
 title: Set up VSCode to Debug Python in 3ds Max
-date: 2020-11-30T10:10:46.12
-category: dev setup
-tags: Python,3ds Max,VSCode
+date: 2020-11-30 10:10
+tags: python, 3ds max, vscode
 slug: python-vscode-max
 authors: db
 summary: A multipart article describing how to debug an application's embedded Python environment.
 header_cover: /images/article-bg.png
+status: published
+categories: developer set-up
+category: developer set-up
+type: article
 ---
 
 Unfortunately, not every application embeds Python the same way.  This makes developing Python tools for these applications awkwardly challenging.  Some applications obfuscate the interpreter it by compiling directly it into the application, while others take a more modular approach and ship a complete Python installation -- including an equivalent `python.exe` and `site-package` folder -- in a easily accessible folder in the application's installation directory.

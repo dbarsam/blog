@@ -1,0 +1,32 @@
+{
+  "$schema": "https://frontmatter.codes/frontmatter.schema.json",
+  "frontMatter.taxonomy.tags": [
+    "3ds max",
+    "bash",
+    "blog",
+    "cmd",
+    "codehilite",
+    "dll",
+    "docker",
+    "front matter",
+    "git",
+    "github",
+    "gui",
+    "markdown",
+    "maya",
+    "motionbuilder",
+    "pelican",
+    "pipeline",
+    "python",
+    "qt",
+    "ssh",
+    "travis",
+    "vscode"
+  ],
+  "frontMatter.taxonomy.categories": [
+    "about the blog",
+    "application development",
+    "developer set-up",
+    "troubleshooting stories"
+  ]
+}

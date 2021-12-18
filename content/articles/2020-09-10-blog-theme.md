@@ -1,12 +1,15 @@
 ---
 title: How this blog is themed
-date: 2020-09-10T03:19:06.034Z
-category: about the blog
-tags: blog,pipeline,travis-ci,github,pelican,python
+date: 2020-09-10 03:19
+tags: github, pelican, pipeline, python, travis
 slug: how-this-blog-themes
 authors: db
 summary: The set-up of this blog's theme.
 header_cover: /images/article-bg.png
+status: published
+categories: about the blog
+category: about the blog
+type: article
 ---
 
 [Pelican] is the tool that makes this static website from the markdown files in the repository.  But, while it has the power to theme the website out of the box, it's not that clear exactly how that is supposed to work.

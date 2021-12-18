@@ -158,3 +158,9 @@ CSS_OVERRIDE = 'extra/css/custom.css'
 SOCIAL = [
     ('github', 'https://github.com/dbarsam'),
 ]
+DISPLAY_PAGES_ON_MENU = True
+MENUITEMS = [
+    ("Archives", "/archives.html"),
+    ("Categories", "/categories.html"),
+    ("Tags", "/tags.html"),
+]
