@@ -224,7 +224,9 @@ The panel can have multiple configurations depending on documentation types.  Th
                     "name": "header_cover",
                     "type": "choice",
                     "choices": [
-                        { "id": "/images/article-bg.png",  "title": "Article Header" },
+                        {
+                            "id": "/images/article-bg.png",  "title": "Article Header"
+                        },
                     ]
                 }
             ]
@@ -267,4 +269,4 @@ After jumping through all the hoops, Front Matter is a pretty good extension.  I
 [front matter]: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-front-matter
 [side panel]: https://frontmatter.codes/docs/panel#metadata
 [known type]: https://frontmatter.codes/docs/content-types#how-it-works
-[default-contenttype.png]: ..\images\articles\2021-01-20-pelican-markdown-and-front-matter\front-matter-panel.png
+[default-contenttype.png]: {attach}images/front-matter-panel.png
