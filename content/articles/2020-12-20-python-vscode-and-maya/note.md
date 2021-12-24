@@ -93,4 +93,4 @@ We're still following the same workflow from our previous 3ds Max example.  The 
 
 [command line]: https://help.autodesk.com/view/MAYAUL/2018/ENU/?guid=GUID-2E5D1D43-DC3D-4CB2-9A35-757598220F22
 [MEL scripts]: https://help.autodesk.com/view/MAYAUL/2018/ENU/?guid=GUID-60178D44-9990-45B4-8B43-9429D54DF70E
-[previous series of articles]: {filename}2020-11-30-python-vscode-and-max.md
+[previous series of articles]: {filename}../2020-11-30-python-vscode-and-max/note.md
