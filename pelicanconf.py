@@ -105,10 +105,29 @@ PAGE_PATHS = [
     'pages'
 ]
 
+# The article url and file processing options
+PAGE_URL = 'pages/{slug}/'
+PAGE_SAVE_AS = 'pages/{slug}/index.html'
+PAGE_LANG_SAVE_AS = False
+
 # A list of directories and files to look at for articles, relative to PATH.
 ARTICLE_PATHS = [
     'articles'
 ]
+
+# The article url and file processing options
+ARTICLE_URL = 'articles/{slug}/'
+ARTICLE_SAVE_AS = 'articles/{slug}/index.html'
+
+# The tag / tags index url and file processing options
+TAG_URL = 'tag/{slug}/'
+TAG_SAVE_AS = 'tag/{slug}/index.html'
+TAGS_URL = 'tags/'
+TAGS_SAVE_AS = None
+
+# The category index url and file processing options
+CATEGORY_URL = 'category/{slug}/'
+CATEGORY_SAVE_AS = 'category/{slug}/index.html'
 
 # A list of directories to look for static files, relative to PATH.
 STATIC_PATHS = [
