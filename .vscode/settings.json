@@ -151,7 +151,12 @@
                         { "id": "/images/article-bg.png", "title": "Article Header" },
                         { "id": "/images/home-bg.png", "title": "Home Header" }
                     ]
-                }
+                },
+                {
+                    "title": "Attachments",
+                    "name": "attachments",
+                    "type": "string"
+                },
             ]
         },
     ],
