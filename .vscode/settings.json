@@ -41,6 +41,16 @@
         "venv",
         "virtualenv"
     ],
+    "cSpell.ignorePaths": [
+        "package-lock.json",
+        "node_modules",
+        "vscode-extension",
+        ".git/objects",
+        ".vscode",
+        ".vscode-insiders",
+        ".frontmatter",
+        "frontmatter.json",
+    ],
     "cSpell.languageSettings": [
         {
             "languageId": "python",
