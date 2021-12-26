@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Pelican, Markdown, and Front Matter</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="A probably incomplete introduction to managing markdown front matter in a Pelican powered blog.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="front matter">
+        <meta name="tags" content="markdown">
+        <meta name="tags" content="pelican">
+        <meta name="tags" content="vscode">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/pelican-markdown-and-front-matter/">
+	<meta property="og:title" content="Pelican, Markdown, and Front Matter">
+	<meta property="article:published_time" content="2021-01-20 14:10:00-05:00">
+            <meta property="og:description" content="A probably incomplete introduction to managing markdown front matter in a Pelican powered blog.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/home-bg.png">
+</head>
+
+<body class="article-pelican-markdown-and-front-matter">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/home-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Pelican, Markdown, and Front Matter</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Wed 20 January 2021
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <!--
+spell-checker:ignore deliminators frontmark jekkyl elio struyf contenttype lastmod
+-->
+
+<p>A person with a blog should care about front matter -- and an engineer with a blog should care about making caring about front matter as easy as possible.  This article is the start of that caring, where we dive into concept of front matter, see what's options are available for our Pelican blog, and end with an almost satisfactory workflow.</p>
+<h2 id="pelican-markdown-and-front-matter">Pelican, Markdown, and Front Matter</h2>
+<p>It's a little unclear if there is a standard for blog post metadata.  Pelican has its own set of metadata fields, defined in the <a href="https://docs.getpelican.com/en/latest/content.html#file-metadata">Pelican help</a>, but they don't necessarily map to what other system are using.  This is a known issue with the Pelican team and you can track that conversation over at <a href="https://github.com/getpelican/pelican/issues/350">Issue #350</a>.</p>
+<p>But even if we move past Pelican's design decision, there is another level of inconsistency.  Most Markdown based websites are coalescing around a YAML based front matter style, largely championed by the Pelican competitors, like <a href="https://jekyllrb.com/docs/front-matter/">Jekyll</a> or <a href="https://gohugo.io/content-management/front-matter/">Hugo</a>.  But because Markdown is Pelican's secondary language, after reStructured Text, Pelican doesn't support the language natively.  Instead, it defers to the <a href="https://python-markdown.github.io/extensions/meta_data/">python-markdown</a> extension, which doesn't quite follow the crowd:</p>
+<blockquote>
+<p>Alternatively, You may use YAML style deliminators to mark the start and/or end of your meta-data. When doing so, the first line of your document must be ---. The meta-data ends at the first blank line or the first line containing an end deliminator (either <code>---</code> or <code>...</code>), whichever comes first. Even though YAML deliminators are supported, meta-data is not parsed as YAML.</p>
+</blockquote>
+<p>So unfortunately, Pelican's current handling of Markdown front matter is limited to a set of Pelican specific keywords and processed by a YAML-light parser.</p>
+<h2 id="the-broken-pelican-front-matter-plugin">The Broken Pelican Front Matter Plugin</h2>
+<p>Fortunately, Axle H. has developed the <a href="https://github.com/noirbizarre/pelican-frontmark/">pelican-frontmark</a> Python library, which is a Pelican plugin that adds the missing YAML support via the <a href="https://pyyaml.org/">PyYAML</a> library.</p>
+<p>Unfortunately, it looks like development on it has stopped.  It's suffering from a deprecation problem, introduced in this <a href="https://github.com/getpelican/pelican/pull/2644#issuecomment-548304256">pull request</a> from Pelican.  It was fixed in <a href="https://github.com/noirbizarre/pelican-frontmark/pull/2">PR #2</a>, but it has yet to be reviewed and accepted.</p>
+<p>There's another bug in <code>pelican-frontmark</code>, openly discussed in its <a href="https://github.com/noirbizarre/pelican-frontmark/issues/1">Issue #1</a>.  The <a href="https://pyyaml.org/">PyYAML</a> parser is too good and automatically converts recognizable text chunks to known Python types before Pelican processes the metadata.  This means that when <code>PyYAML</code> comes across a date, it will convert the value from text to the Python native <code>datetime</code> object and store that type.  However Pelican expects <code>str</code> and not <code>datetime</code> objects, so you may see the following exception:</p>
+<div class="highlight"><pre><span></span><span class="n">ERROR</span>    <span class="n">Could</span> <span class="ow">not</span> <span class="n">process</span> <span class="n">articles</span>\<span class="mi">2020</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">20</span><span class="o">-</span><span class="n">dummy</span><span class="o">.</span><span class="n">md</span>       <span class="n">log</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">96</span>
+    <span class="n">an</span> <span class="n">integer</span> <span class="ow">is</span> <span class="n">required</span> <span class="p">(</span><span class="n">got</span> <span class="nb">type</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican\generators.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">633</span><span class="p">,</span> <span class="ow">in</span> <span class="n">generate_context</span>
+            <span class="n">context_sender</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican</span><span class="se">\r</span><span class="s2">eaders.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">573</span><span class="p">,</span> <span class="ow">in</span> <span class="n">read_file</span>
+            <span class="n">content</span><span class="p">,</span> <span class="n">reader_metadata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican-frontmark</span><span class="se">\f</span><span class="s2">rontmark</span><span class="se">\r</span><span class="s2">eader.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">138</span><span class="p">,</span> <span class="ow">in</span> <span class="n">read</span>
+            <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican-frontmark</span><span class="se">\f</span><span class="s2">rontmark</span><span class="se">\r</span><span class="s2">eader.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">184</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_parse_metadata</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_metadata</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican</span><span class="se">\r</span><span class="s2">eaders.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">124</span><span class="p">,</span> <span class="ow">in</span> <span class="n">process_metadata</span>
+            <span class="k">return</span> <span class="n">METADATA_PROCESSORS</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican</span><span class="se">\r</span><span class="s2">eaders.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">51</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span>
+            <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">get_date</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)),</span>
+        <span class="ne">TypeError</span><span class="p">:</span> <span class="n">an</span> <span class="n">integer</span> <span class="ow">is</span> <span class="n">required</span> <span class="p">(</span><span class="n">got</span> <span class="nb">type</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
+<p>There is a work around that does not require any code modification.  You need to configure your Pelican system to use <em>unrecognizable</em> date formats like <code>2020-12-20 10:04</code> instead of <code>datetime</code>-parsable ones, like <code>2020-12-20T10:04:07.000Z</code>.  The <code>PyYAML</code> parser will simply skip over the unrecognizable dates and leave it as text, which is what Pelican's <code>get_date</code> function expects.</p>
+<p>However, that work around does not fix the deprecation problem so we're still stuck with a broken plugin.  We could fix the plugin and get YAML style front matter working, but that's a task for another day.</p>
+<h2 id="category-vs-categories">Category vs Categories</h2>
+<p>Before we move onto something that is actually working, we first need to reconcile the design difference outlined in Pelican's <a href="https://github.com/getpelican/pelican/issues/350">issue #350</a>.  To begin, we need to talk about the the three different ways to assign search engine friendly labels to an article:</p>
+<ol>
+<li>Tags</li>
+<li>Keywords</li>
+<li>Categories</li>
+</ol>
+<h3 id="tags-keywords-categories">Tags, Keywords, Categories</h3>
+<p>Tags and keywords seem to be used interchangeably depending on which publishing system you're using.</p>
+<p>Traditionally, keywords are words that exist in the content itself, probably in the title or important paragraphs.  They are the shorthand way to describe the article's topic and lend themselves to creating traditional indexes, you know, where all the pages referencing a topic are organized in an listing in the back of a book.</p>
+<p>There's not an equivalent for tags.  Instead, it appears that tags are built from a collection of keywords and are specific to the system displaying the content.  It's easy to get confused when you see the case of tags that only contain single keywords.</p>
+<p>And then there are categories, which seem to operate at a higher level than keywords or tags.  They are more like themes that group one or more articles together.  These articles may have different topics (i.e. keywords and tags), but still be part of a user-defined collection collection.</p>
+<p>Pelican supports multiple tags and keywords, but it only support a single category per article.  This conflicts with other system that support multiple catagories -- or even nested categories.  Again, see Pelican's <a href="https://github.com/getpelican/pelican/issues/350">Issue #350</a> for the final word on this.</p>
+<h3 id="front-matter-fields">Front Matter Fields</h3>
+<p>When it comes to front matter then, most systems prefer the multiple categories stored in the <code>categories</code> metadata field.  However, Pelican sticks to the single category with the <code>category</code> metadata field.  This is frustrating to somebody that likes agnostic systems as neither system has been design with that compatibility in mind (well, maybe [Jekkyl]).</p>
+<p>For example, a system processing the <code>category</code> field will not recognize the equivalent of a single value in the <code>categories</code> field.  Like wise, a system processing the <code>categories</code> field will not read in the equivalent 'list of size 1' value from the <code>category</code> field.  The user is forced to pick a side between camps <code>category</code> and <code>categories</code>, which is unfortunate because the content should be free of any platform specific manipulation.  Content that is platform agnostic is open to be processed by other platforms and -- more importantly -- accessed by universal tools that make writing articles easier.</p>
+<h2 id="vscodes-front-matter-extension">VSCode's 'Front Matter' Extension</h2>
+<p>VSCode is already the daily driver for work so it was a pleasant surprise to find that Elio Struyf and friends have created <a href="https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-front-matter">Front Matter</a>, an extension that turns the editor in a content management system.  The extension is in active development and really leverages the plugin framework of Visual Studio Code to deliver a nice user experience.</p>
+<h3 id="pelican-specific-settings">Pelican Specific Settings</h3>
+<p>In the context of our Pelican blog, the plugin adapts quite well.  We're able to configure Front Matter it for Pelican via the following settings:</p>
+<ol>
+<li>
+<p>Configure the date format to the expected format:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.taxonomy.dateFormat&quot;</span><span class="p">:</span> <span class="s2">&quot;YYYY-MM-DD H:mm&quot;</span><span class="p">,</span>
+    <span class="err">....</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+<li>
+<p>Change the draft field from the <code>boolean</code> to a Pelican enum <code>choice</code>:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.content.draftField&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;draft&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;choice&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;choices&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;draft&quot;</span><span class="p">,</span> <span class="s2">&quot;hidden&quot;</span><span class="p">,</span> <span class="s2">&quot;published&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="err">....</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+<li>
+<p>Specify the modified field from <code>lastmod</code> to <code>modified</code>:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.taxonomy.modifiedField&quot;</span><span class="p">:</span> <span class="s2">&quot;modified&quot;</span><span class="p">,</span>
+    <span class="err">....</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+<li>
+<p>Change the description field from <code>description</code> to <code>summary</code>:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.taxonomy.seoDescriptionField&quot;</span><span class="p">:</span> <span class="s2">&quot;summary&quot;</span><span class="p">,</span>
+    <span class="err">....</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+<li>
+<p>Change the arrays from YAML lists to comma separated fields:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.taxonomy.commaSeparatedFields&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;tags&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;keywords&quot;</span>
+    <span class="p">],</span>
+    <span class="err">....</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+<li>
+<p>Remove the YAML quoting from all respective fields:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.taxonomy.noPropertyValueQuotes&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;tags&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;modified&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span>
+    <span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</li>
+</ol>
+<h3 id="the-content-panel">The Content Panel</h3>
+<p>FrontMatter also provides a new VSCode <a href="https://frontmatter.codes/docs/panel#metadata">side panel</a> that acts as a metadata editor.</p>
+<p><img alt="default-contenttype.png" class="center-image" src="images/front-matter-panel.png"></p>
+<p>What's great about this, is that it can also be completely customized by specifying the fields in the project's <code>settings.json</code> file.</p>
+<p>The panel can have multiple configurations depending on documentation types.  This Pelican blog only have one type, <code>article</code>, so we add a new view that matches an article's <code>type</code> metadata.</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">&quot;frontMatter.taxonomy.contentTypes&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;article&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Title&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Description&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;summary&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Publishing date&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;datetime&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Last modified date&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;modified&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;datetime&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Status&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;status&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;draft&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Tags&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tags&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;tags&quot;</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Category&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Categories&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Header Image&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;header_cover&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;choice&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;choices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;/images/article-bg.png&quot;</span><span class="p">,</span>  <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Article Header&quot;</span>
+                        <span class="p">},</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    <span class="err">....</span>
+</pre></div>
+<p>It works great, except for one small hitch.  The extension provides a nice tag selection UI for tags, keywords, and categories, and binds to a <a href="https://frontmatter.codes/docs/content-types#how-it-works">known type</a> but it doesn't allow us to remap that type to a different field.</p>
+<p>For example, we can use the Front Matter UI for YAML <code>categories</code> field but we can't remap it to the Pelican's <code>category</code> field.  We can do this with other fields, like <code>drafts</code>, but <code>categories</code> looks like it is hard coded at this point.  So, as a work around, we specify the Pelican field <code>category</code> as a <code>string</code> field and keep the <code>categories</code> field around, well, for fun until a solution is found:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Category&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="p">},</span>
+<span class="p">{</span>
+    <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Categories&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;categories&quot;</span><span class="p">,</span>
+<span class="p">},</span>
+</pre></div>
+<p>After jumping through all the hoops, Front Matter is a pretty good extension.  It's pretty powerful too, probably designed for something more complicated than a simple blog.  However, it really nails down the front matter management and is only hampered by an awkward user request to work with an incomplete Markdown implementation provided by Pelican.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/front-matter/">front matter</a>, <a href="https://dbarsam.github.io/blog/tag/markdown/">markdown</a>, <a href="https://dbarsam.github.io/blog/tag/pelican/">pelican</a>, <a href="https://dbarsam.github.io/blog/tag/vscode/">vscode</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>How this blog renders code samples</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Notes from trying to get Pelican's code formatting feature properly configured.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="markdown">
+        <meta name="tags" content="codehilite">
+        <meta name="tags" content="pelican">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/how-this-blog-renders-code-sample/">
+	<meta property="og:title" content="How this blog renders code samples">
+	<meta property="article:published_time" content="2020-09-11 05:15:00-04:00">
+            <meta property="og:description" content="Notes from trying to get Pelican's code formatting feature properly configured.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
+</head>
+
+<body class="article-how-this-blog-renders-code-sample">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>How this blog renders code samples</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Fri 11 September 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>Pelican doesn't handle syntax highlighting out of the box.  You need to add that functionality, which means extending the blog with a collection of configurations, plugins, and Markdown extensions.</p>
+<p>This post is mainly a collection of notes taken from the first pass at enabling the feature.  And while that first pass really didn't conclude in a satisfying way, it did end up with this blog getting some basic code formatting functionality.  The whole exercise could be broken down into 4 different sub-topics:</p>
+<ol>
+<li>Use Markdown syntax to denote text as code blocks.</li>
+<li>Use the <a href="https://python-markdown.github.io/extensions/code_hilite/">codehilite</a> extension to render the html with the correct colour.</li>
+<li>Use the <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> to extend Markdown with additional Markdown syntax features.</li>
+<li>Use the correct configuration to render line numbers.</li>
+</ol>
+<h2 id="handling-code-with-markdown">Handling Code with Markdown</h2>
+<p>The first part is to use the correct Markdown syntax.  The problem here is that most examples explaining how to do this are written for different flavours of Markdown and may not be applicable to our Pelican powered blog.</p>
+<p>Starting with the basics, Markdown handles code blocks with code fences, denoted by the 3 backticks (<code>```</code>).  For example, consider the below Markdown:</p>
+<div class="highlight"><pre><span></span><span class="sb">```</span>
+<span class="sb">This is a monospace code block</span>
+<span class="sb">```</span>
+</pre></div>
+<p>This gets rendered as:</p>
+<div class="highlight"><pre><span></span>This is a monospace code block
+</pre></div>
+<p>However that's the basic case and unfortunately, there's more needed to take that and make it display code sample in a Pelican blog.</p>
+<h2 id="syntax-highlighting">Syntax Highlighting</h2>
+<p>Markdown doesn't handle syntax highlighting.  Instead it passes the code-fence's attributes to the renderer and it interprets in some way.  In most cases, it adds it to the resulting html as a css class.  Consider this bit of Markdown describing Python code:</p>
+<div class="highlight"><pre><span></span><span class="sb">```python</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">)</span>
+<span class="sb">```</span>
+</pre></div>
+<p>The <code>python</code> text there is just an text attribute is passed through to the html as a interpreted as css class for that particular scope.  <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> has a much better explanation about attributes and syntax highlighting in its <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Fenced Code</a> section, so please refer to that for more information.</p>
+<p>The important thing to note is that in <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> it's actually the <a href="https://python-markdown.github.io/extensions/code_hilite/">codehilite</a> extension that is responsible for the syntax highlighting and the actual rendering of the text is controlled by its <code>css_class</code> option, which by default is also set to <code>codehilite</code>.</p>
+<p>The basic code fence and the syntax highlighting work pretty much out of the box so there's no need to tinker with the settings.  However, this blog does tinker with the settings because of requiring more specialized way of rendering code blocks.</p>
+<h2 id="nested-code-blocks">Nested Code Blocks</h2>
+<p>Instructional steps are nice and having those steps point to fully rendered code blocks is even nicer.  This is one part where the standard Markdown specification doesn't really provide a definition and <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> doesn't seem to support it, so this a case where it's up to other groups provide a solution and implement this feature in their Markdown 'flavour'.</p>
+<p>Consider this this bit of Markdown:</p>
+<div class="highlight"><pre><span></span><span class="k">1.</span> Step 1
+
+<span class="k">2.</span> Step 2, but with Python code.
+
+<span class="sb">    ```</span>
+<span class="sb">    print(&quot;Hello world&quot;)</span>
+<span class="sb">    ```</span>
+
+<span class="k">3.</span> Step 3, but with syntax highlighted Python code.
+
+<span class="sb">    ```python</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">)</span>
+<span class="sb">    ```</span>
+</pre></div>
+<p>This Markdown sample lists a series of steps and, in Step 2 and 3, adds a bit of sample Python code.  The code in Step 2 should render as monospace text, but the code in Step 3 should be rendered with syntax colouring appropriate for Python.  Unfortunately, this is somewhat fragile and only works in a very specific scenario:</p>
+<ol>
+<li>Indent your fenced block by an indent at your level (i.e. add extra 4 spaces).</li>
+<li>The fence requires a newline above and below the fenced block, so to be consistent, make the whole list double spaced.</li>
+</ol>
+<p>And even then, this is only made possible by some behind the scenes work in our Pelican configuration file.  By default, Pelican is being powered by <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> and that will not render our example correctly.  Instead, we need to first install another package, <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a> and then enable its <a href="https://facelessuser.github.io/pymdown-extensions/extensions/superfences/">superfences</a> extension in the <code>pelicanconf.py</code> file:</p>
+<div class="highlight"><pre><span></span><span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+        <span class="s1">&#39;pymdownx.superfences&#39;</span> <span class="p">:</span> <span class="p">{}</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
+<p>After that, the aboves renders as expected with the <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a>'s default settings:</p>
+<ol>
+<li>
+<p>Step 1</p>
+</li>
+<li>
+<p>Step 2, but with Python code.</p>
+<div class="highlight"><pre><span></span>print(&quot;Hello world&quot;)
+</pre></div>
+</li>
+<li>
+<p>Step 3, but with syntax highlighted Python code.</p>
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">)</span>
+</pre></div>
+</li>
+</ol>
+<h2 id="adding-line-numbering">Adding line numbering</h2>
+<p>Line numbering is handles by <a href="https://facelessuser.github.io/pymdown-extensions/extensions/superfences/">superfences</a> and its help page is great at answering questions.  For this blog, it's important to note that out of the box, there are two options to rendering line numbers:</p>
+<ol>
+<li>Embedded</li>
+<li>Separate Table Column</li>
+</ol>
+<p>Note:  <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a> does add third option, <code>pymdownx-inline</code>, but that's not working with this current theme. Incidentally, this seems to be part of a larger problem of non-working extensions, like <code>markdown.extensions.admonition</code> and <code>pymdownx.tabbed</code>, and it's not clear if the fault lies with the theme, Pelican, or something on the blog's configuration side.  As a result, this blog uses the separate table column as configured in thr <code>pelicanconf.py</code>, under the <code>pymdownx.highlight</code> extension:</p>
+<div class="highlight"><pre><span></span><span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+        <span class="s1">&#39;pymdownx.highlight&#39;</span> <span class="p">:</span> <span class="p">{</span>
+            <span class="o">....</span>
+            <span class="s1">&#39;linenums_style&#39;</span><span class="p">:</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span>
+            <span class="o">....</span>
+        <span class="p">}</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
+<p>The <code>pelicanconf.py</code> configuration has line number disabled by default. Line numbers are enabled by adding the <code>linenums</code> attribute to each individual code block with the starting line number as its argument.</p>
+<p>For example, this Markdown:</p>
+<div class="highlight"><pre><span></span>```python linenums=&quot;3&quot;
+for i in range(10):
+    print(&quot;Hello world!&quot;)
+print(&quot;Goodbye&quot;)
+```
+</pre></div>
+<p>Renders this code, with line number starting on line 3.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
+<p>To highlight a specific lines use the <code>hl_lines</code> option.</p>
+<p>For example, this Markdown:</p>
+<div class="highlight"><pre><span></span>```python linenums=&quot;5&quot; hl_lines=&quot;2-3&quot;
+for i in range(10):
+    print(&quot;Hello world!&quot;)
+print(&quot;Goodbye&quot;)
+```
+</pre></div>
+<p>Renders this code, with line number starting on line 5, but highlighted code block lines 2 and 3:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="hll">    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world!&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</span></pre></div>
+</td></tr></table>
+<p>Note that the <code>hl_lines</code> refers to lines in the code block, not the lines as numbered by <code>linenums</code>.</p>
+<h2 id="line-numbering-and-line-wrapping">Line Numbering And Line Wrapping</h2>
+<p>There's one small problem with the theme and <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a>.  If a line of code is too long, the theme will wrap the code but not update the line numbering accordingly.  The ends up with mis-aligned line numbering and breaks the feature.</p>
+<p>To work around this, this blog disables word wrapping for code blocks in the <code>pelicanconf.py</code> file with the <code>legacy_no_wrap_code</code>.</p>
+<div class="highlight"><pre><span></span><span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+        <span class="s1">&#39;legacy_no_wrap_code&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;pymdownx.highlight&#39;</span> <span class="p">:</span> <span class="p">{</span>
+            <span class="o">....</span>
+            <span class="s1">&#39;linenums_style&#39;</span><span class="p">:</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span>
+            <span class="o">....</span>
+        <span class="p">}</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
+<p>For example, this Markdown:</p>
+<div class="highlight"><pre><span></span>```python linenums=&quot;5&quot;
+for i in range(10):
+    print(&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;)
+print(&quot;Goodbye&quot;)
+```
+</pre></div>
+<p>Renders the long line at line <code>6</code> un-wrapped and preserves the alignment with the table columns:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
+<p>It's important to also note that this is behaving differently if there were no line numbering at all. For example, the above code block with the <code>linenums</code> attribute removed renders this code block:</p>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</pre></div>
+<p>The above code block is not wrapped, but embedded in a scroll box to work around that.  The problem lies with the table mechanism used for the table column line numbering. Underneath the hood, the code block with <code>linenums</code> renders this html:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlighttable&quot;</span><span class="p">&gt;&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;linenos&quot;</span><span class="p">&gt;&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;linenodiv&quot;</span><span class="p">&gt;&lt;</span><span class="nt">pre</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;normal&quot;</span><span class="p">&gt;</span>5<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;normal&quot;</span><span class="p">&gt;</span>6<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;normal&quot;</span><span class="p">&gt;</span>7<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">pre</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;code&quot;</span><span class="p">&gt;&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlight&quot;</span><span class="p">&gt;&lt;</span><span class="nt">pre</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;k&quot;</span><span class="p">&gt;</span>for<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;n&quot;</span><span class="p">&gt;</span>i<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;ow&quot;</span><span class="p">&gt;</span>in<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>range<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;mi&quot;</span><span class="p">&gt;</span>10<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>):<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>Goodbye<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">pre</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+<p>While the one without, renders this html (which is the same as the table cell containing the code in the above example):</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlight&quot;</span><span class="p">&gt;&lt;</span><span class="nt">pre</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;k&quot;</span><span class="p">&gt;</span>for<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;n&quot;</span><span class="p">&gt;</span>i<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;ow&quot;</span><span class="p">&gt;</span>in<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>range<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;mi&quot;</span><span class="p">&gt;</span>10<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>):<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>Goodbye<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">pre</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/markdown/">markdown</a>, <a href="https://dbarsam.github.io/blog/tag/codehilite/">codehilite</a>, <a href="https://dbarsam.github.io/blog/tag/pelican/">pelican</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>

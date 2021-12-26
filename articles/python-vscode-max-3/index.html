@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Set up VSCode to Debug Python in 3ds Max - III</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Part III: VSCode's attach to process workflow'">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="python">
+        <meta name="tags" content="3ds max">
+        <meta name="tags" content="vscode">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/python-vscode-max-3/">
+	<meta property="og:title" content="Set up VSCode to Debug Python in 3ds Max - III">
+	<meta property="article:published_time" content="2020-12-05 19:10:00-05:00">
+            <meta property="og:description" content="Part III: VSCode's attach to process workflow'">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
+</head>
+
+<body class="article-python-vscode-max-3">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Set up VSCode to Debug Python in 3ds Max - III</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Sat 05 December 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In the <a href="{filename}../2020-12-03-python-vscode-and-max-2/note.md">previous article</a>, we had created a Python virtual environment via <code>virtualenv</code>'s and built a <code>bootstrap.py</code> to graft it into the application.  In this article, we'll take a first pass at incorporating VSCode into our workflow.</p>
+<h2 id="attach-to-process">Attach to Process</h2>
+<p>Developing Python packages for use in external application is a very special edge case.  The <a href="https://code.visualstudio.com/docs/python/debugging">Python debug configurations in Visual Studio Code</a> only covers the most common Python debugging scenarios and we'll be incorporating the <em>Attach To Process</em> one, where we attach the debugger to the already-running application.</p>
+<p>That workflow is represented as a <code>attach</code> configuration request in the <code>launch.json</code>, which is different than the more workflow-friendly <code>launch</code> configuration, which launches the process and immediately attaches to it.  The VSCode Python plugin provides an auto-generated <code>attach</code> configuration under the <code>Python: Remote Attach</code> template:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Python: Remote Attach&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;attach&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;justMyCode&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+    <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">5678</span><span class="p">,</span>
+    <span class="s2">&quot;pathMappings&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;localRoot&quot;</span><span class="p">:</span> <span class="s2">&quot;$</span><span class="si">{workspaceFolder}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;remoteRoot&quot;</span><span class="p">:</span> <span class="s2">&quot;$</span><span class="si">{workspaceFolder}</span><span class="s2">&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+<span class="p">},</span>
+</pre></div>
+<p>This <code>attach</code> configuration is the same configuration used for <em>Remote Debugging</em>.  The only real difference here is that instead of making a connection to another machine, we'll be making a network connection to the same machine that we're running on.  That means a few different things:</p>
+<ol>
+<li>
+<p>The loopback connection is denoted by using the <code>localhost</code> host name.</p>
+</li>
+<li>
+<p>The loopback connection will communicate to another VSCode-compatible debugger on the local <code>5678</code> port.</p>
+</li>
+</ol>
+<p>This is the value VSCode chose as its default port.  A port is a single use communication channel, so if you're planning on doing anything more complex, like maybe debugging multiple applications side by side, you'll need to select a different port to avoid port-in-use conflicts.</p>
+<ol>
+<li>
+<p>We've toggled <code>justMyCode</code> to <code>true</code> so we're not debugging the standard lib.</p>
+</li>
+<li>
+<p>We've configured <code>pathMapping</code> to make <code>localRoot</code> and <code>remoteRoot</code> point to the same path.  Other remote workflows will have different values in that mapping, but because we're on the same machine and debugging the same project, we simply use use project's root path, stored in the <code>${workspaceFolder}</code> variable.</p>
+</li>
+</ol>
+<h2 id="the-ptvsd-package">The <code>ptvsd</code> package</h2>
+<p>The <code>attach</code> configuration expects to connect with VSCode-compatible debugger running inside the application.  That means for the attach process to work, we need to activate that software component and have that component start a connection to VSCode after the application has start.</p>
+<p>Unfortunately, there's nothing in 3ds Max (and most applications) that will do this out of the box.  To work around this, we'll need to install a 3<sup>rd</sup> party library, like the <code>ptvsd</code> Python package, and activate it at start-up.</p>
+<p>The activation is straight forward.  Sometime after the application has loaded, the user needs to execute the following commands:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ptvsd</span>
+<span class="n">ptvsd</span><span class="o">.</span><span class="n">enable_attach</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">5678</span><span class="p">),</span> <span class="n">redirect_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ptvsd</span><span class="o">.</span><span class="n">wait_for_attach</span><span class="p">()</span>
+</pre></div>
+<p>The <code>enable_attach</code> function will enable the port at the same <code>localhost:5678</code> address our <code>attach</code> configuration is using.  And the <code>wait_for_attach</code> function will wait forever, freezing the application in a busy loop, until VSCode completes the connection.  After the connection is made, VSCode is now attached and the application continues on its way.</p>
+<h2 id="install-ptvsd-into-the-side-car-environment">Install <code>ptvsd</code> into the side-car environment</h2>
+<p>There are different ways to handle installing the <code>ptvsd</code> package.  But because it is available as a standalone Python package on PyPI, we can leverage our existing workflow that we put into place in <a href="{filename}../2020-12-01-python-vscode-and-max-1/note.md">Part I</a>.  There, we created a virtual environment to be grafted into the application, which we set-up by using <code>pip</code>:</p>
+<div class="highlight"><pre><span></span>$ D:<span class="se">\p</span>roject<span class="se">\.</span>env27<span class="se">\s</span>cript<span class="se">\a</span>ctivate.bat
+<span class="o">(</span>.env27<span class="o">)</span> $ python -m pip install -r D:<span class="se">\p</span>roject<span class="se">\r</span>equirements.txt
+<span class="o">(</span>.env27<span class="o">)</span> $ python -m pip install -e D:<span class="se">\p</span>roject
+</pre></div>
+<p>This means that the simplest way to instal ptvsd is to add it to the <code>requirements.txt</code> file</p>
+<div class="highlight"><pre><span></span>ptvsd==4.3.2
+</pre></div>
+<p>Note:  Do not add it as a package dependency to your project, be it in setup.py's <code>install_requires</code> or some other mechanism.  It is not a dependency to be installed on the user's machine when the user installs your project; it is a development tool that only has value to the development team.  There's more information about the difference in the PyPA's <a href="https://packaging.python.org/discussions/install-requires-vs-requirements/">install_requires vs requirements files</a> guidelines.</p>
+<h2 id="call-ptvsd-from-the-bootstrappy-script">Call <code>ptvsd</code> from the <code>bootstrap.py</code> script</h2>
+<p>We can also leverage the components we created in <a href="{filename}../2020-12-03-python-vscode-and-max-2/note.md">Part II</a> and add the <code>ptvsd</code> connection call to our <code>bootstrap.py</code>. This will make the connection at startup, but we have to be careful to add it <em>after</em> the grafting of the side-car environment, as that's where the Python package lives.</p>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone script to attach to a remote debugging.</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">In addition the script will also use `ptvsd` to remotely attach to</span>
+<span class="sd">a remote debugger to the current process.  In some applications this</span>
+<span class="sd">is the only way to debug Python code.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">- `PROJECT_DEBUG_HOST` The host name of the remote debugger to attach to.</span>
+
+<span class="sd">- `PROJECT_DEBUG_PORT` The port number of the remote debugger to attach to.</span>
+
+<span class="sd">- `PROJECT_LOG_LEVEL` The initial logging level this script will use.</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">    This script does not install ptvsd and expects the module to be already installed,</span>
+<span class="sd">    or installed during the site injection or exec execution step.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Main entry point for the bootstrap script&quot;&quot;&quot;</span>
+
+    <span class="n">debug_port</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">debug_host</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">log_level</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - start -&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized logging to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scripts</span><span class="p">:</span>
+        <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No scripts to execute.  Skipping script execution.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not find variable PROJECT_SCRIPTS does not exist or is empty.  Skipping Python script execution.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug_host</span> <span class="ow">and</span> <span class="n">debug_port</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">ptvsd</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waiting for PTVSD debug client to connect on </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">debug_host</span><span class="p">,</span> <span class="n">debug_port</span><span class="p">)</span>
+            <span class="n">ptvsd</span><span class="o">.</span><span class="n">enable_attach</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">debug_host</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">debug_port</span><span class="p">)),</span> <span class="n">redirect_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ptvsd</span><span class="o">.</span><span class="n">wait_for_attach</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Could not import module `ptvsd`.  Is installed?&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_DEBUG_HOST/PROJECT_DEBUG_PORT do not exist or are empty.  Skipping Python remote debugging.&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - stop -&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<p>In this iteration we've made a few changes things:</p>
+<ol>
+<li>
+<p>We've added <code>PROJECT_DEBUG_PORT</code> and <code>PROJECT_DEBUG_HOST</code> environment variables to contain the respective parameters for <code>ptvsd</code>.</p>
+</li>
+<li>
+<p>We've add a little of extra error handling in case the <code>ptvsd</code> module is not importable.</p>
+</li>
+</ol>
+<h2 id="code-complexity">Code Complexity</h2>
+<p>Unfortunately, we've triggered a code complexity warning in the single <code>main</code> function.  We'll do that by splitting up the function into <code>main</code> and two internal function <code>_exec</code> and <code>_attach</code>:</p>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone script to attach to a remote debugging.</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">In addition the script will also use `ptvsd` to remotely attach to</span>
+<span class="sd">a remote debugger to the current process.  In some applications this</span>
+<span class="sd">is the only way to debug Python code.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">- `PROJECT_DEBUG_HOST` The host name of the remote debugger to attach to.</span>
+
+<span class="sd">- `PROJECT_DEBUG_PORT` The port number of the remote debugger to attach to.</span>
+
+<span class="sd">- `PROJECT_LOG_LEVEL` The initial logging level this script will use.</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">    This script does not install ptvsd and expects the module to be already installed,</span>
+<span class="sd">    or installed during the site injection or exec execution step.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">_exec</span><span class="p">(</span><span class="n">filenames</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute a collection of Python files in the current environment</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scripts (list): A list of filename.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No scripts to execute.  Skipping script execution.&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_attach</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Attaches to a remote debugger on a host and port</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        host (str): The host name.</span>
+<span class="sd">        port (int): The host port.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">ptvsd</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Could not import module `ptvsd`.  Is installed?&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waiting for PTVSD debug client to connect on </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">ptvsd</span><span class="o">.</span><span class="n">enable_attach</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">),</span> <span class="n">redirect_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ptvsd</span><span class="o">.</span><span class="n">wait_for_attach</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Main entry point for the bootstrap script&quot;&quot;&quot;</span>
+
+    <span class="n">debug_port</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">debug_host</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">log_level</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - start -&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized logging to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scripts</span><span class="p">:</span>
+        <span class="n">_exec</span><span class="p">(</span><span class="n">scripts</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not find variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug_port</span> <span class="ow">and</span> <span class="n">debug_host</span><span class="p">:</span>
+        <span class="n">_attach</span><span class="p">(</span><span class="n">debug_host</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">debug_port</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_DEBUG_HOST/PROJECT_DEBUG_PORT do not exist or are empty.  Python debugging disabled.&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - stop -&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<h2 id="attach-to-process-manually">Attach to Process (Manually)</h2>
+<p>With the <code>ptvsd</code> installed in the side-car environment and configured to run on startup via <code>bootstrap.py</code>, we now have the minimum amount of pieces in place to start a debugging session.</p>
+<p>First we update our launch script to include to host and the port:</p>
+<div class="highlight"><pre><span></span><span class="p">@</span><span class="k">echo</span> off
+<span class="k">setlocal</span>
+<span class="k">cd</span> <span class="nv">%~dp0</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_LOG_LEVEL=DEBUG&quot;</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_SCRIPTS=</span><span class="nv">%CD%</span><span class="s2">\.env27\Scripts\activate_this.py&quot;</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_HOST=locahost&quot;</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_PORT=5678&quot;</span>
+3dsmax.exe -u PythonHost bootstrap.py
+</pre></div>
+<p>And second, we execute the VSCode's [remote debugging manual steps] to connect the <code>ptvsd</code> instance running in the application:</p>
+<ol>
+<li>
+<p>Launch the application with <code>launch.cmd</code>.</p>
+</li>
+<li>
+<p>Wait for the application to display <code>Waiting for debug client to connect on localhost:5678</code></p>
+</li>
+<li>
+<p>Switch to VSCode.</p>
+</li>
+<li>
+<p>Execute the <code>Python: Attach</code> launch configuration from above.</p>
+</li>
+</ol>
+<p>You should see the application resume its start sequence and VSCode should be in <a href="https://code.visualstudio.com/Docs/editor/debugging">debugger mode</a>.</p>
+<h2 id="next-step">Next Step</h2>
+<p>The updated <code>bootstrap.py</code> and <code>launcher.cmd</code> scripts completes the third part of the tutorial and we now have a complete workflow (even if it is somewhat clunky) to debug our Python package while it's running inside an embedded Python environment.  In the <a href="{filename}../2020-12-07-python-vscode-and-max-4/note.md">Part IV</a>, we'll start the refinement phase and start looking at different way to make this manual process an automatic one.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/python/">python</a>, <a href="https://dbarsam.github.io/blog/tag/3ds-max/">3ds max</a>, <a href="https://dbarsam.github.io/blog/tag/vscode/">vscode</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>

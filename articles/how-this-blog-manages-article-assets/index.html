@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>How this blog manages article assets</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="How to use Autostatic to re-organize Pelican's default article structure to be more article specific.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="markdown">
+        <meta name="tags" content="pelican">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/">
+	<meta property="og:title" content="How this blog manages article assets">
+	<meta property="article:published_time" content="2021-01-22 19:13:00-05:00">
+            <meta property="og:description" content="How to use Autostatic to re-organize Pelican's default article structure to be more article specific.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/home-bg.png">
+</head>
+
+<body class="article-how-this-blog-manages-article-assets">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/home-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>How this blog manages article assets</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Fri 22 January 2021
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <!--
+spell-checker:ignore autostatic alexandre fonseca's pelly pdfs pelicanconf staticattach
+-->
+<p>Sooner or later, an article will require an attachment.  These accompanying non-markdown files are usually images, maybe pdfs, or even fully working pieces of code that are referenced by the article.</p>
+<p>How exactly to best manage these extra files is more preference than best practice. This article examines a strategy that makes articles and their respective assets more modular than what's available with the default settings.</p>
+<h2 id="pelican-asset-management">Pelican Asset Management</h2>
+<p>Pelican treats the articles and assets as two different types of source material.  The article are, of course, <a href="https://docs.getpelican.com/en/latest/content.html#articles-and-pages">articles</a>, but to Pelican, the assets are <a href="https://docs.getpelican.com/en/latest/content.html#static-content">static files</a>.  And yes, there's the third class of content, pages, but we'll ignore them for now.</p>
+<p>Pelican also splits the discovery and processing of these assets into two distinct operations.  So while the markdown files and the accompanying image files could be stored next to each other, the Pelican build process could move them to different locations.</p>
+<p>If you're used to writing Markdown in VSCode (or any other tool that immediately renders Markdown) this may be a bit jarring. Everything could very well appear to work in the editor only to mysteriously break in the final website update.</p>
+<h2 id="global-assets">Global Assets</h2>
+<p>Out of the box, Pelican works with the following example structure:</p>
+<div class="highlight"><pre><span></span><span class="go">project/</span>
+<span class="go">├── content</span>
+<span class="go">│   ├── articles/</span>
+<span class="go">│   │   ├── article1.md</span>
+<span class="go">│   │   └── article2.md</span>
+<span class="go">│   ├── images/</span>
+<span class="go">│   │   └── pelly.png</span>
+<span class="go">│   ├── pdfs/</span>
+<span class="go">│   │   └── pelly.pdf</span>
+<span class="go">│   └── pages/</span>
+<span class="go">│       └── test.md</span>
+<span class="go">└── pelican.conf.py</span>
+</pre></div>
+<p>The <code>articles</code> and <code>pages</code> are both separate types of content and have their own distinct discovery options, the respective <code>ARTICLE_PATH</code> and <code>PAGES_PATH</code> settings.  However, the <code>images</code> and <code>pdf</code> are static files and are discovered by the <code>STATIC_PATHS</code> setting.  These are all documented in the <a href="https://docs.getpelican.com/en/latest/settings.html#url-settings">url settings</a> section of the Pelican options page.</p>
+<p>The thing to not here is that both the image and pdf files in that structure are separated from their respective articles.  This makes sense if these assets are meant to be accessible from multiple articles and/or pages in the website.  However, if those assets are article specific, then this layout does not make sense.  As more articles are added to this structure it will be harder to track which asset is referred to by which source.</p>
+<h2 id="article-specific-assets">Article Specific Assets</h2>
+<p>To make things more modular, we keep the assets specific to the article along side the article.  In our above example, this would transform <code>article1</code> from a file into a folder containing the image, the pdf, and the respective article:</p>
+<div class="highlight"><pre><span></span><span class="go">project/</span>
+<span class="go">├── content</span>
+<span class="go">│   ├── articles/</span>
+<span class="go">│   │   ├── article1/</span>
+<span class="go">│   │   │   ├── images/</span>
+<span class="go">│   │   │   │   └── pelly.png</span>
+<span class="go">│   │   │   ├── pdfs/</span>
+<span class="go">│   │   │   │   └── pelly.pdf</span>
+<span class="go">│   │   │   └── article.md</span>
+<span class="go">│   │   └── article2.md</span>
+<span class="go">│   └── pages/</span>
+<span class="go">│       └── test.md</span>
+<span class="go">└── pelican.conf.py</span>
+</pre></div>
+<p>To make this work, we first configure Pelican to generate slug folders instead of individual pages.  We do this easily enough with the following settings into our <code>pelicanconf.py</code> file:</p>
+<div class="highlight"><pre><span></span><span class="n">ARTICLE_PATHS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;articles&#39;</span>
+<span class="p">]</span>
+<span class="n">ARTICLE_URL</span> <span class="o">=</span> <span class="s1">&#39;articles/</span><span class="si">{slug}</span><span class="s1">/&#39;</span>
+<span class="n">ARTICLE_SAVE_AS</span> <span class="o">=</span> <span class="s1">&#39;articles/</span><span class="si">{slug}</span><span class="s1">/index.html&#39;</span>
+</pre></div>
+<p>The above settings configure Pelican to discover files in the <code>articles</code> folder, save them as <code>index.html</code> files in the pages's <code>slug</code> folder, and update the url to the cleaner folder style.  The <code>slug</code> value comes from the article's slug <a href="https://docs.getpelican.com/en/latest/content.html#file-metadata">metadata field</a>, which we set at the top of each article.</p>
+<p>The next part is to configure Pelican to move the assets to a relative folder inside the slug folder instead of the global folder.  This is done by <a href="https://docs.getpelican.com/en/latest/content.html#attaching-static-files">attaching</a> the files to the article with the <code>{attach}</code> keyword inside our <code>article1\article.md</code> file:</p>
+<div class="tabbed-set" data-tabs="1:2"><input checked id="__tabbed_1_1" name="__tabbed_1" type="radio"><label for="__tabbed_1_1">Markdown</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span>---
+Title: Test Article
+Category: test
+Date: 2014-10-31
+<span class="gu">Slug: article1</span>
+<span class="gu">---</span>
+
+This is an image:
+
+![<span class="nt">pelly.png</span>](<span class="na">{attach}images/pelly.png</span>)
+
+This is a link to a [pdf] files.
+
+[<span class="nl">pdf</span>]: <span class="na">{attach}pdfs/pelly.pdf</span>
+</pre></div>
+</div>
+<input id="__tabbed_1_2" name="__tabbed_1" type="radio"><label for="__tabbed_1_2">Result</label><div class="tabbed-content">
+<p>This is an image:</p>
+<p><img alt="pelly.png" src="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/images/pelly.png"></p>
+<p>This is a link to a <a href="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/pdfs/pelly.pdf">pdf</a> files.</p>
+</div>
+</div>
+<p>Just like the <code>{static}</code> and <code>{filename}</code> tag, Pelican uses a <code>{attach}</code> tag to mark the link for special handling.  Here,Pelican will move the asset relative to the referring file instead of the more global location denoted by <code>{static}</code>.</p>
+<h2 id="the-autostatic-plugin">The AutoStatic Plugin</h2>
+<p>The attach method works well for assets that are directly linked to the article.  This doesn't work for internal assets,like custom css or javascript files.  Those files are not displayed like an image or a download link so there is no way to <code>{attach}</code> them to the article.</p>
+<p>Fortunately, Alexandre Fonseca's <a href="https://github.com/AlexJF/pelican-autostatic">autostatic plugin</a> handles these internal assets quite nicely.  His plugin creates a new <code>{static}</code> tag that acts the same as the <code>{attach}</code> tag while also extending it with additional options.</p>
+<p>There's more info in the project's readme, but one nice feature is it ability to read the tag from anywhere in the article -- including the metadata section.  That allows us to lump all of the assets into a single place and removes any non-markdown tag from the actual article.</p>
+<p>Consider our example from above where we used the <code>{attach}</code> tag in the links to the png and pdf files.  With <code>autostatic</code> we can restore those links to <em>pure</em> markdown links and register all local assets in the metadata:</p>
+<div class="tabbed-set" data-tabs="2:2"><input checked id="__tabbed_2_1" name="__tabbed_2" type="radio"><label for="__tabbed_2_1">Markdown</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span>---
+Title: Test Article
+Category: test
+Date: 2014-10-31
+Slug: article1
+Attachments:
+    <span class="k">-</span> &#39;{static images/pelly3.png}&#39;
+<span class="gu">    - &#39;{static pdfs/pelly3.pdf}&#39;</span>
+<span class="gu">---</span>
+
+This is an image:
+
+![<span class="nt">pelly2.png</span>](<span class="na">images/pelly2.png</span>)
+
+This is a link to a [another pdf] files.
+
+[<span class="nl">another pdf</span>]: <span class="na">pdfs/pelly2.pdf</span>
+</pre></div>
+</div>
+<input id="__tabbed_2_2" name="__tabbed_2" type="radio"><label for="__tabbed_2_2">Result</label><div class="tabbed-content">
+<p>This is an image:</p>
+<p><img alt="pelly2.png" src="images/pelly2.png"></p>
+<p>This is a link to a <a href="pdfs/pelly2.pdf">another pdf</a> files.</p>
+</div>
+</div>
+<p>There's a few things to note with our example:</p>
+<ul>
+<li>
+<p>We created a new metadata field, <code>Attachment</code>, but that name is arbitrary and it could be called anything, like <code>Files</code> or even <code>Assets</code>.  Pelican allows dynamically created metadata fields, as long as it doesn't conflict with <a href="https://docs.getpelican.com/en/stable/content.html#file-metadata">existing metadata</a>.</p>
+</li>
+<li>
+<p>The plugin scans the rendered metadata and the rendered html document, processing any <code>{static}</code> tag defined by the <code>AUTOSTATIC_REFERENCE_PATTERN</code> regex expression.  Any matching files are copied to the respective location and any references in the metadata or html is replaced with the qualified url, so as along as the file is referenced at least once, it will be copied.</p>
+</li>
+<li>
+<p>The example's YAML has formatted the metadata as a list of strings. This is to work around some YAML processor which might interpret the raw <code>- { .... }</code> as a list item referencing a mal-formed dictionary. We work around that by escaping the expression as a string <code>- `{ .... }`</code>.</p>
+</li>
+<li>
+<p>The plugin is a little too greedy with processing the various <code>{static}</code> tags in the file.  Out of the box, the plugin  will process everything, including any references in code samples -- even through it should be ignored because the content is rendered in a <code>&lt;code&gt;</code> html block.</p>
+<p>To work around that, this site changes the plugin's  <code>AUTOSTATIC_REFERENCE_PATTERN</code> setting to explicitly use the metadata's single line usage of <code>- '{static ...}'</code>.  We do this by changing the regex pattern in the <code>pelicanconf.py</code>:</p>
+<div class="highlight"><pre><span></span><span class="n">AUTOSTATIC_REFERENCE_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;^- &#39;{static(?:\s+|\|)((?:&quot;|&#39;)?)(?P&lt;path&gt;[^\1=]+?)\1(?:(?:\s+|\|)(?P&lt;extra&gt;.*))?\s*}&#39;$&quot;&quot;&quot;</span>
+</pre></div>
+<p>This works because the plugin processes the rendered html as a single block of text and processes each value in the metadata list as single lines that starts with a <code>-</code> and ends with the <code>}</code>.</p>
+</li>
+</ul>
+<p>After a little bit of configuration, the <code>autostatic</code> plugin does a pretty good job of solving our problem.  Not only does the plugin allow us to use article assets in a more relative way, but it also gives us the ability to link all assets as attachments via the metadata section.  Wether intentional or not, this not only make asset management more modular, but also promotes a similar workflow pattern used by other CMS platforms.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/markdown/">markdown</a>, <a href="https://dbarsam.github.io/blog/tag/pelican/">pelican</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>

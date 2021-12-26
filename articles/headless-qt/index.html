@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Headless Qt?</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Can you configure Qt to work in systems with no UI?">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="python">
+        <meta name="tags" content="qt">
+        <meta name="tags" content="docker">
+        <meta name="tags" content="gui">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/headless-qt/">
+	<meta property="og:title" content="Headless Qt?">
+	<meta property="article:published_time" content="2020-11-06 10:14:00-05:00">
+            <meta property="og:description" content="Can you configure Qt to work in systems with no UI?">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
+</head>
+
+<body class="article-headless-qt">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Headless Qt?</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Fri 06 November 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>This isn't a real article.  Instead, it's more of an annotated bookmark of this <a href="https://www.qcad.org/bugtracker/index.php?do=details&amp;task_id=1534">post</a>, which was used in some research on how to configure Qt applications to run in Docker Windows containers -- and that Docker task is part of another, work-in-progress project that may not ever be completed. So, there are no solutions here.  Sorry.</p>
+<p>The <a href="https://www.qcad.org/bugtracker/index.php?do=details&amp;task_id=1534">post</a>, archived here, says this:</p>
+<blockquote>
+<p>Since the launcher batch no longer requests "-style plastique" QT wants to apply the native style of the desktop environment. This fails on a headless system (or where the current user has no graphical shell to connect to) with the message "Gtk-WARNING **: cannot open display: ". Fortunately, QT provides a workaround in addition to the new "platform=offscreen" flag.</p>
+<p>In the tools that set <em>-no-gui</em>, beforehand export these variables into the environment</p>
+<div class="highlight"><pre><span></span><span class="go">export QT_STYLE_OVERRIDE=&quot;&quot;</span>
+<span class="go">export QT_QPA_PLATFORM=offscreen</span>
+<span class="go">export DISPLAY=&quot;&quot;</span>
+</pre></div>
+<p>PS: QT-offscreen will not find fonts; unfortunately the workaround only allows for a single directory to search them (I need helvetica):</p>
+<div class="highlight"><pre><span></span><span class="go">export QT_QPA_FONTDIR=&quot;/usr/local/share/fonts/type1&quot;</span>
+</pre></div>
+<p>Maybe that should get reported upstream, so that like LD_LIBRARY_PATH several directories could be specified.</p>
+</blockquote>
+<p>The post has some concepts that require some commentary, done here via unorganized bullet points:</p>
+<ul>
+<li>
+<p>The solution should be as simple as setting the <code>QT_QPA_PLATFORM=offscreen</code> variable setting. However, it's probably wishful thinking that Qt would make it that easy to disable the UI part of their UI framework.</p>
+</li>
+<li>
+<p>This post is for Linux, in case it's not obvious.  Windows does not support the <code>export</code> command nor the <code>DISPLAY</code> environment variable:</p>
+<ul>
+<li>
+<p>The <code>export</code> command does has an equivalent <code>set</code> command.</p>
+</li>
+<li>
+<p>The <code>DISPLAY</code> variable is actually part of the <code>X server</code> window system, which introduces an entirely different problem if you want this to work on Windows.  This is a awkward problem:  You have to either find the Windows equivalent or launch an X compatible window system, like <a href="https://sourceforge.net/projects/vcxsrv/">vcxsrv</a>, on top of your system -- but why would if you do that if your goal is a to run as headless application?</p>
+</li>
+</ul>
+</li>
+<li>
+<p>The Qt library does provide a <a href="https://doc.qt.io/qt-5/qoffscreensurface.html">QOffscreenSurface</a> class but is it intended for cases common to <a href="https://forum.qt.io/topic/56889/what-exactly-is-a-qoffscreensurface">OpenGL rendering</a>.  Despite the name it does not seem applicable to the problem.</p>
+</li>
+<li>
+<p>The Qt help page for <a href="https://doc.qt.io/qt-5/qcoreapplication.html">QtCoreApplication</a> describes it as the class for non-GUI applications:</p>
+<blockquote>
+<p>This class is used by non-GUI applications to provide their event loop. For non-GUI application that uses Qt, there should be exactly one QCoreApplication object. For GUI applications, see QGuiApplication. For applications that use the Qt Widgets module, see QApplication.</p>
+</blockquote>
+<p>But since we need the UI application to only be headless in certain situations it's unclear if this is really applicable.  Our goal is to seamlessly work in the different environments without having to add additional code to switch between <code>QApplication</code> and <code>QCoreApplication</code>.</p>
+</li>
+<li>
+<p>Here's the unanswered <a href="https://stackoverflow.com/questions/42686691/create-a-truly-headless-qapplication-instance">StackOverflow</a> question asking the same thing.  One comment confirms that it worked with the <a href="https://doc.qt.io/qt-5/qguiapplication.html#platformName-prop">offscreen</a> setting.</p>
+</li>
+</ul>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/python/">python</a>, <a href="https://dbarsam.github.io/blog/tag/qt/">qt</a>, <a href="https://dbarsam.github.io/blog/tag/docker/">docker</a>, <a href="https://dbarsam.github.io/blog/tag/gui/">gui</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>

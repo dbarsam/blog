@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Set up VSCode to Debug Python in 3ds Max - IV</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Part IV: VSCode's compound launch configuration'">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="python">
+        <meta name="tags" content="3ds max">
+        <meta name="tags" content="vscode">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/python-vscode-max-4/">
+	<meta property="og:title" content="Set up VSCode to Debug Python in 3ds Max - IV">
+	<meta property="article:published_time" content="2020-12-07 21:08:00-05:00">
+            <meta property="og:description" content="Part IV: VSCode's compound launch configuration'">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
+</head>
+
+<body class="article-python-vscode-max-4">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Set up VSCode to Debug Python in 3ds Max - IV</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Mon 07 December 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In the <a href="{filename}../2020-12-05-python-vscode-and-max-3/note.md">previous article</a>, we successful created a debugging session from connecting various pieces of our infrastructure.  We created a Python virtual environment via <code>virtualenv</code>, built a <code>bootstrap.py</code> to graft it into the application, executed <code>ptvsd</code> at startup, and successfully made the whole contraption work, via VSCode's <code>Attach to Process</code> remote debugging configuration. In this article, we'll look up at couple of tweaks to automate that manual process.</p>
+<h2 id="attach-vs-launch">Attach vs Launch</h2>
+<p>VSCode has two main workflows for debugging: <code>launch</code> and <code>attach</code>.  While we want to use the <code>launch</code> configuration, it requires a very specific set up that needs to point to a <code>python.exe</code> (or equivalent).  That doesn't work in our case because the Python interpreter is buried inside a Windows application.  So we're left with an <code>attach</code> workflow where we manually launch the application, switch to VSCode and execute the <code>attach</code> configuration.</p>
+<p>While this launch-and-attach workflow does its job, it can become tedious after a while -- especially if unhandled exceptions or crashes destabilizes the application so much that the only recourse is to restart the session.  There is, however, some automation tricks that we can incorporate to our current set-up that could remove that friction and make the <code>attach</code> into a <code>auto-attach</code> configuration.</p>
+<h2 id="companion-launch-configuration">Companion Launch Configuration</h2>
+<p>The first trick is to create a <code>launch</code> configuration, but not for Python.  Instead we're going to create a <em>companion</em> launch configuration for our application, which should use a debugger native to the application.</p>
+<p>Since we're targeting Windows <code>exe</code> files, we configure the new configuration with the [cppvsdg] debugger (from VSCode's <a href="https://code.visualstudio.com/docs/cpp/launch-json-reference">C/C++ debugging</a> documentation) and include all the settings from our <code>launch.cmd</code> script.  Thankfully, this is pretty straight forward:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;3ds Max 2018&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;cppvsdbg&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;launch&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;C:\\Program Files\\Autodesk\\3ds Max 2018\\3dsmax.exe&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;-U&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PythonHost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;${workspaceFolder}\\scripts\\bootstrap.py&quot;</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;stopAtEntry&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nt">&quot;environment&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="err">//</span> <span class="err">E</span><span class="kc">nsure</span> <span class="kc">t</span><span class="err">ha</span><span class="kc">t</span> <span class="mi">3</span><span class="err">ds</span> <span class="err">Max</span> <span class="err">is</span> <span class="err">ahead</span> <span class="err">o</span><span class="kc">f</span> <span class="err">a</span><span class="kc">n</span><span class="err">y</span> <span class="err">o</span><span class="kc">t</span><span class="err">her</span> <span class="err">Q</span><span class="kc">t</span> <span class="err">based</span> <span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">.</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PATH&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;C:\\Program Files\\Autodesk\\3ds Max 2018;${env:PATH}&quot;</span>
+        <span class="p">},</span>
+        <span class="err">//</span> <span class="err">PROJECT_LOG_LEVEL</span> <span class="err">is</span> <span class="kc">t</span><span class="err">he</span> <span class="err">loggi</span><span class="kc">n</span><span class="err">g</span> <span class="err">levele</span> <span class="err">we</span> <span class="kc">nee</span><span class="err">d</span> <span class="kc">f</span><span class="err">or</span> <span class="err">developme</span><span class="kc">nt</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;DEBUG&quot;</span>
+        <span class="p">}</span>
+        <span class="err">//</span> <span class="err">PROJECT_DEBUG_PORT</span> <span class="err">/</span> <span class="err">PROJECT_DEBUG_HOST</span> <span class="err">should</span> <span class="err">ma</span><span class="kc">t</span><span class="err">ch</span> <span class="err">&#39;Remo</span><span class="kc">te</span> <span class="err">A</span><span class="kc">tta</span><span class="err">ch&#39;.</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;5678&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span>
+        <span class="p">},</span>
+        <span class="err">//</span> <span class="err">PROJECT_SCRIPTS</span> <span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ns</span> <span class="err">a</span> <span class="err">&#39;;&#39;</span> <span class="err">delime</span><span class="kc">ter</span> <span class="err">lis</span><span class="kc">t</span> <span class="err">o</span><span class="kc">f</span> <span class="err">Py</span><span class="kc">t</span><span class="err">ho</span><span class="kc">n</span> <span class="err">scrip</span><span class="kc">t</span> <span class="kc">t</span><span class="err">o</span> <span class="err">ru</span><span class="kc">n</span> <span class="err">a</span><span class="kc">t</span> <span class="err">s</span><span class="kc">tartu</span><span class="err">p.</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceRoot}\\.env27\\Scripts\\activate_this.py&quot;</span>
+        <span class="p">},</span>
+    <span class="p">],</span>
+<span class="p">},</span>
+</pre></div>
+<p>This configuration replaces our <code>launch.cmd</code> script.  It incorporate the same command line to load the <code>bootstrap.py</code> as a start-up script while also specifying the needed environment variables for our workflow.</p>
+<p>As a bonus, we're also addressing <a href="{filename}../2020-10-29-qt-dll-mismatch/note.md">another problem</a> by updating the <code>PATH</code> environment to ensure that 3ds Max's executable and libraries are given the top most priority.</p>
+<h2 id="compound-configuration">Compound Configuration</h2>
+<p>We now have an <code>attach</code> and <code>launch</code> configuration and we can execute them at the same time using a <a href="https://code.visualstudio.com/Docs/editor/debugging#_compound-launch-configurations">compound configuration</a>.  The compound configuration is the VSCode mechanism to execute multi-target sessions, which is what we have now:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;compounds&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Python 3ds Max 2018&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;configurations&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;3ds Max 2018&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Python: Remote Attach&quot;</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+<p>Now, selecting <code>Python 3ds Max 2018</code> and hitting ++F5++ will launch both the <code>3ds Max 2018</code> and <code>Python: Remote Attach</code>.  We would be done here, except for one last thing:  3ds Max takes a good 10-20 seconds before it gets to processing <code>bootstrap.py</code> script and calling the <code>ptvsd.wait_for_attach()</code> line.  The compound configuration launches all configurations at the same time, so the loading delay cascades into the <code>attach</code> call timing out before 3ds Max is ready.</p>
+<p>We need to delay the <code>attach</code> until our application is ready to establish the debugger connection.  There is no native delay mechanism in VSCode's launch configurations, but we can take advantage of the <a href="https://code.visualstudio.com/Docs/editor/debugging#_launchjson-attributes">preLaunchTask</a> attribute and add an artificial delay to the <code>attach</code> configuration.</p>
+<h2 id="delayed-attach-configuration">'Delayed' Attach Configuration</h2>
+<p>The <code>preLaunchTask</code> is a generic enough to take in any <a href="https://code.visualstudio.com/docs/editor/tasks">Task</a>, so we create one:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;sleep&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;${env:COMSPEC}&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;/c&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;timeout&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;/t&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;30&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;/nobreak&quot;</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;presentation&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;reveal&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;showReuseMessage&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">},</span>
+</pre></div>
+<p>The <code>sleep</code> task is a custom VSCode Task in our project's <code>tasks.json</code> file that wraps around the <code>cmd.exe</code> command <a href="https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/timeout">timeout</a>.  We try to avoid any conflicts with shell settings by making this a <code>process</code> task instead of a <code>shell</code> task.  We explicitly name the [cmd.exe] executable, which is usually available <code>COMSPEC</code> environment variable.</p>
+<p>For our 3ds Max example we anecdotally select use a hardcoded a time of 30 seconds.  That time will vary on how a collection of factors, like how 3ds max is configured, what's the current system specs, and even if you've launched the application for the first time.  Even with everything the same, multiple iterations will keep the application available in memory so subsequent launches will appear shorter.</p>
+<p>The implementation of <code>sleep</code> is a personal choice and it could be re-written to use any command.  Our only requirement is that the command delays the original <code>Remote Attach</code> task by desired amount.  After the command is written, it is then plugged into the <code>preLaunchTask</code> attribute:</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Python: Remote Attach&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;request&quot;</span><span class="p">:</span> <span class="s2">&quot;attach&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;justMyCode&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nt">&quot;processName&quot;</span><span class="p">:</span> <span class="s2">&quot;3dsmax.exe&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;port&quot;</span><span class="p">:</span> <span class="mi">5678</span><span class="p">,</span>
+    <span class="nt">&quot;pathMappings&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;localRoot&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;remoteRoot&quot;</span><span class="p">:</span> <span class="s2">&quot;${workspaceFolder}&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;preLaunchTask&quot;</span><span class="p">:</span> <span class="s2">&quot;sleep&quot;</span><span class="p">,</span>
+<span class="p">},</span>
+</pre></div>
+<h2 id="next-step">Next Step</h2>
+<p>We now have a collection of components assembled into something that delivers a seamless debugging workflow.  In fact the workflow is good enough that we could start using it right now.  However, in the <a href="{filename}../2020-12-09-python-vscode-and-max-5/note.md">Part V</a>, we'll look at an alternative to the sleep command that adds a little more precision to our delay, effectively making our <code>sleep-attach</code> workflow into an <code>auto-attach</code> workflow.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/python/">python</a>, <a href="https://dbarsam.github.io/blog/tag/3ds-max/">3ds max</a>, <a href="https://dbarsam.github.io/blog/tag/vscode/">vscode</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>
