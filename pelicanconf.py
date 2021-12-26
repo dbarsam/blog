@@ -200,5 +200,5 @@ PLUGINS = [
     'autostatic'
 ]
 
-# AutoStaic should only process files listed in the YAML metadata
+# AutoStatic should only process files listed in the YAML metadata
 AUTOSTATIC_REFERENCE_PATTERN = r"""^- '{static(?:\s+|\|)((?:"|')?)(?P<path>[^\1=]+?)\1(?:(?:\s+|\|)(?P<extra>.*))?\s*}'$"""

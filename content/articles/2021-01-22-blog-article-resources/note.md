@@ -14,10 +14,12 @@ attachments:
     - '{static images/pelly2.png}'
     - '{static pdfs/pelly2.pdf}'
 ---
-
+<!--
+spell-checker:ignore autostatic alexandre fonseca's pelly pdfs pelicanconf staticattach
+-->
 Sooner or later, an article will require an attachment.  These accompanying non-markdown files are usually images, maybe a pdf, or even an fully working piece of code that are used or reference by the article.
 
-How exactly to best do this is open to debate. This article examines a strategy to make the management of article assets more modular than what's availabelw tih the default settings.
+How exactly to best do this is open to debate. This article examines a strategy to make the management of article assets more modular than what's available tih the default settings.
 
 ## Pelican Asset Management
 
@@ -46,9 +48,9 @@ project/
 └── pelican.conf.py
 ```
 
-The `articles` and `pages` are both separate types of content and have their own distinctinct discover option, the respective `ARTICLE_PATH` and `PAGES_PATH` options.  However, the `images` and `pdf` are static files and are discovered by the `STATIC_PATHS` option.  These are all documented in the [url settings] section of the options page.
+The `articles` and `pages` are both separate types of content and have their own distinct discover option, the respective `ARTICLE_PATH` and `PAGES_PATH` options.  However, the `images` and `pdf` are static files and are discovered by the `STATIC_PATHS` option.  These are all documented in the [url settings] section of the options page.
 
-However, the images and pdfs in that structure are separateed from their respective articles.  This makes sense if these assets are meant to be accesible from any article or page in the website.
+However, the image and pdf files in that structure are separated from their respective articles.  This makes sense if these assets are meant to be accessible from any article or page in the website.
 
 However if those assets are article specific, then this layout does not make sense.  As more articles are added to this structure it will be harder and harder to track which asset belongs to with files.
 
@@ -82,7 +84,7 @@ ARTICLE_URL = 'articles/{slug}/'
 ARTICLE_SAVE_AS = 'articles/{slug}/index.html'
 ```
 
-The above settings configure Pelican to disocver files in the `articles` folder, save them as `index.html` files in the pages's `slug` folder, and update the url to the cleander folder style that defaults to loading the `index.html` file.  The `slug` value comes from the article's slug [metadata field], which we set at the top of each article.
+The above settings configure Pelican to discover files in the `articles` folder, save them as `index.html` files in the pages's `slug` folder, and update the url to the cleaner folder style that defaults to loading the `index.html` file.  The `slug` value comes from the article's slug [metadata field], which we set at the top of each article.
 
 The next part is to configure Pelican to move the assets to a relative folder inside the slug folder instead of the global folder.  This is done by [attaching] the files to the article with the `{attach}` keyword inside our `article1\article.md` file:
 

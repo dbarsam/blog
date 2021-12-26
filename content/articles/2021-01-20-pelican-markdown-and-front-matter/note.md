@@ -13,6 +13,9 @@ type: article
 attachments:
     - '{static images/front-matter-panel.png}'
 ---
+<!--
+spell-checker:ignore deliminators frontmark jekkyl elio struyf contenttype lastmod
+-->
 
 A person with a blog should care about front matter -- and an engineer with a blog should care about making caring about front matter as easy as possible.  This article is the start of that caring, where we dive into concept of front matter, see what's options are available for our Pelican blog, and end with an almost satisfactory workflow.
 
@@ -53,7 +56,7 @@ ERROR    Could not process articles\2020-12-20-dummy.md       log.py:96
         TypeError: an integer is required (got type str)
 ```
 
-There is a work around that does not require any code modification.  You need to configure your Pelican system to use *unrecognisable* date formats like `2020-12-20 10:04` instead of `datetime`-parsable ones, like `2020-12-20T10:04:07.000Z`.  The `PyYAML` parser will simply skip over the unrecognizable dates and leave it as text, which is what Pelican's `get_date` function expects.
+There is a work around that does not require any code modification.  You need to configure your Pelican system to use *unrecognizable* date formats like `2020-12-20 10:04` instead of `datetime`-parsable ones, like `2020-12-20T10:04:07.000Z`.  The `PyYAML` parser will simply skip over the unrecognizable dates and leave it as text, which is what Pelican's `get_date` function expects.
 
 However, that work around does not fix the deprecation problem so we're still stuck with a broken plugin.  We could fix the plugin and get YAML style front matter working, but that's a task for another day.
 
