@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 # Standard Library
 import os
+import pathlib
 
 # External Libraries
 import pymdownx.emoji
@@ -34,8 +35,11 @@ DEFAULT_LANG = 'en'
 # Basic Setting
 # ####################################
 
+# Where to output the generated files.
+OUTPUT_PATH = pathlib.Path(__file__).parent.resolve().joinpath('output')
+
 # Base URL of your web site - set to localhost for development.
-SITEURL = 'http://localhost:8000'
+SITEURL = os.environ.get("PELICAN_SITEURL", OUTPUT_PATH.as_uri())
 
 # Developper Setting
 LOAD_CONTENT_CACHE = False

@@ -27,9 +27,16 @@
             "args": [
                 "-m",
                 "pelican",
+                "--ignore-cache",
                 "--autoreload",
                 "--listen"
             ],
+            "options": {
+                "shell": {},
+                "env": {
+                    "PELICAN_SITEURL": "http://localhost:8000",
+                }
+            },
             "problemMatcher": []
         },
         {
