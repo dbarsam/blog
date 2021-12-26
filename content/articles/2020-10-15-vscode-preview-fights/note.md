@@ -10,6 +10,8 @@ status: published
 categories: developer set-up
 category: developer set-up
 type: article
+attachments:
+    - '{static images/vscode-example.gif}'
 ---
 
 VSCode has a nice preview engine that allows a side-by-side of text and rendered-text. The feature is best documented in VSCode's native [Markdown] support help, but it's available for other languages and their plugins.
@@ -36,4 +38,4 @@ This is seems like the same issue described in Visual Code issues #[108582], but
 [Markdown]: https://code.visualstudio.com/Docs/languages/markdown
 [Editor and Preview Synchronization]: https://code.visualstudio.com/Docs/languages/markdown#_editor-and-preview-synchronization
 [108582]: https://github.com/microsoft/vscode/issues/108582
-[vscode-editor-preview-sync.gif]: {attach}images/vscode-example.gif
+[vscode-editor-preview-sync.gif]: images/vscode-example.gif

@@ -10,6 +10,8 @@ status: published
 categories: about the blog
 category: about the blog
 type: article
+attachments:
+    - '{static images/front-matter-panel.png}'
 ---
 
 A person with a blog should care about front matter -- and an engineer with a blog should care about making caring about front matter as easy as possible.  This article is the start of that caring, where we dive into concept of front matter, see what's options are available for our Pelican blog, and end with an almost satisfactory workflow.
@@ -269,4 +271,4 @@ After jumping through all the hoops, Front Matter is a pretty good extension.  I
 [front matter]: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-front-matter
 [side panel]: https://frontmatter.codes/docs/panel#metadata
 [known type]: https://frontmatter.codes/docs/content-types#how-it-works
-[default-contenttype.png]: {attach}images/front-matter-panel.png
+[default-contenttype.png]: images/front-matter-panel.png
