@@ -12,7 +12,8 @@
                 "-m",
                 "pelican",
                 "--ignore-cache",
-                "${workspaceFolder}\\content"
+                "${workspaceFolder}\\content",
+                "-e DELETE_OUTPUT_DIRECTORY=true"
             ],
             "problemMatcher": []
         },
