@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 # Standard Library
 import os
+import pathlib
 
 # External Libraries
 import pymdownx.emoji
@@ -34,8 +35,11 @@ DEFAULT_LANG = 'en'
 # Basic Setting
 # ####################################
 
+# Where to output the generated files.
+OUTPUT_PATH = pathlib.Path(__file__).parent.resolve().joinpath('output')
+
 # Base URL of your web site - set to localhost for development.
-SITEURL = 'http://localhost:8000'
+SITEURL = os.environ.get("PELICAN_SITEURL", OUTPUT_PATH.as_uri())
 
 # Developper Setting
 LOAD_CONTENT_CACHE = False
@@ -105,10 +109,29 @@ PAGE_PATHS = [
     'pages'
 ]
 
+# The article url and file processing options
+PAGE_URL = 'pages/{slug}/'
+PAGE_SAVE_AS = 'pages/{slug}/index.html'
+PAGE_LANG_SAVE_AS = False
+
 # A list of directories and files to look at for articles, relative to PATH.
 ARTICLE_PATHS = [
     'articles'
 ]
+
+# The article url and file processing options
+ARTICLE_URL = 'articles/{slug}/'
+ARTICLE_SAVE_AS = 'articles/{slug}/index.html'
+
+# The tag / tags index url and file processing options
+TAG_URL = 'tag/{slug}/'
+TAG_SAVE_AS = 'tag/{slug}/index.html'
+TAGS_URL = 'tags/'
+TAGS_SAVE_AS = None
+
+# The category index url and file processing options
+CATEGORY_URL = 'category/{slug}/'
+CATEGORY_SAVE_AS = 'category/{slug}/index.html'
 
 # A list of directories to look for static files, relative to PATH.
 STATIC_PATHS = [
@@ -143,11 +166,13 @@ DEFAULT_PAGINATION = 10
 # ####################################
 # Theme
 # ####################################
+
 THEME = os.path.join('pelican', 'themes', 'pelican-clean-blog')
 
 # ####################################
 # Theme Specific Settings
 # ####################################
+
 HEADER_COVER = 'images/home-bg.png'
 HEADER_COLOR = '#004a59'
 COLOR_SCHEME_CSS = 'tomorrow_night.css'
@@ -164,3 +189,16 @@ MENUITEMS = [
     ("Categories", "/categories.html"),
     ("Tags", "/tags.html"),
 ]
+
+# ####################################
+# Plugins
+# ####################################
+PLUGIN_PATHS = [
+    os.path.join('pelican', 'plugins')
+]
+PLUGINS = [
+    'autostatic'
+]
+
+# AutoStatic should only process files listed in the YAML metadata
+AUTOSTATIC_REFERENCE_PATTERN = r"""^- '{static(?:\s+|\|)((?:"|')?)(?P<path>[^\1=]+?)\1(?:(?:\s+|\|)(?P<extra>.*))?\s*}'$"""

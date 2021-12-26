@@ -12,7 +12,8 @@
                 "-m",
                 "pelican",
                 "--ignore-cache",
-                "${workspaceFolder}\\content"
+                "${workspaceFolder}\\content",
+                "-e DELETE_OUTPUT_DIRECTORY=true"
             ],
             "problemMatcher": []
         },
@@ -27,9 +28,16 @@
             "args": [
                 "-m",
                 "pelican",
+                "--ignore-cache",
                 "--autoreload",
                 "--listen"
             ],
+            "options": {
+                "shell": {},
+                "env": {
+                    "PELICAN_SITEURL": "http://localhost:8000",
+                }
+            },
             "problemMatcher": []
         },
         {

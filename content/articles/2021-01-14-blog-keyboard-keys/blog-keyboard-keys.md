@@ -2,7 +2,7 @@
 title: How this blog styles keyboard keys
 date: 2021-01-14 17:48
 tags: markdown, pelican, pymdown extensions
-slug: blog-keyboard-keys
+slug: how-this-blog-renders-keyboard-keys
 authors: db
 summary: An quick example of one of how this blog uses PyMdown Extensions' 'keys' feature to render keyboard keys
 header_cover: /images/home-bg.png
