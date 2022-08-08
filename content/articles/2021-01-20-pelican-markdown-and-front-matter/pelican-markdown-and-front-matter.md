@@ -80,7 +80,7 @@ Pelican supports multiple tags and keywords, but it only support a single catego
 
 ### Front Matter Fields
 
-When it comes to front matter then, most systems prefer the multiple categories stored in the `categories` metadata field.  However, Pelican sticks to the single category with the `category` metadata field.  This is frustrating to somebody that likes agnostic systems as neither system has been design with that compatibility in mind (well, maybe [Jekkyl]).
+When it comes to front matter then, most systems prefer the multiple categories stored in the `categories` metadata field.  However, Pelican sticks to the single category with the `category` metadata field.  This is frustrating to somebody that likes agnostic systems as neither system has been design with that compatibility in mind (well, maybe [Jekyll]).
 
 For example, a system processing the `category` field will not recognize the equivalent of a single value in the `categories` field.  Like wise, a system processing the `categories` field will not read in the equivalent 'list of size 1' value from the `category` field.  The user is forced to pick a side between camps `category` and `categories`, which is unfortunate because the content should be free of any platform specific manipulation.  Content that is platform agnostic is open to be processed by other platforms and -- more importantly -- accessed by universal tools that make writing articles easier.
 
