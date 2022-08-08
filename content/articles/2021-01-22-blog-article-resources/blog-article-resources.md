@@ -7,7 +7,6 @@ authors: db
 summary: How to use Autostatic to re-organize Pelican's default article structure to be more article specific.
 header_cover: /images/home-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 attachments:

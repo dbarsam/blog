@@ -7,7 +7,6 @@ authors: db
 summary: How to validate local and internet links in markdown files.
 header_cover: /images/article-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 modified: 2021-02-01 20:01

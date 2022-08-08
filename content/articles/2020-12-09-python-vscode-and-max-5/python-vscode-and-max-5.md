@@ -7,7 +7,6 @@ authors: db
 summary: Part V&#58; A slight tweak to get us an VSCode auto-attach configuration
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

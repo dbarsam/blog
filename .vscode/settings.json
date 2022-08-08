@@ -134,13 +134,8 @@
                     "type": "tags"
                 },
                 {
-                    "title": "Category",
-                    "name": "category",
-                    "type": "string",
-                },
-                {
                     "title": "Categories",
-                    "name": "categories",
+                    "name": "category",
                     "type": "categories",
                 },
                 {

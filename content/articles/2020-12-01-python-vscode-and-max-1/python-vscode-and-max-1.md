@@ -7,7 +7,6 @@ authors: db
 summary: Part I&#58; Python Side Car Environments
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

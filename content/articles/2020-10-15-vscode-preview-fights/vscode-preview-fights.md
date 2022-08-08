@@ -7,7 +7,6 @@ authors: db
 summary: VSCode's preview synchronization is a nice feature -- when it works...
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 attachments:

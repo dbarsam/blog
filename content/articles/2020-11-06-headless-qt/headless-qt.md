@@ -7,7 +7,6 @@ authors: db
 summary: Can you configure Qt to work in systems with no UI?
 header_cover: /images/article-bg.png
 status: published
-categories: application development
 category: application development
 type: article
 ---

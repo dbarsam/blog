@@ -7,7 +7,6 @@ authors: db
 summary: Part II&#58; The bootstrap script
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

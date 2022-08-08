@@ -7,7 +7,6 @@ authors: db
 summary: A multipart article describing how to debug an application's embedded Python environment.
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

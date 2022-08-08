@@ -7,7 +7,6 @@ authors: db
 summary: How to recognize a particular PySide's DLL load failure error in Windows.
 header_cover: /images/article-bg.png
 status: published
-categories: troubleshooting stories
 category: troubleshooting stories
 type: article
 ---

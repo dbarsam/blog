@@ -7,7 +7,6 @@ authors: db
 summary: A probably incomplete introduction to managing markdown front matter in a Pelican powered blog.
 header_cover: /images/home-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 attachments:

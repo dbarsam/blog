@@ -7,7 +7,6 @@ authors: db
 summary: Part IV&#58; VSCode's compound launch configuration'
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

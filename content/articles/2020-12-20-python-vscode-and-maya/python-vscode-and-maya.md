@@ -7,7 +7,6 @@ authors: db
 summary: A small tweak to adapt the VSCode auto-attach to work with Maya
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

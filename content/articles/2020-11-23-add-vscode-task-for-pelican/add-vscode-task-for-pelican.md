@@ -7,7 +7,6 @@ authors: db
 summary: How to run Pelican commands from within Visual Studio Code.
 header_cover: /images/article-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 ---

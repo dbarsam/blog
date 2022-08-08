@@ -7,7 +7,6 @@ authors: db
 summary: Notes from trying to get Pelican's code formatting feature properly configured.
 header_cover: /images/article-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 ---

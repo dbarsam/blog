@@ -7,7 +7,6 @@ authors: db
 summary: The set-up of this blog's theme.
 header_cover: /images/article-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 ---

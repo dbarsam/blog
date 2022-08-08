@@ -7,7 +7,6 @@ authors: db
 summary: An quick example of one of how this blog uses PyMdown Extensions' 'keys' feature to render keyboard keys
 header_cover: /images/home-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 ---

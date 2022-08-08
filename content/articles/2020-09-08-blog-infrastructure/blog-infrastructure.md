@@ -7,7 +7,6 @@ authors: db
 summary: The pieces that make up this blog's backend.
 header_cover: /images/article-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 ---

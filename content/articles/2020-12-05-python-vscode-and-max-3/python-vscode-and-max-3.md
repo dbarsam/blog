@@ -7,7 +7,6 @@ authors: db
 summary: Part III&#58; VSCode's attach to process workflow'
 header_cover: /images/article-bg.png
 status: published
-categories: developer set-up
 category: developer set-up
 type: article
 ---

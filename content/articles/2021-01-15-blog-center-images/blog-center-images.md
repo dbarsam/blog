@@ -7,7 +7,6 @@ authors: db
 summary: One of the many ways to center an image with Markdown and CSS in a Pelican blog.
 header_cover: /images/home-bg.png
 status: published
-categories: about the blog
 category: about the blog
 type: article
 ---
