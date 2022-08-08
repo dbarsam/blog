@@ -69,7 +69,6 @@
     ],
     "frontMatter.preview.host": "http://localhost:8000/",
     "frontMatter.content.autoUpdateDate": true,
-    "frontMatter.taxonomy.modifiedField": "modified",
     "frontMatter.taxonomy.seoDescriptionField": "summary",
     "frontMatter.taxonomy.commaSeparatedFields": [
         "tags",
@@ -116,12 +115,14 @@
                 {
                     "title": "Publishing date",
                     "name": "date",
-                    "type": "datetime"
+                    "type": "datetime",
+                    "isPublishDate": true
                 },
                 {
                     "title": "Last modified date",
                     "name": "modified",
-                    "type": "datetime"
+                    "type": "datetime",
+                    "isModifiedDate": true
                 },
                 {
                     "title": "Status",
