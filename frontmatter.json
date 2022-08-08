@@ -28,5 +28,79 @@
     "application development",
     "developer set-up",
     "troubleshooting stories"
+  ],
+  "frontMatter.taxonomy.contentTypes": [
+    {
+      "name": "article",
+      "fields": [
+        {
+          "title": "Title",
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "title": "Description",
+          "name": "summary",
+          "type": "string"
+        },
+        {
+          "title": "Publishing date",
+          "name": "date",
+          "type": "datetime",
+          "isPublishDate": true
+        },
+        {
+          "title": "Last modified date",
+          "name": "modified",
+          "type": "datetime",
+          "isModifiedDate": true
+        },
+        {
+          "title": "Status",
+          "name": "status",
+          "type": "draft"
+        },
+        {
+          "title": "Tags",
+          "name": "tags",
+          "type": "tags"
+        },
+        {
+          "title": "Categories",
+          "name": "category",
+          "type": "categories"
+        },
+        {
+          "title": "Header Image",
+          "name": "header_cover",
+          "type": "choice",
+          "choices": [
+            {
+              "id": "/images/article-bg.png",
+              "title": "Article Header"
+            },
+            {
+              "id": "/images/home-bg.png",
+              "title": "Home Header"
+            }
+          ]
+        },
+        {
+          "title": "Attachments",
+          "name": "attachments",
+          "type": "string"
+        },
+        {
+          "title": "authors",
+          "name": "authors",
+          "type": "string"
+        },
+        {
+          "title": "type",
+          "name": "type",
+          "type": "string"
+        }
+      ]
+    }
   ]
 }
