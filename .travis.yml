@@ -20,7 +20,7 @@ jobs:
         - npm install -g npm@8.16.0
         - npm install -g markdown-link-check@3.10.2
       script:
-        - for file in  $(find ./content -name \*.md); do markdown-link-check --config .markdown-link-check.json --verbose "$file" || exit 1; done;
+        - find content -name \*.md -print0 | xargs --null --max-args=1 -L1 markdown-link-check --config .markdown-link-check.json --verbose
     - stage: build
       language: python
       python:
