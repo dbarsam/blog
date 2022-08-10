@@ -5,6 +5,9 @@
         },
         {
             "pattern": "^({|%7B)static(}|%7D)"
+        },
+        {
+            "pattern": "^({|%7B)attach(}|%7D)"
         }
     ]
 }
