@@ -180,7 +180,4 @@ After a little bit of configuration, the `autostatic` plugin does a pretty good 
 [metadata field]: https://docs.getpelican.com/en/latest/content.html#file-metadata
 [attaching]: https://docs.getpelican.com/en/latest/content.html#attaching-static-files
 [autostatic plugin]: https://github.com/AlexJF/pelican-autostatic
-[pelly.png]: {attach}images/pelly.png
-[pelly.pdf]: {attach}pdfs/pelly.pdf
 [existing metadata]: https://docs.getpelican.com/en/stable/content.html#file-metadata
-[official documentation]: https://github.com/AlexJF/pelican-autostatic

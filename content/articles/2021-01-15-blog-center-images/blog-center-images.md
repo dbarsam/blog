@@ -116,7 +116,6 @@ This is a logo.
 {: .center-text}
 
 [how do i center an image in markdown]: https://stackoverflow.com/questions/3912694/using-markdown-how-do-i-center-an-image-and-its-caption
-[pelican]: https://blog.getpelican.com/logo/pelican-logo.png
 [pelican-logo]: https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png
 [python-markdown help]: https://python-markdown.github.io/extensions/attr_list/#block-level
 [extra]: https://python-markdown.github.io/extensions/extra/

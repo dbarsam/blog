@@ -97,9 +97,6 @@ The `gh-pages` branch is a git branch named `gh-pages`.  There is nothing specia
 [travis-ci]: https://travis-ci.com
 [pelican]: http://docs.getpelican.com
 [submits the html files]: https://docs.travis-ci.com/user/deployment/pages/
-[pelican-themes]: https://docs.getpelican.com/en/stable/pelican-themes.html
-[Pelican Themes GitHub Project]: https://github.com/getpelican/pelican-themes
-[plumage]: https://pypi.org/project/plumage/
 [github pages]: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
 [markdown]: https://daringfireball.net/projects/markdown/
 [support of GitHub Pages]: https://docs.travis-ci.com/user/deployment/pages/

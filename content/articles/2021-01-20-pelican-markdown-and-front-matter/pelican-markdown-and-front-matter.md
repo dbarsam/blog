@@ -264,8 +264,6 @@ After jumping through all the hoops, Front Matter is a pretty good extension.  I
 [Pelican help]: https://docs.getpelican.com/en/latest/content.html#file-metadata
 [hugo]: https://gohugo.io/content-management/front-matter/
 [pyyaml]: https://pyyaml.org/
-[markdown-it-front-matter]: https://github.com/ParkSB/markdown-it-front-matter]
-[jack dewinter]: https://jackdewinter.github.io/2021/03/15/markdown-linter-road-to-initial-release-front-matter/#markdown-front-matter
 [pelican-frontmark]: https://github.com/noirbizarre/pelican-frontmark/
 [issue #1]: https://github.com/noirbizarre/pelican-frontmark/issues/1
 [pull request]: https://github.com/getpelican/pelican/pull/2644#issuecomment-548304256

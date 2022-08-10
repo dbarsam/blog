@@ -315,7 +315,6 @@ The updated `bootstrap.py` and `launcher.cmd` scripts completes the third part o
 [install_requires vs requirements files]: https://packaging.python.org/discussions/install-requires-vs-requirements/
 [debugger mode]: https://code.visualstudio.com/Docs/editor/debugging
 [part iv]: {filename}../2020-12-07-python-vscode-and-max-4/note.md
-[remote debugging steps]: https://code.visualstudio.com/docs/python/debugging#_remote-script-debugging-with-ssh
 [previous article]: {filename}../2020-12-03-python-vscode-and-max-2/note.md
 [part i]: {filename}../2020-12-01-python-vscode-and-max-1/note.md
 [part ii]: {filename}../2020-12-03-python-vscode-and-max-2/note.md

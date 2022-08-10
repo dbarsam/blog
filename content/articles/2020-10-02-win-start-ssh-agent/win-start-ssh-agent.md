@@ -69,10 +69,6 @@ call "%GIT_INSTALL_ROOT%\cmd\start-ssh-agent.cmd" /k exit
 
 The `/k exit` will be passed through to the nested session and quick exit it, leaving the original parent session that your session manager is managing.
 
-[github]: https://github.com
-[travis ci]: https://travis-ci.org
-[pelican]: http://docs.getpelican.com
-[submits the html files]: https://docs.travis-ci.com/user/deployment/pages/
 [post]: https://github.com/cmderdev/cmder/issues/1807#issuecomment-400504725
 [cmder]: https://cmder.net
 [ConeEmu]: https://conemu.github.io
