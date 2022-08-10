@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 Unfortunately, not every application embeds Python the same way.  This makes developing Python tools for these applications awkwardly challenging.  Some applications obfuscate the interpreter it by compiling directly it into the application, while others take a more modular approach and ship a complete Python installation -- including an equivalent `python.exe` and `site-package` folder -- in a easily accessible folder in the application's installation directory.
 
 But even ignoring the differences between how the applications embed these Python environment, there's usually one or two additional design choices that makes developing these Python plugins even harder than they need to be. It's almost as if the applications' creators embed Python as an afterthought, slating it as an auxillary scripting language that's only there to implement a few automation macros.  Python is infinitely more open, so developing anything more powerful often takes on a journey of connecting mismatched puzzle pieces that ends up with a somewhat unsatisfying solution.

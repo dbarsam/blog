@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 One of the features this blog uses from the [PyMdown Extensions] extension is the [Keys] option.  That options enables `++` as Markdown syntax and converts it to HTML5's `<kbd></kbd>` html.
 
 This means that `++ctrl+alt+delete++` renders out as ++ctrl+alt+delete++.  Better information is available on the official [help].

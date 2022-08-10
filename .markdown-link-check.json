@@ -1,10 +1,13 @@
 {
     "ignorePatterns": [
         {
-            "pattern": "^{filename}"
+            "pattern": "^({|%7B)filename(}|%7D)"
         },
         {
-            "pattern": "^{static}"
+            "pattern": "^({|%7B)static(}|%7D)"
+        },
+        {
+            "pattern": "^({|%7B)attach(}|%7D)"
         }
     ]
 }

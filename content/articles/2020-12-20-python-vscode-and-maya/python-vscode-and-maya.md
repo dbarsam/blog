@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 In the [previous series of articles], we built a quasi auto-attach workflow to debug 3ds Max's Python scripts with VSCode.  Fortunately, that workflow was general enough that trying to apply that to Maya only requires some slight tweaking.
 
 ## `bootstrap.mel`

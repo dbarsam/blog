@@ -11,7 +11,9 @@ categories: application development
 category: application development
 type: article
 ---
-
+<!--
+spell-checker:ignore FONTDIR vcxsrv
+-->
 This isn't a real article.  Instead, it's more of an annotated bookmark of this [post], which was used in some research on how to configure Qt applications to run in Docker Windows containers -- and that Docker task is part of another, work-in-progress project that may not ever be completed. So, there are no solutions here.  Sorry.
 
 The [post], archived here, says this:

@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 In the [previous article], we set up a conventional Python development environment with a Python virtual environment and our Python plugin as an editable package.  In this article, we'll make that virtual environment a side-car environment by grafting it onto the external application.
 
 ## Python Activator
@@ -255,7 +257,6 @@ The next step, [Part III], will look into how exactly we can incorporate VSCode 
 [logging.basicConfig]: https://docs.python.org/3/library/logging.html#logging.basicConfig
 [logging]: https://docs.python.org/3/library/logging.html
 [logging.config.dictConfig]: https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig
-[install_requires vs requirements files]:https://packaging.python.org/discussions/install-requires-vs-requirements/
 [3ds max help]: https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html
 [previous article]: {filename}../2020-12-01-python-vscode-and-max-1/note.md
 [part iii]: {filename}../2020-12-05-python-vscode-and-max-3/note.md

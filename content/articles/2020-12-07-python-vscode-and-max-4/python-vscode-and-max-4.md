@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore cppvsdg
+-->
 In the [previous article], we successful created a debugging session from connecting various pieces of our infrastructure.  We created a Python virtual environment via `virtualenv`, built a `bootstrap.py` to graft it into the application, executed `ptvsd` at startup, and successfully made the whole contraption work, via VSCode's `Attach to Process` remote debugging configuration. In this article, we'll look up at couple of tweaks to automate that manual process.
 
 ## Attach vs Launch
@@ -146,19 +148,12 @@ The implementation of `sleep` is a personal choice and it could be re-written to
 
 We now have a collection of components assembled into something that delivers a seamless debugging workflow.  In fact the workflow is good enough that we could start using it right now.  However, in the [Part V], we'll look at an alternative to the sleep command that adds a little more precision to our delay, effectively making our `sleep-attach` workflow into an `auto-attach` workflow.
 
-[activate_this.py]: https://github.com/pypa/virtualenv/blob/main/src/virtualenv/activation/python/activate_this.py
-[addsitedir]: https://docs.python.org/3/library/site.html#site.addsitedir
-[site]: https://docs.python.org/3/library/site.html
-[sys.path]: https://docs.python.org/3/library/sys.html#sys.path
-[install_requires vs requirements files]: https://packaging.python.org/discussions/install-requires-vs-requirements/
-[__main__]: https://docs.python.org/3/library/__main__.html
-[debugger mode]: https://code.visualstudio.com/Docs/editor/debugging
 [C/C++ debugging]: https://code.visualstudio.com/docs/cpp/launch-json-reference
 [compound configuration]: https://code.visualstudio.com/Docs/editor/debugging#_compound-launch-configurations
 [another problem]: {filename}../2020-10-29-qt-dll-mismatch/note.md
 [prelaunchtask]: https://code.visualstudio.com/Docs/editor/debugging#_launchjson-attributes
 [task]: https://code.visualstudio.com/docs/editor/tasks
 [timeout]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/timeout
-[cmd]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
+[cmd.exe]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
 [previous article]: {filename}../2020-12-05-python-vscode-and-max-3/note.md
 [part v]: {filename}../2020-12-09-python-vscode-and-max-5/note.md

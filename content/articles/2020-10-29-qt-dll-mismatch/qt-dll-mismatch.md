@@ -11,7 +11,9 @@ categories: troubleshooting stories
 category: troubleshooting stories
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 Every couple of months we'll get a report of some Python tool magically failing with a mysterious -- and unhelpful -- `DLL load failed` error message.  The error is unfortunately too generic to be helpful, but if the Python tool is a PySide application, then there might be a workaround to solve this problem.
 
 ## Wrong DLLs

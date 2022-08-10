@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 When you install Git on Windows, the installer will also install the utility script `start-ssh-agent.cmd`.  That script isn't necessarily required to use Git, but if you fall into a narrow category of users who have a particular workflow, you can get tripped up by one of its unfortunate side effects.
 
 ## SSH, Not HTTP
@@ -67,10 +69,6 @@ call "%GIT_INSTALL_ROOT%\cmd\start-ssh-agent.cmd" /k exit
 
 The `/k exit` will be passed through to the nested session and quick exit it, leaving the original parent session that your session manager is managing.
 
-[github]: https://github.com
-[travis ci]: https://travis-ci.org
-[pelican]: http://docs.getpelican.com
-[submits the html files]: https://docs.travis-ci.com/user/deployment/pages/
 [post]: https://github.com/cmderdev/cmder/issues/1807#issuecomment-400504725
 [cmder]: https://cmder.net
 [ConeEmu]: https://conemu.github.io

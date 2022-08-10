@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 VSCode's [tasks feature] is the editor's mechanism to execute building, testing, and other software development actions from the comfort of the IDE.  Most of the common tasks are built-in or provided by plugins, but it's also possible to define workspace tasks in the project's `tasks.json` file.
 
 In this Pelican powered project, we can take advantage of that flexibility and add support for two Pelican specific commands:  build and serve.

@@ -6,21 +6,21 @@ jobs:
     - stage: lint
       language: node_js
       node_js:
-        - 12
+        - 14
       install:
-        - npm install -g npm@latest
-        - npm install -g markdownlint-cli
+        - npm install -g npm@8.16.0
+        - npm install -g markdownlint-cli@0.32.1
       script:
         - markdownlint **/*.md
     - stage: lint
       language: node_js
       node_js:
-        - 12
+        - 14
       install:
-        - npm install -g npm@latest
-        - npm install -g markdown-link-check
+        - npm install -g npm@8.16.0
+        - npm install -g markdown-link-check@3.10.2
       script:
-        - for file in  $(find ./content -name \*.md); do markdown-link-check --config .markdown-link-check.json --verbose "$file" || exit 1; done;
+        - find content -name \*.md -print0 | xargs --null --max-args=1 -L1 markdown-link-check --config .markdown-link-check.json --verbose
     - stage: build
       language: python
       python:

@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 In the [previous article], we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the Python part and talk about set up a *side-car* environment for the external application.
 
 ## 'Side Car' Environments
@@ -34,15 +36,15 @@ Python developers should already recognize this pattern as the concept of a *vir
 
 There are many tools that implement Python virtual environments, but the usual, and maybe mature choice is the `virtualenv` module.  Python's `virtualenv` module is a tool popular enough to warrant its own tutorials so it won't be covered here.  A good resource to keep around is the [official help], but the the important thing to note is that the `virtualenv` module works by spawning a new environment based on its host Python installation.   This brings up a few points:
 
-1. Because the `virtualenv` module create virtual environments from a hosting Python environment, you must first install a _system_ Python environment to host `virtualenv`.  This installation is a permanent Python solutions and we only need it to create the temporary side car environments provided by `virtualenv`.
+1. Because the `virtualenv` module create virtual environments from a hosting Python environment, you must first install a *system* Python environment to host `virtualenv`.  This installation is a permanent Python solutions and we only need it to create the temporary side car environments provided by `virtualenv`.
 
-2. Because the `virtualenv` module can only create virtual environments that matches its hosting Python environment, that _system_ Python should be the same version as the the application's Python installation -- or at least match it as close as possible.  This may be challenging if your application still uses Python 2 environments as that line has been discontinued.
+2. Because the `virtualenv` module can only create virtual environments that matches its hosting Python environment, that *system* Python should be the same version as the the application's Python installation -- or at least match it as close as possible.  This may be challenging if your application still uses Python 2 environments as that line has been discontinued.
 
-3. The _system_ Python installation is usually pre-installed on Linux systems but not on Windows.  On Windows, this achieved simply by installing a Python environment from <https://www.python.org> and then installing the `virtualenv` module.  It's possible to use alternative installations methods (like [Chocolatey]) or even alternative distribution (like [Conda]), but that won't be covered here.
+3. The *system* Python installation is usually pre-installed on Linux systems but not on Windows.  On Windows, this achieved simply by installing a Python environment from <https://www.python.org> and then installing the `virtualenv` module.  It's possible to use alternative installations methods (like [Chocolatey]) or even alternative distribution (like [Conda]), but that won't be covered here.
 
 Some vendors have listened to feedback (and learning from their past handling of Python 2) so there is a chance of that the application could already provide all of the necessary support to create user virtual environments.  If that's the case for your specific application, then that makes this section joyfully redundant.
 
-However, if the application does not provide `virtualenv` support directly out of the box, then we should continue with this side-car plan and use a _system_ Python.  Even if the application's Python installation is accessible, installing `virtualenv` into the application's Python environment would still violate our separation policy.
+However, if the application does not provide `virtualenv` support directly out of the box, then we should continue with this side-car plan and use a *system* Python.  Even if the application's Python installation is accessible, installing `virtualenv` into the application's Python environment would still violate our separation policy.
 
 ## `venv` vs. `virtualenv`
 
@@ -60,9 +62,9 @@ The `virtualenv` module was not always (and maybe still isn't to some people) th
 
 But even then it wasn't clear which tool to use, as the `venv` help notes:
 
-> _Deprecated since version 3.6_: `pyvenv` was the recommended tool for creating virtual environments for Python 3.3 and 3.4, and is [deprecated in Python 3.6].
+> *Deprecated since version 3.6*: `pyvenv` was the recommended tool for creating virtual environments for Python 3.3 and 3.4, and is [deprecated in Python 3.6].
 >
-> _Changed in version 3.5_: The use of `venv` is now recommended for creating virtual environments.
+> *Changed in version 3.5*: The use of `venv` is now recommended for creating virtual environments.
 
 So this article is using the shared features of both the `venv`/`virtualenv` modules but we've selected `virtualenv` for its finer grain of control over the virtual environment process.
 
@@ -120,7 +122,7 @@ Behind the scenes, the editable install only modifies the virtual environment by
 
 ## Next Steps
 
-This part of the infrastructure has only focused on the Python parts of it.  With the virtual environment complete and our project properly installed for development, it's time to move onto [Part II].  There we'll look into how we'll graft the virtual environment onto the application using the _bootstrap_ script.
+This part of the infrastructure has only focused on the Python parts of it.  With the virtual environment complete and our project properly installed for development, it's time to move onto [Part II].  There we'll look into how we'll graft the virtual environment onto the application using the *bootstrap* script.
 
 [chocolatey]: https://chocolatey.org
 [conda]: https://docs.conda.io

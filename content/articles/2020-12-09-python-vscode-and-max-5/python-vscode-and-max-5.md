@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 In the [previous article], we established an auto-attach workflow with VSCode that was based on a passive sleep delay.  Now we'll refine that process by using the same network strategy used by the remote debugger.
 
 ## Preliminary Connection

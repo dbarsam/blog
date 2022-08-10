@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 [Pelican] is the tool that makes this static website from the markdown files in the repository.  But, while it has the power to theme the website out of the box, it's not that clear exactly how that is supposed to work.
 
 ## Getting the Theme
@@ -70,19 +72,8 @@ python -m pelican --autoreload --listen
 
 Like a rug, a good theme really ties the whole website together.  So I appreciate the work that goes into making one; however, the one point I can't get over is use of copying and pasting files to install the theme.  While using submodules to embed the theme is a good step towards being modular, it feels dated and the wrong tool -- especially when we're already using Python packages.   Hopefully, this is just a transition.  It looks like Pelican 4.0 did start to push for better extension organization, but the current focus is on [Pelican Plugins].  Most of development for the themes in the [Pelican Themes GitHub Project] appears to be stagnant, and only a few talk about supporting Pelican 4.0, and of those even fewer publish their themes as Python package.
 
-[github]: https://github.com
-[travis ci]: https://travis-ci.com
 [pelican]: http://docs.getpelican.com
 [pelican plugins]: https://github.com/pelican-plugins
-[submits the html files]: https://docs.travis-ci.com/user/deployment/pages/
 [pelican-themes]: https://docs.getpelican.com/en/stable/pelican-themes.html
 [Pelican Themes GitHub Project]: https://github.com/getpelican/pelican-themes
 [plumage]: https://pypi.org/project/plumage/
-[github pages]: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
-[markdown]: https://daringfireball.net/projects/markdown/
-[support of ghitub pages]: https://docs.travis-ci.com/user/deployment/pages/
-[markdownlint]: https://github.com/DavidAnson/markdownlint
-[github pages documentation]: https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#types-of-github-pages-sites
-[publishing source]: https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#publishing-sources-for-github-pages-sites
-[pelican-clean-blog]: https://github.com/gilsondev/pelican-clean-blog
-[plugins]: https://github.com/getpelican/cookiecutter-pelican-plugin
