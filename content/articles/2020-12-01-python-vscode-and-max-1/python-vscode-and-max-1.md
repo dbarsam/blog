@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 In the [previous article], we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the Python part and talk about set up a *side-car* environment for the external application.
 
 ## 'Side Car' Environments

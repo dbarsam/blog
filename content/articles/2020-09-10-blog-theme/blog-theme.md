@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 [Pelican] is the tool that makes this static website from the markdown files in the repository.  But, while it has the power to theme the website out of the box, it's not that clear exactly how that is supposed to work.
 
 ## Getting the Theme

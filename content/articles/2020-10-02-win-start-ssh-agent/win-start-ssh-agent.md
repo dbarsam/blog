@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 When you install Git on Windows, the installer will also install the utility script `start-ssh-agent.cmd`.  That script isn't necessarily required to use Git, but if you fall into a narrow category of users who have a particular workflow, you can get tripped up by one of its unfortunate side effects.
 
 ## SSH, Not HTTP

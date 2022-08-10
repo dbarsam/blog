@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore cppvsdg
+-->
 In the [previous article], we successful created a debugging session from connecting various pieces of our infrastructure.  We created a Python virtual environment via `virtualenv`, built a `bootstrap.py` to graft it into the application, executed `ptvsd` at startup, and successfully made the whole contraption work, via VSCode's `Attach to Process` remote debugging configuration. In this article, we'll look up at couple of tweaks to automate that manual process.
 
 ## Attach vs Launch

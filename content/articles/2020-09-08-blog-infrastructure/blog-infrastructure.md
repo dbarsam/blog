@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore publishconf
+-->
 This project is a blog with a pipeline.  The pipeline compiles the project's text files into static html pages and pushes them to a host which then displays it as a website.  The whole process is split along these steps:
 
 1. All content for this blog is stored as files in a project on [GitHub].

@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore colour colouring
+-->
 Pelican doesn't handle syntax highlighting out of the box.  You need to add that functionality, which means extending the blog with a collection of configurations, plugins, and Markdown extensions.
 
 This post is mainly a collection of notes taken from the first pass at enabling the feature.  And while that first pass really didn't conclude in a satisfying way, it did end up with this blog getting some basic code formatting functionality.  The whole exercise could be broken down into 4 different sub-topics:

@@ -11,7 +11,9 @@ categories: developer set-up
 category: developer set-up
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 In the [previous article], we had created a Python virtual environment via `virtualenv`'s and built a `bootstrap.py` to graft it into the application.  In this article, we'll take a first pass at incorporating VSCode into our workflow.
 
 ## Attach to Process

@@ -11,7 +11,9 @@ categories: about the blog
 category: about the blog
 type: article
 ---
-
+<!--
+spell-checker:ignore
+-->
 Here is a common question that has almost an infinite number of answers:  [How do I center an image in Markdown]?
 
 The solution (for this blog, at least) comes in two parts:  CSS and Markdown Attributes.

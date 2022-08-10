@@ -16,7 +16,6 @@ attachments:
 <!--
 spell-checker:ignore deliminators frontmark jekkyl elio struyf contenttype lastmod
 -->
-
 A person with a blog should care about front matter -- and an engineer with a blog should care about making caring about front matter as easy as possible.  This article is the start of that caring, where we dive into concept of front matter, see what's options are available for our Pelican blog, and end with an almost satisfactory workflow.
 
 ## Pelican, Markdown, and Front Matter
