@@ -14,7 +14,7 @@ type: article
 <!--
 spell-checker:ignore
 -->
-This is an update to a previous article, [how this blog detects broken links], describing updated ways to use the[markdown-link-check] npm package.
+This article is a follow-up to [how this blog detects broken links], describing updated ways to use the [markdown-link-check] npm package.
 
 ## Batch Operation
 
@@ -30,11 +30,11 @@ That `exit` command turned out to exit the shell in some cases and this was not 
 find content -name \*.md -print0 | xargs --null --max-lines=1 markdown-link-check --config .markdown-link-check.json --verbose
 ```
 
-Using `xargs` introduces some new changes.  At first `xargs` passed all arguments to `markdown-link-check`, but the additional flag executes it once per file.  Second, `xargs` will return back exit code 123 if any of invocations returns back a non-zero value, which is fine in the ci pipeline.  And lastly, `xargs` processes all arguments, regardless if one invocation fails.  This means that `xargs will not quit at the first error and continue to process the rest of the files.  This is desirable in our case as our file collection is small.
+Using `xargs` introduces some new changes.  At first `xargs` passed all arguments to `markdown-link-check`, but the additional flag executes it once per file.  Second, `xargs` will return back exit code 123 if any of invocations returns back a non-zero value, which is fine in the ci pipeline.  And lastly, `xargs` processes all arguments, regardless if one invocation fails.  This is desirable in our case because we need to check all links and not quit at the first failure.
 
 ## Ignore Rules
 
-We have another update regarding Pelican's shorthand for [local links]: `{filename}` and `{static}`.  These are not valid links but we create a configuration file (`.markdown-link-check.json`) and use the `ignorePatterns` option to skip those special cases.  Before we could use the raw `{` and `}` characters.  Now, it looks like we have to use the html escape codes `%7B` and `%7D`:
+We have another update regarding Pelican's shorthand for [local links]: `{filename}` and `{static}`.  These are not valid links but we create a configuration file, `.markdown-link-check.json`, and use the `ignorePatterns` option to skip those special cases.  Before we could use the raw `{` and `}` characters.  Now, it looks like we have to use the html escape codes `%7B` and `%7D`:
 
 ```json
 {
@@ -47,8 +47,8 @@ We have another update regarding Pelican's shorthand for [local links]: `{filena
 }
 ```
 
-For backwards compatibility, both characters are in a regex _or_ block.
+For backwards compatibility, both characters are in a regex _or_ (`|`) group.
 
+[local links]: https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content
 [how this blog detects broken links]: {filename}../2020-11-08-link-checker/link-checker.md
 [markdown-link-check]: https://github.com/tcort/markdown-link-check
-[HTTP/s and relative link checker]: https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD
