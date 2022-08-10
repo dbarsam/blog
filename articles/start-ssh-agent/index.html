@@ -112,36 +112,39 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>When you install Git on Windows, the installer will also install the utility script <code>start-ssh-agent.cmd</code>.  That script isn't necessarily required to use Git, but if you fall into a narrow category of users who have a particular workflow, you can get tripped up by one of its unfortunate side effects.</p>
+        <!--
+spell-checker:ignore
+-->
+<p>When you install Git on Windows, the installer will also install the utility script <code>start-ssh-agent.cmd</code>.  That script isn't necessarily required to use Git, but if you fall into a narrow category of users who have a particular workflow, you can get tripped up by one of its unfortunate side effects.</p>
 <h2 id="ssh-not-http">SSH, Not HTTP</h2>
 <p>That workflow starts with command-line Git and 2FA.  2FA is a pretty much the standard security feature for any online service.  Most of the time the 2FA is handled by a web site with a nice UI, but working with it on the Windows command line requires a bit more work.</p>
 <p>Git already provides an authentication layer for connecting to remote repositories.  This is usually a choice between SSH keys or a HTTP username/password prompt.  While SSH is more secure than HTTP, HTTP is easier to understand and requires no set-up.  However, with 2FA enabled, the ease-of-use goes away as 2FA adds an extra handling on top of the HTTP process.  SHH, on the other hand, doesn't required that extra handling as it's already providing the same level of security.  So in the end it's simpler to work with SSH keys -- but SSH security really isn't as easily presentable to the Windows user as it is in Unix system.</p>
 <h2 id="cmd-not-git-bash">CMD, Not Git Bash</h2>
 <p>After selecting SSH, the next part of the workflow is choosing to use SSH with the Windows command line, aka <code>cmd.exe</code>.  The challenge there is that <code>cmd.exe</code> doesn't provide the same functionality that Unix shells do.  Most of the available tutorials that deal Git on Windows will usually use a Git Bash shell because it's bundle with Git and has the same experience as the existing Unix tutorials.</p>
 <p>For example, let's assume that you create a GitHub SSH key using the <a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent">GitHub docs</a> and add it to your <code>.ssh</code> folder.  SSH requires an agent running in the background to handle a persistent connection.  On Bash it's started with the <code>eval `ssh-agent`</code> command.  The <code>ssh-agent</code> function returns a collection of environment variables needed by other processes to use the agent:</p>
-<div class="highlight"><pre><span></span><span class="go">db@PC-5559 MINGW64 ~</span>
-<span class="gp">$ </span>ssh-agent
-<span class="go">SSH_AUTH_SOCK=/tmp/ssh-nubDqpgoGDRA/agent.4548; export SSH_AUTH_SOCK;</span>
-<span class="go">SSH_AGENT_PID=18568; export SSH_AGENT_PID;</span>
-<span class="go">echo Agent pid 18568;</span>
-</pre></div>
+<p><code>console
+db@PC-5559 MINGW64 ~
+$ ssh-agent
+SSH_AUTH_SOCK=/tmp/ssh-nubDqpgoGDRA/agent.4548; export SSH_AUTH_SOCK;
+SSH_AGENT_PID=18568; export SSH_AGENT_PID;
+echo Agent pid 18568;</code></p>
 <p>Wrapping this up with the <code>eval</code> command simply executes that output text as shell script and sets the environment variables.</p>
 <p>There's no equivalent of that in Windows.  Instead, you can use the <code>start-ssh-agent.cmd</code> script, which is usually installed in <code>C:\Program Files\Git\cmd</code> and added to the Window's <code>PATH</code> by the Git installer.  The <code>start-ssh-agent.cmd</code> is a bit more complex but accomplishes the same thing -- except for a little bit of shenanigans at the end of the script.</p>
 <h2 id="windows-explorer-vs-cmdexe">Windows Explorer vs cmd.exe</h2>
 <p>The problem with the script is that it misses the mark when it makes a guess about the user's intention.  The script looks at the <code>%cmdcmdline%</code> environment variable and re-executes the script in a nested call depending on the contents.</p>
-<div class="highlight"><pre><span></span>@ECHO %cmdcmdline% | @FINDSTR /l &quot;\&quot;\&quot;&quot; &gt;NUL
+<p><code>cmd
+@ECHO %cmdcmdline% | @FINDSTR /l "\"\"" &gt;NUL
 @IF NOT ERRORLEVEL 1 @(
     @CALL cmd %*
-)
-</pre></div>
+)</code></p>
 <p>The variable contains the command line arguments used to launch the <code>cmd.exe</code> process.  When the script is launched from the command line, it contains <code>"C:\Windows\system32\cmd.exe"</code>, but when the script is executed from a double click in Windows Explorer, that value is <code>C:\WINDOWS\system32\cmd.exe /c ""C:\Program Files\Git\cmd\start-ssh-agent.cmd" "</code>.  When the <code>start-ssh-cmd.exe</code> sees the <code>""</code> it will launch an interactive child session to keep the command prompt open.</p>
 <p>By itself this isn't really isn't a problem. If the check wasn't there, then the session would naturally terminate as soon as the script ended.  This is useless because any ssh environment variables created would have been local to that short-lived session.</p>
 <h2 id="session-managers">Session Managers</h2>
 <p>The problem comes in the last stage of the workflow, where you're using a customized Windows shell tool, like with <a href="https://cmder.net">cmder</a> or <a href="https://conemu.github.io">ConeEmu</a>.  Both tools provide a way to customize and manage multiple shell sessions, which is useful when you need to juggle shells like <a href="https://docs.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2019">Visual Studio developer shell</a> or <a href="https://docs.anaconda.com/ae-notebooks/user-guide/basic-tasks/apps/use-terminal/">Anaconda</a> in a tab manager.</p>
 <p>If you want to add <code>start-ssh-agent.cmd</code> to one of those shells, you'll need to pay close attention to the tool's start script.  If it contain the same <code>""</code> pattern, it will spawn a new, nested session within the original session as it was launched from Windows Explorer.  It won't be readily apparent, but the quickest way to identify this new symptom is if exiting the shell somehow requires two <code>exit</code> commands.</p>
 <p>The work around (from this <a href="https://github.com/cmderdev/cmder/issues/1807#issuecomment-400504725">post</a>) is to supply the <code>/k exit</code> args to immediately kill the nested session:</p>
-<div class="highlight"><pre><span></span>call &quot;%GIT_INSTALL_ROOT%\cmd\start-ssh-agent.cmd&quot; /k exit
-</pre></div>
+<p><code>cmd
+call "%GIT_INSTALL_ROOT%\cmd\start-ssh-agent.cmd" /k exit</code></p>
 <p>The <code>/k exit</code> will be passed through to the nested session and quick exit it, leaving the original parent session that your session manager is managing.</p>
     </article>
 

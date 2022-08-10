@@ -112,24 +112,28 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>One of the features this blog uses from the <a href="https://facelessuser.github.io/pymdown-extensions">PyMdown Extensions</a> extension is the <a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/">Keys</a> option.  That options enables <code>++</code> as Markdown syntax and converts it to HTML5's <code>&lt;kbd&gt;&lt;/kbd&gt;</code> html.</p>
+        <!--
+spell-checker:ignore
+-->
+<p>One of the features this blog uses from the <a href="https://facelessuser.github.io/pymdown-extensions">PyMdown Extensions</a> extension is the <a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/">Keys</a> option.  That options enables <code>++</code> as Markdown syntax and converts it to HTML5's <code>&lt;kbd&gt;&lt;/kbd&gt;</code> html.</p>
 <p>This means that <code>++ctrl+alt+delete++</code> renders out as <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-alt">Alt</kbd><span>+</span><kbd class="key-delete">Del</kbd></span>.  Better information is available on the official <a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/">help</a>.</p>
 <h2 id="installation">Installation</h2>
 <p>Install the Python package into Pelican's Python environment:</p>
-<div class="highlight"><pre><span></span><span class="go">pip install pymdown-extensions</span>
-</pre></div>
+<p><code>console
+pip install pymdown-extensions</code></p>
 <h2 id="configuration">Configuration</h2>
 <p>Enable it in the <code>pelicanconf.py</code> file, in the <code>MARKDOWN</code> variable:</p>
-<div class="highlight"><pre><span></span><span class="c1"># Extra configuration settings for the Markdown processor.</span>
-<span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="o">....</span>
-        <span class="s1">&#39;pymdownx.keys&#39;</span> <span class="p">:</span> <span class="p">{},</span>
-        <span class="o">....</span>
-    <span class="p">},</span>
-    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
-<span class="p">}</span>
-</pre></div>
+<p>```python</p>
+<h1 id="extra-configuration-settings-for-the-markdown-processor">Extra configuration settings for the Markdown processor.</h1>
+<p>MARKDOWN = {
+    "extension_configs": {
+        ....
+        'pymdownx.keys' : {},
+        ....
+    },
+    'output_format': 'html5'
+}
+```</p>
     </article>
 
         <div class="tags">

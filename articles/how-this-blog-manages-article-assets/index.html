@@ -122,62 +122,57 @@ spell-checker:ignore autostatic alexandre fonseca's pelly pdfs pelicanconf stati
 <p>If you're used to writing Markdown in VSCode (or any other tool that immediately renders Markdown) this may be a bit jarring. Everything could very well appear to work in the editor only to mysteriously break in the final website update.</p>
 <h2 id="global-assets">Global Assets</h2>
 <p>Out of the box, Pelican works with the following example structure:</p>
-<div class="highlight"><pre><span></span><span class="go">project/</span>
-<span class="go">├── content</span>
-<span class="go">│   ├── articles/</span>
-<span class="go">│   │   ├── article1.md</span>
-<span class="go">│   │   └── article2.md</span>
-<span class="go">│   ├── images/</span>
-<span class="go">│   │   └── pelly.png</span>
-<span class="go">│   ├── pdfs/</span>
-<span class="go">│   │   └── pelly.pdf</span>
-<span class="go">│   └── pages/</span>
-<span class="go">│       └── test.md</span>
-<span class="go">└── pelican.conf.py</span>
-</pre></div>
+<p><code>console
+project/
+├── content
+│   ├── articles/
+│   │   ├── article1.md
+│   │   └── article2.md
+│   ├── images/
+│   │   └── pelly.png
+│   ├── pdfs/
+│   │   └── pelly.pdf
+│   └── pages/
+│       └── test.md
+└── pelican.conf.py</code></p>
 <p>The <code>articles</code> and <code>pages</code> are both separate types of content and have their own distinct discovery options, the respective <code>ARTICLE_PATH</code> and <code>PAGES_PATH</code> settings.  However, the <code>images</code> and <code>pdf</code> are static files and are discovered by the <code>STATIC_PATHS</code> setting.  These are all documented in the <a href="https://docs.getpelican.com/en/latest/settings.html#url-settings">url settings</a> section of the Pelican options page.</p>
 <p>The thing to not here is that both the image and pdf files in that structure are separated from their respective articles.  This makes sense if these assets are meant to be accessible from multiple articles and/or pages in the website.  However, if those assets are article specific, then this layout does not make sense.  As more articles are added to this structure it will be harder to track which asset is referred to by which source.</p>
 <h2 id="article-specific-assets">Article Specific Assets</h2>
 <p>To make things more modular, we keep the assets specific to the article along side the article.  In our above example, this would transform <code>article1</code> from a file into a folder containing the image, the pdf, and the respective article:</p>
-<div class="highlight"><pre><span></span><span class="go">project/</span>
-<span class="go">├── content</span>
-<span class="go">│   ├── articles/</span>
-<span class="go">│   │   ├── article1/</span>
-<span class="go">│   │   │   ├── images/</span>
-<span class="go">│   │   │   │   └── pelly.png</span>
-<span class="go">│   │   │   ├── pdfs/</span>
-<span class="go">│   │   │   │   └── pelly.pdf</span>
-<span class="go">│   │   │   └── article.md</span>
-<span class="go">│   │   └── article2.md</span>
-<span class="go">│   └── pages/</span>
-<span class="go">│       └── test.md</span>
-<span class="go">└── pelican.conf.py</span>
-</pre></div>
+<p><code>console
+project/
+├── content
+│   ├── articles/
+│   │   ├── article1/
+│   │   │   ├── images/
+│   │   │   │   └── pelly.png
+│   │   │   ├── pdfs/
+│   │   │   │   └── pelly.pdf
+│   │   │   └── article.md
+│   │   └── article2.md
+│   └── pages/
+│       └── test.md
+└── pelican.conf.py</code></p>
 <p>To make this work, we first configure Pelican to generate slug folders instead of individual pages.  We do this easily enough with the following settings into our <code>pelicanconf.py</code> file:</p>
-<div class="highlight"><pre><span></span><span class="n">ARTICLE_PATHS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;articles&#39;</span>
-<span class="p">]</span>
-<span class="n">ARTICLE_URL</span> <span class="o">=</span> <span class="s1">&#39;articles/</span><span class="si">{slug}</span><span class="s1">/&#39;</span>
-<span class="n">ARTICLE_SAVE_AS</span> <span class="o">=</span> <span class="s1">&#39;articles/</span><span class="si">{slug}</span><span class="s1">/index.html&#39;</span>
-</pre></div>
+<p><code>python
+ARTICLE_PATHS = [
+    'articles'
+]
+ARTICLE_URL = 'articles/{slug}/'
+ARTICLE_SAVE_AS = 'articles/{slug}/index.html'</code></p>
 <p>The above settings configure Pelican to discover files in the <code>articles</code> folder, save them as <code>index.html</code> files in the pages's <code>slug</code> folder, and update the url to the cleaner folder style.  The <code>slug</code> value comes from the article's slug <a href="https://docs.getpelican.com/en/latest/content.html#file-metadata">metadata field</a>, which we set at the top of each article.</p>
 <p>The next part is to configure Pelican to move the assets to a relative folder inside the slug folder instead of the global folder.  This is done by <a href="https://docs.getpelican.com/en/latest/content.html#attaching-static-files">attaching</a> the files to the article with the <code>{attach}</code> keyword inside our <code>article1\article.md</code> file:</p>
 <div class="tabbed-set" data-tabs="1:2"><input checked id="__tabbed_1_1" name="__tabbed_1" type="radio"><label for="__tabbed_1_1">Markdown</label><div class="tabbed-content">
-<div class="highlight"><pre><span></span>---
-Title: Test Article
+<h2 id="markdown">```markdown</h2>
+<p>Title: Test Article
 Category: test
 Date: 2014-10-31
-<span class="gu">Slug: article1</span>
-<span class="gu">---</span>
-
-This is an image:
-
-![<span class="nt">pelly.png</span>](<span class="na">{attach}images/pelly.png</span>)
-
-This is a link to a [pdf] files.
-
-[<span class="nl">pdf</span>]: <span class="na">{attach}pdfs/pelly.pdf</span>
-</pre></div>
+Slug: article1</p>
+<hr>
+<p>This is an image:</p>
+<p><img alt="pelly.png" src="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/images/pelly.png"></p>
+<p>This is a link to a <a href="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/pdfs/pelly.pdf">pdf</a> files.</p>
+<p>```</p>
 </div>
 <input id="__tabbed_1_2" name="__tabbed_1" type="radio"><label for="__tabbed_1_2">Result</label><div class="tabbed-content">
 <p>This is an image:</p>
@@ -192,24 +187,19 @@ This is a link to a [pdf] files.
 <p>There's more info in the project's readme, but one nice feature is it ability to read the tag from anywhere in the article -- including the metadata section.  That allows us to lump all of the assets into a single place and removes any non-markdown tag from the actual article.</p>
 <p>Consider our example from above where we used the <code>{attach}</code> tag in the links to the png and pdf files.  With <code>autostatic</code> we can restore those links to <em>pure</em> markdown links and register all local assets in the metadata:</p>
 <div class="tabbed-set" data-tabs="2:2"><input checked id="__tabbed_2_1" name="__tabbed_2" type="radio"><label for="__tabbed_2_1">Markdown</label><div class="tabbed-content">
-<div class="highlight"><pre><span></span>---
-Title: Test Article
+<h2 id="markdown_1">```markdown</h2>
+<p>Title: Test Article
 Category: test
 Date: 2014-10-31
 Slug: article1
 Attachments:
-    <span class="k">-</span> &#39;{static images/pelly3.png}&#39;
-<span class="gu">    - &#39;{static pdfs/pelly3.pdf}&#39;</span>
-<span class="gu">---</span>
-
-This is an image:
-
-![<span class="nt">pelly2.png</span>](<span class="na">images/pelly2.png</span>)
-
-This is a link to a [another pdf] files.
-
-[<span class="nl">another pdf</span>]: <span class="na">pdfs/pelly2.pdf</span>
-</pre></div>
+    - '{static images/pelly3.png}'
+    - '{static pdfs/pelly3.pdf}'</p>
+<hr>
+<p>This is an image:</p>
+<p><img alt="pelly2.png" src="images/pelly2.png"></p>
+<p>This is a link to a <a href="pdfs/pelly2.pdf">another pdf</a> files.</p>
+<p>```</p>
 </div>
 <input id="__tabbed_2_2" name="__tabbed_2" type="radio"><label for="__tabbed_2_2">Result</label><div class="tabbed-content">
 <p>This is an image:</p>
@@ -231,12 +221,14 @@ This is a link to a [another pdf] files.
 <li>
 <p>The plugin is a little too greedy with processing the various <code>{static}</code> tags in the file.  Out of the box, the plugin  will process everything, including any references in code samples -- even through it should be ignored because the content is rendered in a <code>&lt;code&gt;</code> html block.</p>
 <p>To work around that, this site changes the plugin's  <code>AUTOSTATIC_REFERENCE_PATTERN</code> setting to explicitly use the metadata's single line usage of <code>- '{static ...}'</code>.  We do this by changing the regex pattern in the <code>pelicanconf.py</code>:</p>
-<div class="highlight"><pre><span></span><span class="n">AUTOSTATIC_REFERENCE_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;^- &#39;{static(?:\s+|\|)((?:&quot;|&#39;)?)(?P&lt;path&gt;[^\1=]+?)\1(?:(?:\s+|\|)(?P&lt;extra&gt;.*))?\s*}&#39;$&quot;&quot;&quot;</span>
-</pre></div>
+<p><code>python
+AUTOSTATIC_REFERENCE_PATTERN = r"""^- '{static(?:\s+|\|)((?:"|')?)(?P&lt;path&gt;[^\1=]+?)\1(?:(?:\s+|\|)(?P&lt;extra&gt;.*))?\s*}'$"""</code></p>
 <p>This works because the plugin processes the rendered html as a single block of text and processes each value in the metadata list as single lines that starts with a <code>-</code> and ends with the <code>}</code>.</p>
 </li>
 </ul>
 <p>After a little bit of configuration, the <code>autostatic</code> plugin does a pretty good job of solving our problem.  Not only does the plugin allow us to use article assets in a more relative way, but it also gives us the ability to link all assets as attachments via the metadata section.  Wether intentional or not, this not only make asset management more modular, but also promotes a similar workflow pattern used by other CMS platforms.</p>
+<!-- Disable MD053 below because the linter reports this as invalid -- but it's unclear how the is invalid. -->
+<!-- markdownlint-disable-next-line MD053 -->
     </article>
 
         <div class="tags">

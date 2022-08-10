@@ -112,22 +112,32 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>Every couple of months we'll get a report of some Python tool magically failing with a mysterious -- and unhelpful -- <code>DLL load failed</code> error message.  The error is unfortunately too generic to be helpful, but if the Python tool is a PySide application, then there might be a workaround to solve this problem.</p>
+        <!--
+spell-checker:ignore
+-->
+<p>Every couple of months we'll get a report of some Python tool magically failing with a mysterious -- and unhelpful -- <code>DLL load failed</code> error message.  The error is unfortunately too generic to be helpful, but if the Python tool is a PySide application, then there might be a workaround to solve this problem.</p>
 <h2 id="wrong-dlls">Wrong DLLs</h2>
 <p>It's easy to validate the problem right away with a simple import from the prompt:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">PySide2</span> <span class="kn">import</span> <span class="n">QtXml</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;console&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-<span class="ne">ImportError</span><span class="p">:</span> <span class="n">DLL</span> <span class="n">load</span> <span class="n">failed</span><span class="p">:</span> <span class="n">The</span> <span class="n">specified</span> <span class="n">module</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">found</span><span class="o">.</span>
-</pre></div>
+<p>```python</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>from PySide2 import QtXml
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+ImportError: DLL load failed: The specified module could not be found.
+```</p>
+</blockquote>
+</blockquote>
+</blockquote>
 <p>The <code>QtXml</code> is just an example module from the <code>PySide2</code> package, but the above code should work out of the box.  The fact that PySide is failing to load a Qt DLL hints to a common problem with how applications are packaging their Qt DLLs.</p>
 <p>Qt is a 3<sup>rd</sup> party UI framework and those DLLs are not unique to the application.  If another Qt-using application is installed on the same machine, then what most likely is happening with that failure is that your Qt application is finding the PySide package correctly, but PySide is somehow loading the Qt dlls from the other application instead of its own copies.</p>
 <h2 id="hack-the-windows-dll-search-order">Hack the Windows DLL Search Order</h2>
 <p>Instead of going into a deep dive about the <a href="https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order">Windows DLL Search Order</a>, the easiest workaround is to hack it so that your application's Qt DLL are given the highest priority. One way to do that is to adding the application's folder for Qt DLLs to the front of the <code>PATH</code> environment variable  You can do this in a permanent or temporary way with a script <code>launcher.cmd</code>:</p>
-<div class="highlight"><pre><span></span>setlocal
-set &quot;PATH=C:\Program Files\My Application\bin;%PATH%&quot;
-C:\Program Files\My Application\bin\application.exe
-</pre></div>
+<p><code>cmd
+setlocal
+set "PATH=C:\Program Files\My Application\bin;%PATH%"
+C:\Program Files\My Application\bin\application.exe</code></p>
 <p>Given that we're working around a conflicts between two (or more) applications, we don't have access to fix it properly.  Instead, it's probably easier to solve this with a launcher script and keep the change local to application.</p>
     </article>
 

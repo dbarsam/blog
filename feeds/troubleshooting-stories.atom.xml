@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - troubleshooting stories</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/troubleshooting-stories.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2020-10-29T11:27:00-04:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>Qt DLLs in the Windows PATH</title><link href="https://dbarsam.github.io/blog/articles/qt-dll-mismatch/" rel="alternate"></link><published>2020-10-29T11:27:00-04:00</published><updated>2020-10-29T11:27:00-04:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-10-29:/blog/articles/qt-dll-mismatch/</id><summary type="html">&lt;p&gt;How to recognize a particular PySide's DLL load failure error in Windows.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Every couple of months we'll get a report of some Python tool magically failing with a mysterious -- and unhelpful -- &lt;code&gt;DLL load failed&lt;/code&gt; error message.  The error is unfortunately too generic to be helpful, but if the Python tool is a PySide application, then there might be a workaround to solve this problem.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - troubleshooting stories</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/troubleshooting-stories.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2020-10-29T11:27:00-04:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>Qt DLLs in the Windows PATH</title><link href="https://dbarsam.github.io/blog/articles/qt-dll-mismatch/" rel="alternate"></link><published>2020-10-29T11:27:00-04:00</published><updated>2020-10-29T11:27:00-04:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-10-29:/blog/articles/qt-dll-mismatch/</id><summary type="html">&lt;p&gt;How to recognize a particular PySide's DLL load failure error in Windows.&lt;/p&gt;</summary><content type="html">&lt;!--
+spell-checker:ignore
+--&gt;
+&lt;p&gt;Every couple of months we'll get a report of some Python tool magically failing with a mysterious -- and unhelpful -- &lt;code&gt;DLL load failed&lt;/code&gt; error message.  The error is unfortunately too generic to be helpful, but if the Python tool is a PySide application, then there might be a workaround to solve this problem.&lt;/p&gt;
 &lt;h2 id="wrong-dlls"&gt;Wrong DLLs&lt;/h2&gt;
 &lt;p&gt;It's easy to validate the problem right away with a simple import from the prompt:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;PySide2&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;QtXml&lt;/span&gt;
-&lt;span class="n"&gt;Traceback&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;most&lt;/span&gt; &lt;span class="n"&gt;recent&lt;/span&gt; &lt;span class="n"&gt;call&lt;/span&gt; &lt;span class="n"&gt;last&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-  &lt;span class="n"&gt;File&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;lt;console&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;module&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
-&lt;span class="ne"&gt;ImportError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;DLL&lt;/span&gt; &lt;span class="n"&gt;load&lt;/span&gt; &lt;span class="n"&gt;failed&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;The&lt;/span&gt; &lt;span class="n"&gt;specified&lt;/span&gt; &lt;span class="n"&gt;module&lt;/span&gt; &lt;span class="n"&gt;could&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;be&lt;/span&gt; &lt;span class="n"&gt;found&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;```python&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;from PySide2 import QtXml
+Traceback (most recent call last):
+  File "&lt;console&gt;", line 1, in &lt;module&gt;
+ImportError: DLL load failed: The specified module could not be found.
+```&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;The &lt;code&gt;QtXml&lt;/code&gt; is just an example module from the &lt;code&gt;PySide2&lt;/code&gt; package, but the above code should work out of the box.  The fact that PySide is failing to load a Qt DLL hints to a common problem with how applications are packaging their Qt DLLs.&lt;/p&gt;
 &lt;p&gt;Qt is a 3&lt;sup&gt;rd&lt;/sup&gt; party UI framework and those DLLs are not unique to the application.  If another Qt-using application is installed on the same machine, then what most likely is happening with that failure is that your Qt application is finding the PySide package correctly, but PySide is somehow loading the Qt dlls from the other application instead of its own copies.&lt;/p&gt;
 &lt;h2 id="hack-the-windows-dll-search-order"&gt;Hack the Windows DLL Search Order&lt;/h2&gt;
 &lt;p&gt;Instead of going into a deep dive about the &lt;a href="https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order"&gt;Windows DLL Search Order&lt;/a&gt;, the easiest workaround is to hack it so that your application's Qt DLL are given the highest priority. One way to do that is to adding the application's folder for Qt DLLs to the front of the &lt;code&gt;PATH&lt;/code&gt; environment variable  You can do this in a permanent or temporary way with a script &lt;code&gt;launcher.cmd&lt;/code&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;setlocal
-set &amp;quot;PATH=C:\Program Files\My Application\bin;%PATH%&amp;quot;
-C:\Program Files\My Application\bin\application.exe
-&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;cmd
+setlocal
+set "PATH=C:\Program Files\My Application\bin;%PATH%"
+C:\Program Files\My Application\bin\application.exe&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Given that we're working around a conflicts between two (or more) applications, we don't have access to fix it properly.  Instead, it's probably easier to solve this with a launcher script and keep the change local to application.&lt;/p&gt;</content><category term="troubleshooting stories"></category><category term="python"></category><category term="qt"></category><category term="dll"></category></entry></feed>

@@ -110,18 +110,22 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>VSCode has a nice preview engine that allows a side-by-side of text and rendered-text. The feature is best documented in VSCode's native <a href="https://code.visualstudio.com/Docs/languages/markdown">Markdown</a> support help, but it's available for other languages and their plugins.</p>
+        <!--
+spell-checker:ignore
+-->
+<p>VSCode has a nice preview engine that allows a side-by-side of text and rendered-text. The feature is best documented in VSCode's native <a href="https://code.visualstudio.com/Docs/languages/markdown">Markdown</a> support help, but it's available for other languages and their plugins.</p>
 <p>Within that help page is the section on <a href="https://code.visualstudio.com/Docs/languages/markdown#_editor-and-preview-synchronization">Editor and Preview Synchronization</a>.  This is a nice feature but suffers from a locked up, sync-cycle battle between the editor pane and preview pane that leaves the user frustrated and fighting for control of the editor.</p>
 <p>The fun starts when there's a big discrepancy between the screen space  taken by the text editor's monospace text and the previewer's html-looking rendered text.  There are various ways to make this happen, but the one way that seems to be consistent, is to enable the preview and word wrapping at the same time.</p>
 <p>When both options are enabled, the synchronization seems to struggle with the concept of word wrap; after the cursor goes 'below the fold' of the bottom terminal panels, the sync (for some reason) decides to scroll the editor back to top of the file.  But because you're in the middle of typing, the editor then immediately jumps back down to bottom, where the cursor is.  Of course, the synchronization is still active, so the editor jumps back up to the top and the cycle repeats for every keyboard click.</p>
 <p><img alt="vscode-editor-preview-sync.gif" class="center-image" src="images/vscode-example.gif"></p>
 <p>This is seems like the same issue described in Visual Code issues #<a href="https://github.com/microsoft/vscode/issues/108582">108582</a>, but the comments suggest that people are still suffering from it.  Until it's properly fixed, the best answer is to disable that feature by setting the <code>markdown.preview.scrollEditorWithPreview</code> setting to <code>false</code>:</p>
-<div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="err">....</span>
-    <span class="nt">&quot;markdown.preview.scrollEditorWithPreview&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-    <span class="err">....</span>
-<span class="p">}</span>
-</pre></div>
+<p>```json
+{
+    ....
+    "markdown.preview.scrollEditorWithPreview": false,
+    ....
+}</p>
+<p>```</p>
     </article>
 
         <div class="tags">

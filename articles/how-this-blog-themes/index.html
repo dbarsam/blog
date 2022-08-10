@@ -114,40 +114,43 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p><a href="http://docs.getpelican.com">Pelican</a> is the tool that makes this static website from the markdown files in the repository.  But, while it has the power to theme the website out of the box, it's not that clear exactly how that is supposed to work.</p>
+        <!--
+spell-checker:ignore
+-->
+<p><a href="http://docs.getpelican.com">Pelican</a> is the tool that makes this static website from the markdown files in the repository.  But, while it has the power to theme the website out of the box, it's not that clear exactly how that is supposed to work.</p>
 <h2 id="getting-the-theme">Getting the Theme</h2>
 <p>Pelican themes are packaged as a raw bundle of files, but if you're used to CI workflows this concept is rather challenging.  Instead of installing a theme through the Python package managed <code>pip</code>, Pelican expects the files to be available somewhere on disk first and accesses them at run-time, either via a copy or symlink done with the Pelican utility <a href="https://docs.getpelican.com/en/stable/pelican-themes.html">pelican-themes</a>.</p>
 <p>Up to this point in the blog set-up, we've been installing Pelican and its components as Python packages pinned at specific versions -- and pinning dependencies is such a basic requirement of pipeline automation that not having it feels like something is missing.  While some developers have made their theme available as packages (e.g. <a href="https://pypi.org/project/plumage/">Plumage</a>) most themes are collected as submodules of files in the <a href="https://github.com/getpelican/pelican-themes">Pelican Themes GitHub Project</a>.</p>
 <h2 id="embedding-the-theme">Embedding the Theme</h2>
 <p>There's different strategies to 'embedding' a theme.  This project has added it to the repo as a git submodule.  A git submodule is a git-specific way to embed one repo into another repo at a specific commit.  So instead of specifying a released version of the theme, the git submodule points to a specific code change in the repository.</p>
-<p>Using the <a href="https://github.com/gilsondev/pelican-clean-blog">pelican-clean-blog</a> as an example, we first add the submodule through git:</p>
-<div class="highlight"><pre><span></span><span class="go">git submodule add https://github.com/gilsondev/pelican-clean-blog pelican/themes/pelican-clean-blog</span>
-</pre></div>
+<p>Using the [pelican-clean-blog] as an example, we first add the submodule through git:</p>
+<p><code>console
+git submodule add https://github.com/gilsondev/pelican-clean-blog pelican/themes/pelican-clean-blog</code></p>
 <p>If you're working on window you'll need to watch out for file paths with slashes.  If you have any error that's like this,</p>
-<div class="highlight"><pre><span></span><span class="go">fatal: No url found for submodule path &#39;pelican/themes/pelican-clean-blog&#39; in .gitmodules</span>
-</pre></div>
+<p><code>console
+fatal: No url found for submodule path 'pelican/themes/pelican-clean-blog' in .gitmodules</code></p>
 <p>Change the slashes from the escaped window slashes <code>pelican\\themes\\pelican-clean-blog</code> to the unix slashes <code>pelican/themes/pelican-clean-blog</code>.</p>
 <h2 id="enabling-the-theme">Enabling the Theme</h2>
 <p>After the files are on disk Pelican expects the theme to be enabled in the <code>pelicanconf.py</code> file.  First you set the theme's relative path with the <code>THEME</code> variable and then set any other auxillary theme setting with more variables:</p>
-<div class="highlight"><pre><span></span><span class="c1"># ####################################</span>
-<span class="c1"># The Theme</span>
-<span class="c1"># ####################################</span>
-<span class="n">THEME</span> <span class="o">=</span> <span class="s1">&#39;pelican/themes.pelican-clean-blog&#39;</span>
-
-<span class="c1"># ####################################</span>
-<span class="c1"># The Theme Specific Settings</span>
-<span class="c1"># ####################################</span>
-<span class="n">HEADER_COVER</span> <span class="o">=</span> <span class="s1">&#39;images/home-bg.png&#39;</span>
-<span class="n">HEADER_COLOR</span> <span class="o">=</span> <span class="s1">&#39;#004a59&#39;</span>
-<span class="n">COLOR_SCHEME_CSS</span> <span class="o">=</span> <span class="s1">&#39;tomorrow_night.css&#39;</span>
-<span class="n">EXTRA_PATH_METADATA</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;extra/favicon.ico&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="s1">&#39;favicon.ico&#39;</span><span class="p">}</span>
-<span class="p">}</span>
-<span class="n">CSS_OVERRIDE</span> <span class="o">=</span> <span class="s1">&#39;extra/css/custom.css&#39;</span>
-</pre></div>
+<p>```python</p>
+<h1 id="_1"></h1>
+<h1 id="the-theme">The Theme</h1>
+<h1 id="_2"></h1>
+<p>THEME = 'pelican/themes.pelican-clean-blog'</p>
+<h1 id="_3"></h1>
+<h1 id="the-theme-specific-settings">The Theme Specific Settings</h1>
+<h1 id="_4"></h1>
+<p>HEADER_COVER = 'images/home-bg.png'
+HEADER_COLOR = '#004a59'
+COLOR_SCHEME_CSS = 'tomorrow_night.css'
+EXTRA_PATH_METADATA = {
+    'extra/favicon.ico': {'path': 'favicon.ico'}
+}
+CSS_OVERRIDE = 'extra/css/custom.css'
+```</p>
 <p>This should now be visible if the build or run the live local server:</p>
-<div class="highlight"><pre><span></span><span class="go">python -m pelican --autoreload --listen</span>
-</pre></div>
+<p><code>console
+python -m pelican --autoreload --listen</code></p>
 <h2 id="theme-as-submodule">Theme as Submodule</h2>
 <p>Like a rug, a good theme really ties the whole website together.  So I appreciate the work that goes into making one; however, the one point I can't get over is use of copying and pasting files to install the theme.  While using submodules to embed the theme is a good step towards being modular, it feels dated and the wrong tool -- especially when we're already using Python packages.   Hopefully, this is just a transition.  It looks like Pelican 4.0 did start to push for better extension organization, but the current focus is on <a href="https://github.com/pelican-plugins">Pelican Plugins</a>.  Most of development for the themes in the <a href="https://github.com/getpelican/pelican-themes">Pelican Themes GitHub Project</a> appears to be stagnant, and only a few talk about supporting Pelican 4.0, and of those even fewer publish their themes as Python package.</p>
     </article>

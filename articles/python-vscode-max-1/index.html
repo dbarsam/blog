@@ -112,7 +112,10 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
     <!-- Post Content -->
     <article>
-        <p>In the <a href="{filename}../2020-11-30-python-vscode-and-max/note.md">previous article</a>, we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the Python part and talk about set up a <em>side-car</em> environment for the external application.</p>
+        <!--
+spell-checker:ignore
+-->
+<p>In the <a href="{filename}../2020-11-30-python-vscode-and-max/note.md">previous article</a>, we layed out the overall structure of the workflow.  In this article, we'll take a deep dive into the Python part and talk about set up a <em>side-car</em> environment for the external application.</p>
 <h2 id="side-car-environments">'Side Car' Environments</h2>
 <p>While Python-enabled applications usually have some sort of Python scripting support, Python developers looking to deploy their scripts as Python packages -- or create Python scripts that use 3<sup>rd</sup> party Python packages from a <a href="https://pypi.org/">PyPI</a> -- should consider setting up an external Python environment.</p>
 <p>This external Python environment will be completely separate from the application.  Its only role is to be the installation location for all of the Python packages we need to support our plugin, which will also be wrapped up as a Python package.  Also, this environment does nothing different and uses all of the established conventions used by the Python community.</p>
@@ -157,11 +160,11 @@
 <p>So this article is using the shared features of both the <code>venv</code>/<code>virtualenv</code> modules but we've selected <code>virtualenv</code> for its finer grain of control over the virtual environment process.</p>
 <h2 id="creating-virtual-environments">Creating Virtual Environments</h2>
 <p>For this tutorial, we're assuming that you are able to execute <code>virtualenv</code> from a vanilla Python environment that matches the Python environment in your applications.  Creating an environment from the command line should be as simple as:</p>
-<div class="highlight"><pre><span></span>python.exe -m virtualenv env27
-</pre></div>
+<p><code>batch
+python.exe -m virtualenv env27</code></p>
 <p>But because we're on creating this as a side car environment on Windows, we can fine-tune the installation to install it within our project folder:</p>
-<div class="highlight"><pre><span></span>python.exe -m virtualenv D:\project\.env27 --no-download --no-periodic-update --activators batch,python
-</pre></div>
+<p><code>batch
+python.exe -m virtualenv D:\project\.env27 --no-download --no-periodic-update --activators batch,python</code></p>
 <p>We're doing a few things here:</p>
 <ol>
 <li>
@@ -181,10 +184,10 @@
 <p>The batch activator allows us to activate the environment from the <code>cmd</code> shell which will be the shell of our choice.  If you have a different shell preference, like <code>powershell</code>, then select that instead of <code>batch</code>.  The shell activator doesn't really matter as we're more interested in the <code>python</code> activator.  That's the mechanism that will make this virtual environment a 3ds max side car environment.</p>
 <h2 id="editable-installs">Editable installs</h2>
 <p>After the virtual environment is created, we now make the first connection in our development puzzle.  Fortunately, this is fairly straight forward and we'll use the standard module <code>pip</code> <a href="https://pip.pypa.io/en/stable/cli/pip_install/#local-project-installs">editable install</a> to install the Python package in the side-car environment:</p>
-<div class="highlight"><pre><span></span>$ D:\project\.env27\script\activate.bat
-<span class="p">(</span>.env27<span class="p">)</span> $ python -m pip install -r D:\project\requirements.txt
-<span class="p">(</span>.env27<span class="p">)</span> $ python -m pip install -e D:\project
-</pre></div>
+<p><code>batch
+$ D:\project\.env27\script\activate.bat
+(.env27) $ python -m pip install -r D:\project\requirements.txt
+(.env27) $ python -m pip install -e D:\project</code></p>
 <p>We're doing three things here:</p>
 <ol>
 <li>
