@@ -179,5 +179,7 @@ After a little bit of configuration, the `autostatic` plugin does a pretty good 
 [url settings]: https://docs.getpelican.com/en/latest/settings.html#url-settings
 [metadata field]: https://docs.getpelican.com/en/latest/content.html#file-metadata
 [attaching]: https://docs.getpelican.com/en/latest/content.html#attaching-static-files
-[autostatic plugin]: https://github.com/AlexJF/pelican-autostatic
 [existing metadata]: https://docs.getpelican.com/en/stable/content.html#file-metadata
+<!-- Disable MD053 below because the linter reports this as invalid -- but it's unclear how the is invalid. -->
+<!-- markdownlint-disable-next-line MD053 -->
+[autostatic plugin]: https://github.com/AlexJF/pelican-autostatic
