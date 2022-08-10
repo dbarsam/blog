@@ -82,7 +82,7 @@ The vanilla version of our content consists of a simple image and paragraph:
 
 This is a logo.
 
-[pelican-logo]: https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png
+[pelican-logo]: https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png
 ```
 
 And that renders out as this:
@@ -90,8 +90,6 @@ And that renders out as this:
 ![pelican-logo]
 
 This is a logo.
-
-[pelican-logo]: https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png
 
 ### Centered Attributes
 
@@ -103,7 +101,7 @@ We now update the content with our image and text attributes:
 This is a logo.
 {: .center-text}
 
-[pelican-logo]: https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png
+[pelican-logo]: https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png
 ```
 
 Note: The `{: .center-text}` attribute goes at the end of the element because the text paragraph is a *block level element*.  More information is available from the official [Python-Markdown help].
@@ -116,7 +114,7 @@ This is a logo.
 {: .center-text}
 
 [how do i center an image in markdown]: https://stackoverflow.com/questions/3912694/using-markdown-how-do-i-center-an-image-and-its-caption
-[pelican-logo]: https://github.com/getpelican/pelican-blog/raw/master/content/logo/pelican-logo-small.png
+[pelican-logo]: https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png
 [python-markdown help]: https://python-markdown.github.io/extensions/attr_list/#block-level
 [extra]: https://python-markdown.github.io/extensions/extra/
 [attr_list]: https://python-markdown.github.io/extensions/attr_list
