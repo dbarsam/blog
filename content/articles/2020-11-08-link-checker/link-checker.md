@@ -10,11 +10,14 @@ status: published
 categories: about the blog
 category: about the blog
 type: article
+modified: 2021-02-01 20:01
 ---
 <!--
 spell-checker:ignore
 -->
-This blog use VSCode's [HTTP/s and relative link checker] extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++Alt+L++.
+*Note: There is a [follow-up article] updating some outdated information regarding `markdown-link-check`.*
+
+This blog use VSCode's [HTTP/s and relative link checker] extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++alt+l++.
 
 The blog's pipeline is slightly different and our best option is the [markdown-link-check] npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.
 
@@ -51,7 +54,7 @@ The extra bit of magic here is that we check the result of `markdown-link-check`
 
 ## Ignore Rules
 
-We have another problem handling Pelican's shorthand for [local links]: `{filename}` and `{static}`.  These are not valid links but we create a configuration file (`.markdown-link-check.json`) and use the `ignorePatterns` option to skip those special cases:
+We have another problem handling Pelican's shorthand for [local links]: `{filename}` and `{static}`.  These are not valid links but we create a configuration file, `.markdown-link-check.json`, and use the `ignorePatterns` option to skip those special cases:
 
 ```json
 {
@@ -85,3 +88,4 @@ We can combine the the batch operation and the configuration into a final comman
 [local links]: https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content
 [markdown-link-check]: https://github.com/tcort/markdown-link-check
 [HTTP/s and relative link checker]: https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD
+[follow-up article]: {filename}../2021-02-01-link-checker-i/link-checker.md
