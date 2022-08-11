@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-01-22T19:13:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>How this blog manages article assets</title><link href="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/" rel="alternate"></link><published>2021-01-22T19:13:00-05:00</published><updated>2021-01-22T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-01-22:/blog/articles/how-this-blog-manages-article-assets/</id><summary type="html">&lt;p&gt;How to use Autostatic to re-organize Pelican's default article structure to be more article specific.&lt;/p&gt;</summary><content type="html">&lt;!--
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-02-01T20:01:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>How this blog detects broken links - update</title><link href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links-i/" rel="alternate"></link><published>2021-02-01T19:25:00-05:00</published><updated>2021-02-01T19:25:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-02-01:/blog/articles/how-this-blog-detects-broken-links-i/</id><summary type="html">&lt;p&gt;An update to validating local and internet links in markdown files.&lt;/p&gt;</summary><content type="html">&lt;!--
+spell-checker:ignore
+--&gt;
+&lt;p&gt;This article is a follow-up to &lt;a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links/"&gt;how this blog detects broken links&lt;/a&gt;, describing updated ways to use the &lt;a href="https://github.com/tcort/markdown-link-check"&gt;markdown-link-check&lt;/a&gt; npm package.&lt;/p&gt;
+&lt;h2 id="batch-operation"&gt;Batch Operation&lt;/h2&gt;
+&lt;p&gt;The previous article used a &lt;code&gt;for&lt;/code&gt; loop and an shortcut or-operator (&lt;code&gt;||&lt;/code&gt;) with an &lt;code&gt;exit&lt;/code&gt; command.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;bash
+for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$file" || exit 1; done;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;That &lt;code&gt;exit&lt;/code&gt; command turned out to exit the shell in some cases and this was not desirable on some machines.  Instead, we switched to &lt;code&gt;xargs&lt;/code&gt; and enforce single parameters with &lt;code&gt;--max-lines&lt;/code&gt; argument:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;bash
+find content -name \*.md -print0 | xargs --null --max-lines=1 markdown-link-check --config .markdown-link-check.json --verbose&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Using &lt;code&gt;xargs&lt;/code&gt; introduces some new changes.  At first &lt;code&gt;xargs&lt;/code&gt; passed all arguments to &lt;code&gt;markdown-link-check&lt;/code&gt;, but the additional flag executes it once per file.  Second, &lt;code&gt;xargs&lt;/code&gt; will return back exit code 123 if any of invocations returns back a non-zero value, which is fine in the ci pipeline.  And lastly, &lt;code&gt;xargs&lt;/code&gt; processes all arguments, regardless if one invocation fails.  This is desirable in our case because we need to check all links and not quit at the first failure.&lt;/p&gt;
+&lt;h2 id="ignore-rules"&gt;Ignore Rules&lt;/h2&gt;
+&lt;p&gt;We have another update regarding Pelican's shorthand for &lt;a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content"&gt;local links&lt;/a&gt;: &lt;code&gt;{filename}&lt;/code&gt; and &lt;code&gt;{static}&lt;/code&gt;.  These are not valid links but we create a configuration file, &lt;code&gt;.markdown-link-check.json&lt;/code&gt;, and use the &lt;code&gt;ignorePatterns&lt;/code&gt; option to skip those special cases.  Before we could use the raw &lt;code&gt;{&lt;/code&gt; and &lt;code&gt;}&lt;/code&gt; characters.  Now, it looks like we have to use the html escape codes &lt;code&gt;%7B&lt;/code&gt; and &lt;code&gt;%7D&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;json
+{
+    "ignorePatterns": [
+        {
+            "pattern": "^({|%7B)filename(}|%7D)"
+        },
+        ....
+    ]
+}&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;For backwards compatibility, both characters are in a regex &lt;em&gt;or&lt;/em&gt; (&lt;code&gt;|&lt;/code&gt;) group.&lt;/p&gt;</content><category term="about the blog"></category><category term="markdown"></category><category term="travis"></category><category term="bash"></category></entry><entry><title>How this blog manages article assets</title><link href="https://dbarsam.github.io/blog/articles/how-this-blog-manages-article-assets/" rel="alternate"></link><published>2021-01-22T19:13:00-05:00</published><updated>2021-01-22T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-01-22:/blog/articles/how-this-blog-manages-article-assets/</id><summary type="html">&lt;p&gt;How to use Autostatic to re-organize Pelican's default article structure to be more article specific.&lt;/p&gt;</summary><content type="html">&lt;!--
 spell-checker:ignore autostatic alexandre fonseca's pelly pdfs pelicanconf staticattach
 --&gt;
 &lt;p&gt;Sooner or later, an article will require an attachment.  These accompanying non-markdown files are usually images, maybe pdfs, or even fully working pieces of code that are referenced by the article.&lt;/p&gt;
@@ -1731,10 +1754,11 @@ python -m pelican --autoreload --listen&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Project specific keyboard shortcuts are not possible.  See &lt;a href="https://github.com/Microsoft/vscode/issues/23757"&gt;Issue #23757&lt;/a&gt; for more details.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;And of course, we also add an empty &lt;code&gt;problemMatcher&lt;/code&gt; for the same reasons listed above.&lt;/p&gt;</content><category term="about the blog"></category><category term="vscode"></category><category term="pelican"></category></entry><entry><title>How this blog detects broken links</title><link href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links/" rel="alternate"></link><published>2020-11-08T21:25:00-05:00</published><updated>2020-11-08T21:25:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-08:/blog/articles/how-this-blog-detects-broken-links/</id><summary type="html">&lt;p&gt;How to validate local and internet links in markdown files.&lt;/p&gt;</summary><content type="html">&lt;!--
+&lt;p&gt;And of course, we also add an empty &lt;code&gt;problemMatcher&lt;/code&gt; for the same reasons listed above.&lt;/p&gt;</content><category term="about the blog"></category><category term="vscode"></category><category term="pelican"></category></entry><entry><title>How this blog detects broken links</title><link href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links/" rel="alternate"></link><published>2020-11-08T21:25:00-05:00</published><updated>2021-02-01T20:01:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-08:/blog/articles/how-this-blog-detects-broken-links/</id><summary type="html">&lt;p&gt;How to validate local and internet links in markdown files.&lt;/p&gt;</summary><content type="html">&lt;!--
 spell-checker:ignore
 --&gt;
-&lt;p&gt;This blog use VSCode's &lt;a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD"&gt;HTTP/s and relative link checker&lt;/a&gt; extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++Alt+L++.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Note: There is a &lt;a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links-i/"&gt;follow-up article&lt;/a&gt; updating some outdated information regarding &lt;code&gt;markdown-link-check&lt;/code&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;This blog use VSCode's &lt;a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD"&gt;HTTP/s and relative link checker&lt;/a&gt; extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut &lt;span class="keys"&gt;&lt;kbd class="key-alt"&gt;Alt&lt;/kbd&gt;&lt;span&gt;+&lt;/span&gt;&lt;kbd class="key-l"&gt;L&lt;/kbd&gt;&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;The blog's pipeline is slightly different and our best option is the &lt;a href="https://github.com/tcort/markdown-link-check"&gt;markdown-link-check&lt;/a&gt; npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.&lt;/p&gt;
 &lt;h2 id="batch-operation"&gt;Batch Operation&lt;/h2&gt;
 &lt;p&gt;The first challenge is that &lt;code&gt;markdown-link-check&lt;/code&gt; only takes one file as a argument.  To handle multiple files, the website recommends using this &lt;code&gt;find&lt;/code&gt; shell command:&lt;/p&gt;
@@ -1759,7 +1783,7 @@ for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$f
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="ignore-rules"&gt;Ignore Rules&lt;/h2&gt;
-&lt;p&gt;We have another problem handling Pelican's shorthand for &lt;a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content"&gt;local links&lt;/a&gt;: &lt;code&gt;{filename}&lt;/code&gt; and &lt;code&gt;{static}&lt;/code&gt;.  These are not valid links but we create a configuration file (&lt;code&gt;.markdown-link-check.json&lt;/code&gt;) and use the &lt;code&gt;ignorePatterns&lt;/code&gt; option to skip those special cases:&lt;/p&gt;
+&lt;p&gt;We have another problem handling Pelican's shorthand for &lt;a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content"&gt;local links&lt;/a&gt;: &lt;code&gt;{filename}&lt;/code&gt; and &lt;code&gt;{static}&lt;/code&gt;.  These are not valid links but we create a configuration file, &lt;code&gt;.markdown-link-check.json&lt;/code&gt;, and use the &lt;code&gt;ignorePatterns&lt;/code&gt; option to skip those special cases:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;json
 {
     "ignorePatterns": [

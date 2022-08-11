@@ -99,6 +99,7 @@
                                 <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
                              on Sun 08 November 2020
                         </span>
+                            <span class="meta">Updated on Mon 01 February 2021</span>
                         
                     </div>
                 </div>
@@ -115,7 +116,8 @@
         <!--
 spell-checker:ignore
 -->
-<p>This blog use VSCode's <a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD">HTTP/s and relative link checker</a> extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut ++Alt+L++.</p>
+<p><em>Note: There is a <a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links-i/">follow-up article</a> updating some outdated information regarding <code>markdown-link-check</code>.</em></p>
+<p>This blog use VSCode's <a href="https://marketplace.visualstudio.com/items?itemName=blackmist.LinkCheckMD">HTTP/s and relative link checker</a> extension to check url links in markdown files.  The extension is pretty basic, but it does what it says on the tin and provides a nice shortcut <span class="keys"><kbd class="key-alt">Alt</kbd><span>+</span><kbd class="key-l">L</kbd></span>.</p>
 <p>The blog's pipeline is slightly different and our best option is the <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> npm package.  However, to make it work with our Pelican based project we'll need to solve a few problems first.</p>
 <h2 id="batch-operation">Batch Operation</h2>
 <p>The first challenge is that <code>markdown-link-check</code> only takes one file as a argument.  To handle multiple files, the website recommends using this <code>find</code> shell command:</p>
@@ -140,7 +142,7 @@ for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$f
 </li>
 </ul>
 <h2 id="ignore-rules">Ignore Rules</h2>
-<p>We have another problem handling Pelican's shorthand for <a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content">local links</a>: <code>{filename}</code> and <code>{static}</code>.  These are not valid links but we create a configuration file (<code>.markdown-link-check.json</code>) and use the <code>ignorePatterns</code> option to skip those special cases:</p>
+<p>We have another problem handling Pelican's shorthand for <a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content">local links</a>: <code>{filename}</code> and <code>{static}</code>.  These are not valid links but we create a configuration file, <code>.markdown-link-check.json</code>, and use the <code>ignorePatterns</code> option to skip those special cases:</p>
 <p><code>json
 {
     "ignorePatterns": [

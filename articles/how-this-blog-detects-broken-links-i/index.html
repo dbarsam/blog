@@ -2,14 +2,15 @@
 <html lang="en">
 
 <head>
-        <meta charset="utf-8">
+            <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-        <title>#Dev - Tag bash</title>
+        <title>How this blog detects broken links - update</title>
 
             <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
         <!-- Bootstrap Core CSS -->
         <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
 
@@ -34,11 +35,30 @@
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-                <meta property="og:locale" content="">
+
+
+        <meta name="description" content="An update to validating local and internet links in markdown files.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="markdown">
+        <meta name="tags" content="travis">
+        <meta name="tags" content="bash">
+
+	                <meta property="og:locale" content="">
 		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links-i/">
+	<meta property="og:title" content="How this blog detects broken links - update">
+	<meta property="article:published_time" content="2021-02-01 19:25:00-05:00">
+            <meta property="og:description" content="An update to validating local and internet links in markdown files.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/article-bg.png">
 </head>
 
-<body class="tag-bash">
+<body class="article-how-this-blog-detects-broken-links-i">
 
     <!-- Navigation -->
     <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
@@ -68,12 +88,18 @@
         <!-- /.container -->
     </nav>
 
-        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog/images/home-bg.png')">
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/article-bg.png')">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <div class="page-heading">
-                        <h1>Tag bash</h1>
+                    <div class="post-heading">
+                        <h1>How this blog detects broken links - update</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Mon 01 February 2021
+                        </span>
+                        
                     </div>
                 </div>
             </div>
@@ -84,34 +110,39 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <div class="post-preview">
-            <a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links-i/" rel="bookmark" title="Permalink to How this blog detects broken links - update">
-                <h2 class="post-title">
-                    How this blog detects broken links - update
-                </h2>
-            </a>
-                <p class="article-summary">
-                    An update to validating local and internet links in markdown files.
-                </p>
-            <p class="post-meta">Posted by
-                    <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
-                 on Mon 01 February 2021
-            </p>
+    <!-- Post Content -->
+    <article>
+        <!--
+spell-checker:ignore
+-->
+<p>This article is a follow-up to <a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links/">how this blog detects broken links</a>, describing updated ways to use the <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> npm package.</p>
+<h2 id="batch-operation">Batch Operation</h2>
+<p>The previous article used a <code>for</code> loop and an shortcut or-operator (<code>||</code>) with an <code>exit</code> command.</p>
+<p><code>bash
+for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$file" || exit 1; done;</code></p>
+<p>That <code>exit</code> command turned out to exit the shell in some cases and this was not desirable on some machines.  Instead, we switched to <code>xargs</code> and enforce single parameters with <code>--max-lines</code> argument:</p>
+<p><code>bash
+find content -name \*.md -print0 | xargs --null --max-lines=1 markdown-link-check --config .markdown-link-check.json --verbose</code></p>
+<p>Using <code>xargs</code> introduces some new changes.  At first <code>xargs</code> passed all arguments to <code>markdown-link-check</code>, but the additional flag executes it once per file.  Second, <code>xargs</code> will return back exit code 123 if any of invocations returns back a non-zero value, which is fine in the ci pipeline.  And lastly, <code>xargs</code> processes all arguments, regardless if one invocation fails.  This is desirable in our case because we need to check all links and not quit at the first failure.</p>
+<h2 id="ignore-rules">Ignore Rules</h2>
+<p>We have another update regarding Pelican's shorthand for <a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content">local links</a>: <code>{filename}</code> and <code>{static}</code>.  These are not valid links but we create a configuration file, <code>.markdown-link-check.json</code>, and use the <code>ignorePatterns</code> option to skip those special cases.  Before we could use the raw <code>{</code> and <code>}</code> characters.  Now, it looks like we have to use the html escape codes <code>%7B</code> and <code>%7D</code>:</p>
+<p><code>json
+{
+    "ignorePatterns": [
+        {
+            "pattern": "^({|%7B)filename(}|%7D)"
+        },
+        ....
+    ]
+}</code></p>
+<p>For backwards compatibility, both characters are in a regex <em>or</em> (<code>|</code>) group.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/markdown/">markdown</a>, <a href="https://dbarsam.github.io/blog/tag/travis/">travis</a>, <a href="https://dbarsam.github.io/blog/tag/bash/">bash</a></p>
         </div>
-        <div class="post-preview">
-            <a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links/" rel="bookmark" title="Permalink to How this blog detects broken links">
-                <h2 class="post-title">
-                    How this blog detects broken links
-                </h2>
-            </a>
-                <p class="article-summary">
-                    How to validate local and internet links in markdown files.
-                </p>
-            <p class="post-meta">Posted by
-                    <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
-                 on Sun 08 November 2020
-            </p>
-        </div>
+
+    <hr>
 
             </div>
         </div>
