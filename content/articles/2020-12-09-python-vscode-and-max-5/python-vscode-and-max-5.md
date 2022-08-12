@@ -592,4 +592,4 @@ We do see you [PyCharm]. Maybe next time.
 [How To VSCode and Blender]: https://googlethatforyou.com?q=vscode%20blender%20tutorial
 [How To VSCode and Maya]: https://googlethatforyou.com?q=vscode%20maya%20tutorial
 [PyCharm]: https://knowledge.autodesk.com/support/3ds-max/troubleshooting/caas/screencast/Main/Details/34ab44e0-5702-473e-850c-a6b7a86b45f2.html
-[previous article]: {filename}../2020-12-07-python-vscode-and-max-4/note.md
+[previous article]: {filename}../2020-12-07-python-vscode-and-max-4/python-vscode-and-max-4.md

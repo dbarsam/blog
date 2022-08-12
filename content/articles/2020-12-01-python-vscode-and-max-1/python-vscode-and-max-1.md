@@ -133,8 +133,8 @@ This part of the infrastructure has only focused on the Python parts of it.  Wit
 [venv]: https://docs.python.org/3/library/venv.html
 [venv module]: https://docs.python.org/3/library/venv.html
 [editable install]: https://pip.pypa.io/en/stable/cli/pip_install/#local-project-installs
-[part ii]: {filename}../2020-12-03-python-vscode-and-max-2/note.md
+[part ii]: {filename}../2020-12-03-python-vscode-and-max-2/python-vscode-and-max-2.md
 [pypi]:  https://pypi.org/
 [seed packages]: https://virtualenv.pypa.io/en/latest/user_guide.html#seeders
 [requirement files]: https://pip.pypa.io/en/latest/reference/requirements-file-format/
-[previous article]: {filename}../2020-11-30-python-vscode-and-max/note.md
+[previous article]: {filename}../2020-11-30-python-vscode-and-max/python-vscode-and-max.md
