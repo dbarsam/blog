@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - application development</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/application-development.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-02-08T19:13:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>Quick Start to Python Logging</title><link href="https://dbarsam.github.io/blog/articles/python-logging-quick-start/" rel="alternate"></link><published>2021-02-08T19:13:00-05:00</published><updated>2021-02-08T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-02-08:/blog/articles/python-logging-quick-start/</id><summary type="html">&lt;p&gt;The bare minimum needed to get started with thePython logging system.&lt;/p&gt;</summary><content type="html">&lt;!--
+spell-checker:ignore NOTSET asctime levelname
+--&gt;
+&lt;p&gt;Logging is pretty important.  It's the primary way to capture the performance of code after it has left the developer's controlled environment.  This means that the more complex a program becomes, the greater the need for a robust and mature logging system.&lt;/p&gt;
+&lt;p&gt;Fortunately, Python has a logging service built into its core system libraries that is both powerful and flexible -- so much so that it's slightly intimidating.  This post will introduce the logging system through a collection of basic logging topics.&lt;/p&gt;
+&lt;h2 id="replacing-print"&gt;Replacing &lt;code&gt;print&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;The most basic way of logging is to write messages to the console using the &lt;code&gt;print&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;python
+print('This is an info message')&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;print&lt;/code&gt; function writes text to the system's standard output stream.  For small scraps of code this works well because they are small scraps of code.  Scaling this practice up to more complex projects, like applications or system libraries, becomes problematic. In those situations, where a single client is brining in various libraries from multiple developers, all of the &lt;code&gt;print&lt;/code&gt;s would overwhelm the user with information and turn the system console's into a performance bottleneck.&lt;/p&gt;
+&lt;p&gt;Library developers could work around this, maybe creating a dev and release mode of their library, but that's adding an extra layer of needless work and responsibility onto each individual library.  Python's logging system has already solved this problem and splits the responsibility between the developer and client.  The developer write the logging messages and the client controls the output.&lt;/p&gt;
+&lt;h2 id="using-logger-objects"&gt;Using Logger Objects&lt;/h2&gt;
+&lt;p&gt;The developer-facing part of the logging system is the &lt;a href="https://docs.python.org/3/library/logging.html#logger-objects"&gt;logger objects&lt;/a&gt;.  These logger objects are aptly named &lt;code&gt;logger&lt;/code&gt;s and developers request one from the &lt;code&gt;logging&lt;/code&gt; module.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;python
+import logging
+logger = logging.getLogger(__name__)
+logger.info('This is an info message')&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;There are a few things to note with the snippet:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;All logging calls must be done through the &lt;code&gt;logging&lt;/code&gt; library.&lt;/p&gt;
+&lt;p&gt;The logging library is a builtin system library and is quite mature, having been with Python standard library from the start.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Developers request logging objects from the logging system's &lt;code&gt;getLogger&lt;/code&gt; function with a name, preferable using the &lt;code&gt;__name__&lt;/code&gt; value.&lt;/p&gt;
+&lt;p&gt;The logger object is created on demand and managed by the logging system.  The name parameter is simply a label to refer to the logger object later on.  The name could be any pieces of text, but using the built-in &lt;code&gt;__name__&lt;/code&gt; variable is a good habit to use from the start -- especially as you start developing more complex applications.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;__name__&lt;/code&gt; variable is available in all files and contains the fully qualified module name.  This means that developers get a working naming scheme for free with the line &lt;code&gt;logger = logging.getLogger(__name__)&lt;/code&gt; copied and pasted throughout your project.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Developers send messages through one of the logger's convenience functions.&lt;/p&gt;
+&lt;p&gt;While the logger's functions look like it is sending simple strings, each call makes a &lt;a href="https://docs.python.org/3/library/logging.html#logrecord-attributes"&gt;logging record&lt;/a&gt; that contains the text line as an attribute.  The logging system also attaches a severity or logging levels to each record.  The equivalent level of typical &lt;code&gt;print&lt;/code&gt; messages is the &lt;code&gt;info&lt;/code&gt; level and each logger object has a convenience function to send messages on that level.&lt;/p&gt;
+&lt;p&gt;The &lt;a href="https://docs.python.org/3/library/logging.html#logrecord-attributes"&gt;logging record&lt;/a&gt; are the internal objects that represent messages and there are additional tools and utilities to work with them, but that's beyond the scope of this article.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="initializing-with-basicconfig"&gt;Initializing with &lt;code&gt;basicConfig&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;Printing messages to the console with &lt;code&gt;print&lt;/code&gt; works right out of the box.  Sending logging messages to the console, like in the above snippet, does not.&lt;/p&gt;
+&lt;p&gt;The logging system must be initialized and configured to send logging messages to the console.  This configuration step will be custom for larger projects that require more than one output for messages, but smaller projects can initialize the system in a single line using the &lt;code&gt;logging.basicConfig&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;basicConfig&lt;/code&gt; function allows the user to configure the most frequently used options.  The snippet from the &lt;code&gt;example.py&lt;/code&gt; module below initializes the logging system with a opinionated configuration that works for basic usage.&lt;/p&gt;
+&lt;p&gt;```python
+import logging&lt;/p&gt;
+&lt;p&gt;logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)&lt;/p&gt;
+&lt;p&gt;logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
+logger.info('This is an info message')
+```&lt;/p&gt;
+&lt;p&gt;The function takes in multiple parameters, but the bare minimum should include the &lt;code&gt;format&lt;/code&gt; and the &lt;code&gt;level&lt;/code&gt; arguments.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;format&lt;/code&gt; text is the template to apply to all messages and in our case we have a simple one that makes a logging message from three logging message properties:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;asctime&lt;/code&gt;: the time the message was created&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;levelname&lt;/code&gt;: the human readable name of the importance level&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;message&lt;/code&gt;: the message itself&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Running the code example above yields the print message, but also the time and the level name as well:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-08 20:02:30,998 : INFO : This is an info message&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;level&lt;/code&gt; argument is a filter.  Changing the value from &lt;code&gt;logging.INFO&lt;/code&gt; to a higher level, like &lt;code&gt;logging.WARNING&lt;/code&gt; will blocked the info messages from being displayed.  Similarly, going to a lower level, like &lt;code&gt;logging.DEBUG&lt;/code&gt;, will allow the &lt;code&gt;info&lt;/code&gt; messages, but also include all &lt;code&gt;debug&lt;/code&gt; messages.  But again, with the goal of minimally replacing the print statement, this can be set to &lt;code&gt;logging.INFO&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="how-to-initialize"&gt;How to Initialize&lt;/h2&gt;
+&lt;p&gt;Initialization should occur only once in an application's lifespan as each initialization destroyers the previous initialization.  For this reason, initialization should not be done in a library but instead by done in the application's &lt;code&gt;__main__&lt;/code&gt; block.&lt;/p&gt;
+&lt;p&gt;The official &lt;code&gt;__main__&lt;/code&gt; &lt;a href="https://docs.python.org/3/library/__main__.html"&gt;documentation&lt;/a&gt; does a great job explaining what this block is.  But, it's best to use the &lt;code&gt;__main__&lt;/code&gt; block to initialize the logging system because it is the main entry point of the application and executed before anything else.  For example, update the above &lt;code&gt;example.py&lt;/code&gt; by adding a &lt;code&gt;__main__&lt;/code&gt; block:&lt;/p&gt;
+&lt;p&gt;```python
+import sys
+import logging&lt;/p&gt;
+&lt;p&gt;def main(args=[]):
+    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
+    logger.info('This is an info message')
+    return 0&lt;/p&gt;
+&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+    sys.exit(main(sys.argv))
+```&lt;/p&gt;
+&lt;p&gt;If we execute &lt;code&gt;example.py&lt;/code&gt; directly, we see the logging statement.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-08 20:03:01,900 : INFO : This is an info message&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;However, if we &lt;code&gt;import&lt;/code&gt; the module, the &lt;code&gt;__main__&lt;/code&gt; block (and the initialization) is ignored and the logging statement is skipped:&lt;/p&gt;
+&lt;!-- markdownlint-disable MD014 --&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python -c "from example import main;main([])"
+$&lt;/code&gt;&lt;/p&gt;
+&lt;!-- markdownlint-enable MD014 --&gt;
+
+&lt;p&gt;The second example doesn't have any logging messages because the &lt;code&gt;__name__&lt;/code&gt; value contains the module name &lt;code&gt;example&lt;/code&gt; instead of the &lt;code&gt;__main__&lt;/code&gt; value.&lt;/p&gt;
+&lt;h2 id="a-note-about-loggings-name-and-__name__"&gt;A note about logging's &lt;code&gt;name&lt;/code&gt; and &lt;code&gt;__name__&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;Remember that using &lt;code&gt;__name__&lt;/code&gt; in &lt;code&gt;logger = logging.getLogger(__name__)&lt;/code&gt; is considered a best practice because it leverages the python module name stored in that variable and simplifies the way to acquire the logger through the code.&lt;/p&gt;
+&lt;p&gt;However, when using &lt;code&gt;__name__&lt;/code&gt; in the &lt;code&gt;__main__&lt;/code&gt; block, the value of &lt;code&gt;__name__&lt;/code&gt; changes to &lt;code&gt;__main__&lt;/code&gt;.  If we include the &lt;code&gt;%(name)s&lt;/code&gt; field in our initialization we can see this in practice.&lt;/p&gt;
+&lt;p&gt;```python
+import sys
+import logging&lt;/p&gt;
+&lt;p&gt;def main(args=[]):
+    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
+    logger.info('This is an info message')
+    return 0&lt;/p&gt;
+&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
+    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.INFO)
+    sys.exit(main(sys.argv))
+```&lt;/p&gt;
+&lt;p&gt;Executing the file from the command line includes the &lt;code&gt;__main__&lt;/code&gt; in the logging message.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-08 20:05:02,700 : __main__ - INFO : This is an info message&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;However, executing the code as a module (after we manually initialize the logging system), displays the name of the module &lt;code&gt;example&lt;/code&gt; in the name value:&lt;/p&gt;
+&lt;p&gt;```console
+$ python&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;import logging
+logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.INFO)
+from example import main
+main([])
+2021-02-08 20:07:03,600 : example - INFO : This is an info message
+0
+```&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This is important to know as the client could very well use the &lt;code&gt;name&lt;/code&gt; field to filter in or out logging messages from a particular module.&lt;/p&gt;
+&lt;h2 id="using-different-logging-levels"&gt;Using different logging levels&lt;/h2&gt;
+&lt;p&gt;The logging system attaches a numerical severity level to each logging message.  These levels are actually customizable, but in practically all cases its best to just use the default levels define in the &lt;code&gt;logging&lt;/code&gt; module: &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warning&lt;/code&gt;, &lt;code&gt;error&lt;/code&gt;, and &lt;code&gt;critical&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The logger object implements a convenience logging function for each logging level, wrapping around the actual &lt;code&gt;log&lt;/code&gt; function.  The &lt;code&gt;log&lt;/code&gt; function is public to use, and can be used for special handling or for custom levels:&lt;/p&gt;
+&lt;p&gt;```python
+import sys
+import logging&lt;/p&gt;
+&lt;p&gt;def main(args=[]):
+    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
+    logger.log(5, 'This is a custom message at level 5')
+    logger.debug('This is a debug message')
+    logger.info('This is an info message')
+    logger.warning('This is a warning message')
+    logger.error('This is an error message')
+    logger.critical('This is a critical message')
+    logger.log(100, 'This is a custom message at level 100')
+    return 0&lt;/p&gt;
+&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
+    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.INFO)
+    sys.exit(main(sys.argv))
+```&lt;/p&gt;
+&lt;p&gt;The uses all convenience functions and uses custom levels &lt;code&gt;5&lt;/code&gt; and &lt;code&gt;100&lt;/code&gt;. Execute the above module yields the following results:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-08 20:19:58,867 : __main__ INFO : This is an info message
+2021-02-08 20:19:58,867 : __main__ WARNING : This is a warning message
+2021-02-08 20:19:58,867 : __main__ ERROR : This is an error message
+2021-02-08 20:19:58,867 : __main__ CRITICAL : This is a critical message
+2021-02-08 20:19:58,867 : __main__ Level 100 : This is a custom message at level 100&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;All of the logging messages appear -- except for the &lt;code&gt;5&lt;/code&gt; and &lt;code&gt;debug&lt;/code&gt; messages.  This is because we set the global level parameter to &lt;code&gt;logging.INFO&lt;/code&gt; in our &lt;code&gt;basicConfig&lt;/code&gt; call.  That &lt;code&gt;level&lt;/code&gt; parameter configures the system to filter out all messages with a severity level less than given level.  Changing the value to &lt;code&gt;logging.ERROR&lt;/code&gt; will filter out &lt;code&gt;5&lt;/code&gt;, &lt;code&gt;debug&lt;/code&gt;  &lt;code&gt;warning&lt;/code&gt;, and &lt;code&gt;info&lt;/code&gt; messages:&lt;/p&gt;
+&lt;p&gt;```python
+import sys
+import logging&lt;/p&gt;
+&lt;p&gt;def main(args=[]):
+    ....
+    return 0&lt;/p&gt;
+&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
+    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.ERROR)
+    sys.exit(main(sys.argv))
+```&lt;/p&gt;
+&lt;p&gt;Executing the above module yields the following results:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-08 20:36:05,829 : __main__ ERROR : This is an error message
+2021-02-08 20:36:05,829 : __main__ CRITICAL : This is an critical message
+2021-02-08 20:36:05,829 : __main__ Level 100 : This is an custom message at level 100&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;And likewise, setting the value to &lt;code&gt;logging.NOTSET&lt;/code&gt; is the equivalent of setting the filter to &lt;code&gt;0&lt;/code&gt; and letting all messages through:&lt;/p&gt;
+&lt;p&gt;```python
+import sys
+import logging&lt;/p&gt;
+&lt;p&gt;def main(args=[]):
+    ....
+    return 0&lt;/p&gt;
+&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
+    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.NOTSET)
+    sys.exit(main(sys.argv))
+```&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-08 20:37:34,355 : __main__ Level 5 : This is an custom message at level 5
+2021-02-08 20:37:34,355 : __main__ DEBUG : This is an debug message
+2021-02-08 20:37:34,355 : __main__ INFO : This is an info message
+2021-02-08 20:37:34,355 : __main__ WARNING : This is an warning message
+2021-02-08 20:37:34,355 : __main__ ERROR : This is an error message
+2021-02-08 20:37:34,355 : __main__ CRITICAL : This is an critical message
+2021-02-08 20:37:34,355 : __main__ Level 100 : This is an custom message at level 100&lt;/code&gt;&lt;/p&gt;</content><category term="application development"></category><category term="python"></category><category term="logging"></category></entry></feed>
