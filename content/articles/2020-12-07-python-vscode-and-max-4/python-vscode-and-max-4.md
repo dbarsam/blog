@@ -150,10 +150,10 @@ We now have a collection of components assembled into something that delivers a 
 
 [C/C++ debugging]: https://code.visualstudio.com/docs/cpp/launch-json-reference
 [compound configuration]: https://code.visualstudio.com/Docs/editor/debugging#_compound-launch-configurations
-[another problem]: {filename}../2020-10-29-qt-dll-mismatch/note.md
+[another problem]: {filename}../2020-10-29-qt-dll-mismatch/qt-dll-mismatch.md
 [prelaunchtask]: https://code.visualstudio.com/Docs/editor/debugging#_launchjson-attributes
 [task]: https://code.visualstudio.com/docs/editor/tasks
 [timeout]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/timeout
 [cmd.exe]: https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmd
-[previous article]: {filename}../2020-12-05-python-vscode-and-max-3/note.md
-[part v]: {filename}../2020-12-09-python-vscode-and-max-5/note.md
+[previous article]: {filename}../2020-12-05-python-vscode-and-max-3/python-vscode-and-max-3.md
+[part v]: {filename}../2020-12-09-python-vscode-and-max-5/python-vscode-and-max-5.md

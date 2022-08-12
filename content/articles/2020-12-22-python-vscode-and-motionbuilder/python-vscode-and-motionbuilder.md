@@ -95,4 +95,4 @@ Like Maya and 3ds Max, we're still following the same model of grafting a side-c
 [main scope]: https://docs.python.org/3/library/__main__.html
 [builtins]: https://docs.python.org/3/library/builtins.html#module-builtins
 [slightly differently]: https://forums.autodesk.com/t5/motionbuilder-forum/whats-wrong-with-main/td-p/4254363
-[previous series of articles]: {filename}../2020-11-30-python-vscode-and-max/note.md
+[previous series of articles]: {filename}../2020-11-30-python-vscode-and-max/python-vscode-and-max.md

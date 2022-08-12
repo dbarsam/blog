@@ -39,8 +39,8 @@ Breaking it down, we are going to set-up a workflow with the following component
 
 This series starts with [Part I] by repurposing a very basic component of Python development, the virtual environment.
 
-[part i]: {filename}../2020-12-01-python-vscode-and-max-1/note.md
-[part ii]: {filename}../2020-12-03-python-vscode-and-max-2/note.md
-[part iii]: {filename}../2020-12-05-python-vscode-and-max-3/note.md
-[part iv]: {filename}../2020-12-07-python-vscode-and-max-4/note.md
-[part v]: {filename}../2020-12-09-python-vscode-and-max-5/note.md
+[part i]: {filename}../2020-12-01-python-vscode-and-max-1/python-vscode-and-max-1.md
+[part ii]: {filename}../2020-12-03-python-vscode-and-max-2/python-vscode-and-max-2.md
+[part iii]: {filename}../2020-12-05-python-vscode-and-max-3/python-vscode-and-max-3.md
+[part iv]: {filename}../2020-12-07-python-vscode-and-max-4/python-vscode-and-max-4.md
+[part v]: {filename}../2020-12-09-python-vscode-and-max-5/python-vscode-and-max-5.md
