@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Logging Exceptions in Python</title>
+
+            <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
+            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
+        <!-- Bootstrap Core CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="https://dbarsam.github.io/blog/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="https://dbarsam.github.io/blog/theme/css/code_blocks/tomorrow_night.css" rel="stylesheet">
+
+            <!-- CSS specified by the user -->
+            <link href="https://dbarsam.github.io/blog/extra/css/custom.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="How to use the logging system to capture exceptions.">
+
+        <meta name="author" content="db">
+
+        <meta name="tags" content="python">
+        <meta name="tags" content="logging">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="#Dev">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
+	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/python-logging-exceptions/">
+	<meta property="og:title" content="Logging Exceptions in Python">
+	<meta property="article:published_time" content="2021-02-09 19:13:00-05:00">
+            <meta property="og:description" content="How to use the logging system to capture exceptions.">
+
+            <meta property="og:image" content="https://dbarsam.github.io/blog/images/home-bg.png">
+</head>
+
+<body class="article-python-logging-exceptions">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="https://dbarsam.github.io/blog/">#Dev</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/archives.html">Archives</a></li>
+                        <li><a href="/categories.html">Categories</a></li>
+                        <li><a href="/tags.html">Tags</a></li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/home-bg.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Logging Exceptions in Python</h1>
+                        <span class="meta">Posted by
+                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                             on Tue 09 February 2021
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <!--
+spell-checker:ignore
+-->
+<p>The various functions of <code>logger.debug</code>, <code>logger.info</code>, <code>logger.warning</code>, <code>logger.error</code> and <code>logger.critical</code> were introduced in the <a href="https://dbarsam.github.io/blog/articles/python-logging-quick-start/">quick-start article about logging</a>.  However, there is another useful function, the <code>logger.exception</code> function, that that was not covered in that article but should be mentioned because it has a very special use.</p>
+<h2 id="logging-during-exceptions">Logging during Exceptions</h2>
+<p>Like the other conveinience functions, the <code>logger.exception</code> function is a wrapper around the base <code>logger.log</code> function.  The function, however, does two specific things:</p>
+<ol>
+<li>It logs to the <code>error</code> level.</li>
+<li>It includes the stack trace of the current exception from <a href="https://docs.python.org/3/library/sys.html#sys.exc_info">sys.exc_info()</a>.</li>
+</ol>
+<p>These are useful when logging messages during an exception.  For example, consider this example script:</p>
+<p>```python
+import sys
+import logging</p>
+<p>def function():
+    x = 1/ 0</p>
+<p>def main(args=[]):
+    logger = logging.getLogger(<strong>name</strong>)
+    try:
+        function()
+    except Exception:
+        logger.exception("Fatal error when calling function.")
+        return 1
+    return 0</p>
+<p>if <strong>name</strong> == '<strong>main</strong>':
+    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.NOTSET)
+    sys.exit(main(sys.argv))
+```</p>
+<p>The script uses a catch-all pattern by using the base <code>Exception</code> object in the tr/except block.  This is normally discouraged and is only used here for sake of simplicity.</p>
+<p>Executing the example intercepts the divide by 0 and prints out the messasge along with the respective call stack and -- it's important to note it here -- resumes the execution, returning 1 instead of 0.</p>
+<p>Running this script yeilds the following output:</p>
+<p><code>console
+$ python example.py
+2021-02-09 21:34:23,560 : __main__ ERROR : Fatal error when calling function.
+Traceback (most recent call last):
+  File "example.py", line 10, in main
+    function()
+  File "example.py", line 5, in function
+    x = 1/ 0
+ZeroDivisionError: division by zero</code></p>
+<p>The accompanying callstack appears right under the logging message, starting with <code>Traceback</code> and ending with the exception name, <code>ZeroDivisionError</code>.</p>
+<h2 id="logging-exceptions-at-other-levels">Logging Exceptions at other Levels</h2>
+<p>Underneath the hood, the <code>exception</code> function assigns the message to the <code>error</code> level and sets the <code>exc_info</code> parameter to <code>True</code>.  So with the parameter, we can accomplish the same thing by being more explict with the <code>logger.error</code> function:</p>
+<p><code>python
+try:
+    function()
+except Exception:
+    logger.error("Fatal error when calling function.", exc_info=True)
+    return 1</code></p>
+<p>Running the updated script yields the same output:</p>
+<p><code>console
+$ python example.py
+2021-02-09 21:42:23,560 : __main__ ERROR : Fatal error when calling function.
+Traceback (most recent call last):
+  File "example.py", line 10, in main
+    function()
+  File "example.py", line 5, in function
+    x = 1/ 0
+ZeroDivisionError: division by zero</code></p>
+<p>The <code>exc_info</code> is a key word argument of the base <code>log</code> function so using it is not restricted to just the <code>error</code> function. The parameter is available to all convenience functions and can be used to log the message and callstack to any other level, like <code>info</code>, for example:</p>
+<p><code>python
+try:
+    function()
+except Exception:
+    logger.info("Handled exception when calling function.", exc_info=True)</code></p>
+<p>Executing the script changes nothing -- except that the message is now emitted at the <code>info</code> level instead of the more severe <code>error</code> level.</p>
+<p><code>console
+$ python example.py
+2021-02-09 21:59:40,506 : __main__ INFO : Handled exception when calling function.
+Traceback (most recent call last):
+  File "example.py", line 10, in main
+    function()
+  File "example.py", line 5, in function
+    x = 1/ 0
+ZeroDivisionError: division by zero</code></p>
+<p>Using this technique really should be done in special cases.  It's still best to use the <code>exception</code> method to log exception classtacks on the <code>error</code> level.  Callstacks are rather synonymous with applications crashes, so dumping a callstack at a client-visible level, like <code>info</code> or <code>warning</code> will end up confusing the user.  In the cases where the application is  handling expected exceptions, it's probably simpler for everybody for the application to use the regular logging functions skip the callstack.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="https://dbarsam.github.io/blog/tag/python/">python</a>, <a href="https://dbarsam.github.io/blog/tag/logging/">logging</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://github.com/dbarsam">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  db
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://dbarsam.github.io/blog/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://dbarsam.github.io/blog/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="https://dbarsam.github.io/blog/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-210292782-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>

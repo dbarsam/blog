@@ -1,5 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - application development</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/application-development.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-02-08T19:13:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>Quick Start to Python Logging</title><link href="https://dbarsam.github.io/blog/articles/python-logging-quick-start/" rel="alternate"></link><published>2021-02-08T19:13:00-05:00</published><updated>2021-02-08T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-02-08:/blog/articles/python-logging-quick-start/</id><summary type="html">&lt;p&gt;The bare minimum needed to get started with thePython logging system.&lt;/p&gt;</summary><content type="html">&lt;!--
+<feed xmlns="http://www.w3.org/2005/Atom"><title>#Dev - application development</title><link href="https://dbarsam.github.io/blog/" rel="alternate"></link><link href="https://dbarsam.github.io/blog/feeds/application-development.atom.xml" rel="self"></link><id>https://dbarsam.github.io/blog/</id><updated>2021-02-09T19:13:00-05:00</updated><subtitle>A collection of software development notes</subtitle><entry><title>Logging Exceptions in Python</title><link href="https://dbarsam.github.io/blog/articles/python-logging-exceptions/" rel="alternate"></link><published>2021-02-09T19:13:00-05:00</published><updated>2021-02-09T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-02-09:/blog/articles/python-logging-exceptions/</id><summary type="html">&lt;p&gt;How to use the logging system to capture exceptions.&lt;/p&gt;</summary><content type="html">&lt;!--
+spell-checker:ignore
+--&gt;
+&lt;p&gt;The various functions of &lt;code&gt;logger.debug&lt;/code&gt;, &lt;code&gt;logger.info&lt;/code&gt;, &lt;code&gt;logger.warning&lt;/code&gt;, &lt;code&gt;logger.error&lt;/code&gt; and &lt;code&gt;logger.critical&lt;/code&gt; were introduced in the &lt;a href="https://dbarsam.github.io/blog/articles/python-logging-quick-start/"&gt;quick-start article about logging&lt;/a&gt;.  However, there is another useful function, the &lt;code&gt;logger.exception&lt;/code&gt; function, that that was not covered in that article but should be mentioned because it has a very special use.&lt;/p&gt;
+&lt;h2 id="logging-during-exceptions"&gt;Logging during Exceptions&lt;/h2&gt;
+&lt;p&gt;Like the other conveinience functions, the &lt;code&gt;logger.exception&lt;/code&gt; function is a wrapper around the base &lt;code&gt;logger.log&lt;/code&gt; function.  The function, however, does two specific things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;It logs to the &lt;code&gt;error&lt;/code&gt; level.&lt;/li&gt;
+&lt;li&gt;It includes the stack trace of the current exception from &lt;a href="https://docs.python.org/3/library/sys.html#sys.exc_info"&gt;sys.exc_info()&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;These are useful when logging messages during an exception.  For example, consider this example script:&lt;/p&gt;
+&lt;p&gt;```python
+import sys
+import logging&lt;/p&gt;
+&lt;p&gt;def function():
+    x = 1/ 0&lt;/p&gt;
+&lt;p&gt;def main(args=[]):
+    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
+    try:
+        function()
+    except Exception:
+        logger.exception("Fatal error when calling function.")
+        return 1
+    return 0&lt;/p&gt;
+&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
+    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.NOTSET)
+    sys.exit(main(sys.argv))
+```&lt;/p&gt;
+&lt;p&gt;The script uses a catch-all pattern by using the base &lt;code&gt;Exception&lt;/code&gt; object in the tr/except block.  This is normally discouraged and is only used here for sake of simplicity.&lt;/p&gt;
+&lt;p&gt;Executing the example intercepts the divide by 0 and prints out the messasge along with the respective call stack and -- it's important to note it here -- resumes the execution, returning 1 instead of 0.&lt;/p&gt;
+&lt;p&gt;Running this script yeilds the following output:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-09 21:34:23,560 : __main__ ERROR : Fatal error when calling function.
+Traceback (most recent call last):
+  File "example.py", line 10, in main
+    function()
+  File "example.py", line 5, in function
+    x = 1/ 0
+ZeroDivisionError: division by zero&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The accompanying callstack appears right under the logging message, starting with &lt;code&gt;Traceback&lt;/code&gt; and ending with the exception name, &lt;code&gt;ZeroDivisionError&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="logging-exceptions-at-other-levels"&gt;Logging Exceptions at other Levels&lt;/h2&gt;
+&lt;p&gt;Underneath the hood, the &lt;code&gt;exception&lt;/code&gt; function assigns the message to the &lt;code&gt;error&lt;/code&gt; level and sets the &lt;code&gt;exc_info&lt;/code&gt; parameter to &lt;code&gt;True&lt;/code&gt;.  So with the parameter, we can accomplish the same thing by being more explict with the &lt;code&gt;logger.error&lt;/code&gt; function:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;python
+try:
+    function()
+except Exception:
+    logger.error("Fatal error when calling function.", exc_info=True)
+    return 1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Running the updated script yields the same output:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-09 21:42:23,560 : __main__ ERROR : Fatal error when calling function.
+Traceback (most recent call last):
+  File "example.py", line 10, in main
+    function()
+  File "example.py", line 5, in function
+    x = 1/ 0
+ZeroDivisionError: division by zero&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;exc_info&lt;/code&gt; is a key word argument of the base &lt;code&gt;log&lt;/code&gt; function so using it is not restricted to just the &lt;code&gt;error&lt;/code&gt; function. The parameter is available to all convenience functions and can be used to log the message and callstack to any other level, like &lt;code&gt;info&lt;/code&gt;, for example:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;python
+try:
+    function()
+except Exception:
+    logger.info("Handled exception when calling function.", exc_info=True)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Executing the script changes nothing -- except that the message is now emitted at the &lt;code&gt;info&lt;/code&gt; level instead of the more severe &lt;code&gt;error&lt;/code&gt; level.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;console
+$ python example.py
+2021-02-09 21:59:40,506 : __main__ INFO : Handled exception when calling function.
+Traceback (most recent call last):
+  File "example.py", line 10, in main
+    function()
+  File "example.py", line 5, in function
+    x = 1/ 0
+ZeroDivisionError: division by zero&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Using this technique really should be done in special cases.  It's still best to use the &lt;code&gt;exception&lt;/code&gt; method to log exception classtacks on the &lt;code&gt;error&lt;/code&gt; level.  Callstacks are rather synonymous with applications crashes, so dumping a callstack at a client-visible level, like &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;warning&lt;/code&gt; will end up confusing the user.  In the cases where the application is  handling expected exceptions, it's probably simpler for everybody for the application to use the regular logging functions skip the callstack.&lt;/p&gt;</content><category term="application development"></category><category term="python"></category><category term="logging"></category></entry><entry><title>Quick Start to Python Logging</title><link href="https://dbarsam.github.io/blog/articles/python-logging-quick-start/" rel="alternate"></link><published>2021-02-08T19:13:00-05:00</published><updated>2021-02-08T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-02-08:/blog/articles/python-logging-quick-start/</id><summary type="html">&lt;p&gt;The bare minimum needed to get started with thePython logging system.&lt;/p&gt;</summary><content type="html">&lt;!--
 spell-checker:ignore NOTSET asctime levelname
 --&gt;
 &lt;p&gt;Logging is pretty important.  It's the primary way to capture the performance of code after it has left the developer's controlled environment.  This means that the more complex a program becomes, the greater the need for a robust and mature logging system.&lt;/p&gt;
