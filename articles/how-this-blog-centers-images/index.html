@@ -121,56 +121,60 @@ spell-checker:ignore
 <p>The solution (for this blog, at least) comes in two parts:  CSS and Markdown Attributes.</p>
 <h2 id="css-classes">CSS Classes</h2>
 <p>We skip over any embedded HTML shenanigans and go for the CSS option.  There, we define two new CSS classes.  One will handle images and another one to handle text:</p>
-<p>```css
-.center-image
-{
-    margin: 0 auto;
-    display: block;
-}</p>
-<p>.center-text
-{
-    text-align: center;
-}
-```</p>
+<div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">center-image</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="kc">auto</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">block</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="p">.</span><span class="nc">center-text</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">text-align</span><span class="p">:</span><span class="w"> </span><span class="kc">center</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 <p>We write them in the site's <code>custom.css</code> file (<code>extra/css/custom.css</code>) and we inject that into the current <a href="https://github.com/gilsondev/pelican-clean-blog">theme</a> via its <a href="https://github.com/gilsondev/pelican-clean-blog#user-defined-css">CSS_OVERRIDE</a> setting:</p>
-<p><code>python
-CSS_OVERRIDE = 'extra/css/custom.css'</code></p>
+<div class="highlight"><pre><span></span><span class="n">CSS_OVERRIDE</span> <span class="o">=</span> <span class="s1">&#39;extra/css/custom.css&#39;</span>
+</pre></div>
 <p>This configuration expose the CSS class names for the Markdown parser to later manipulate.</p>
 <h2 id="attributes">Attributes</h2>
 <p>With the classes defined, we link them to the Markdown element via attributes.  Attributes are a non-standard feature, provided by Python Markdown's <a href="https://python-markdown.github.io/extensions/attr_list">attr_list</a> extension, that makes CSS attributes accessible in Markdown syntax.  Without attributes, we would have to resort to embedding raw HTML in the Markdown files.  But with them, we have a cleaner syntax to add HTML style and class names to the Markdown content.</p>
 <h3 id="installation">Installation</h3>
 <p>We first install the Python package into Pelican's Python environment:</p>
-<p><code>console
-pip install markdown</code></p>
+<div class="highlight"><pre><span></span><span class="go">pip install markdown</span>
+</pre></div>
 <h2 id="configuration">Configuration</h2>
 <p>And then we enable it in the <code>pelicanconf.py</code> file, in the <code>MARKDOWN</code> variable:</p>
-<p>```python</p>
-<h1 id="extra-configuration-settings-for-the-markdown-processor">Extra configuration settings for the Markdown processor.</h1>
-<p>MARKDOWN = {
-    "extension_configs": {
-        ....
-         "markdown.extensions.attr_list": {},
-        ....
-    },
-    'output_format': 'html5'
-}
-```</p>
+<div class="highlight"><pre><span></span><span class="c1"># Extra configuration settings for the Markdown processor.</span>
+<span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+         <span class="s2">&quot;markdown.extensions.attr_list&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
 <p>The extension is also bundled with the <a href="https://python-markdown.github.io/extensions/extra/">extra</a> extension, so enabling that extension will have the same effect -- but watch out for the conflict if you're also going to use <a href="https://facelessuser.github.io/pymdown-extensions/extensions/extra/">PyMdown Extensions</a>' own version of <code>extra</code>.</p>
 <h3 id="no-attributes">No Attributes</h3>
 <p>The vanilla version of our content consists of a simple image and paragraph:</p>
-<p>```markdown
-<img alt="pelican-logo" src="https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png"></p>
-<p>This is a logo.</p>
-<p>```</p>
+<div class="highlight"><pre><span></span>![pelican-logo]
+
+This is a logo.
+
+[<span class="nl">pelican-logo</span>]: <span class="na">https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png</span>
+</pre></div>
 <p>And that renders out as this:</p>
 <p><img alt="pelican-logo" src="https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png"></p>
 <p>This is a logo.</p>
 <h3 id="centered-attributes">Centered Attributes</h3>
 <p>We now update the content with our image and text attributes:</p>
-<p>```markdown
-<img alt="pelican-logo" class="center-image" src="https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png"></p>
-<p class="center-text">This is a logo.</p>
-<p>```</p>
+<div class="highlight"><pre><span></span>![pelican-logo]{: .center-image}
+
+This is a logo.
+{: .center-text}
+
+[<span class="nl">pelican-logo</span>]: <span class="na">https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png</span>
+</pre></div>
 <p>Note: The <code>{: .center-text}</code> attribute goes at the end of the element because the text paragraph is a <em>block level element</em>.  More information is available from the official <a href="https://python-markdown.github.io/extensions/attr_list/#block-level">Python-Markdown help</a>.</p>
 <p>The above renders out as this:</p>
 <p><img alt="pelican-logo" class="center-image" src="https://raw.githubusercontent.com/getpelican/pelican-blog/main/content/logo/pelican-logo-small.png"></p>

@@ -10,70 +10,72 @@ spell-checker:ignore
 &lt;li&gt;It includes the stack trace of the current exception from &lt;a href="https://docs.python.org/3/library/sys.html#sys.exc_info"&gt;sys.exc_info()&lt;/a&gt;.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;These are useful when logging messages during an exception.  For example, consider this example script:&lt;/p&gt;
-&lt;p&gt;```python
-import sys
-import logging&lt;/p&gt;
-&lt;p&gt;def function():
-    x = 1/ 0&lt;/p&gt;
-&lt;p&gt;def main(args=[]):
-    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
-    try:
-        function()
-    except Exception:
-        logger.exception("Fatal error when calling function.")
-        return 1
-    return 0&lt;/p&gt;
-&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
-    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.NOTSET)
-    sys.exit(main(sys.argv))
-```&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;function&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[]):&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exception&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Fatal error when calling function.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(name)s&lt;/span&gt;&lt;span class="s1"&gt; &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;NOTSET&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The script uses a catch-all pattern by using the base &lt;code&gt;Exception&lt;/code&gt; object in the tr/except block.  This is normally discouraged and is only used here for sake of simplicity.&lt;/p&gt;
 &lt;p&gt;Executing the example intercepts the divide by 0 and prints out the messasge along with the respective call stack and -- it's important to note it here -- resumes the execution, returning 1 instead of 0.&lt;/p&gt;
 &lt;p&gt;Running this script yeilds the following output:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-09 21:34:23,560 : __main__ ERROR : Fatal error when calling function.
-Traceback (most recent call last):
-  File "example.py", line 10, in main
-    function()
-  File "example.py", line 5, in function
-    x = 1/ 0
-ZeroDivisionError: division by zero&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-09 21:34:23,560 : __main__ ERROR : Fatal error when calling function.&lt;/span&gt;
+&lt;span class="go"&gt;Traceback (most recent call last):&lt;/span&gt;
+&lt;span class="go"&gt;  File &amp;quot;example.py&amp;quot;, line 10, in main&lt;/span&gt;
+&lt;span class="go"&gt;    function()&lt;/span&gt;
+&lt;span class="go"&gt;  File &amp;quot;example.py&amp;quot;, line 5, in function&lt;/span&gt;
+&lt;span class="go"&gt;    x = 1/ 0&lt;/span&gt;
+&lt;span class="go"&gt;ZeroDivisionError: division by zero&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The accompanying callstack appears right under the logging message, starting with &lt;code&gt;Traceback&lt;/code&gt; and ending with the exception name, &lt;code&gt;ZeroDivisionError&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="logging-exceptions-at-other-levels"&gt;Logging Exceptions at other Levels&lt;/h2&gt;
 &lt;p&gt;Underneath the hood, the &lt;code&gt;exception&lt;/code&gt; function assigns the message to the &lt;code&gt;error&lt;/code&gt; level and sets the &lt;code&gt;exc_info&lt;/code&gt; parameter to &lt;code&gt;True&lt;/code&gt;.  So with the parameter, we can accomplish the same thing by being more explict with the &lt;code&gt;logger.error&lt;/code&gt; function:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;python
-try:
-    function()
-except Exception:
-    logger.error("Fatal error when calling function.", exc_info=True)
-    return 1&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Fatal error when calling function.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;exc_info&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Running the updated script yields the same output:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-09 21:42:23,560 : __main__ ERROR : Fatal error when calling function.
-Traceback (most recent call last):
-  File "example.py", line 10, in main
-    function()
-  File "example.py", line 5, in function
-    x = 1/ 0
-ZeroDivisionError: division by zero&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-09 21:42:23,560 : __main__ ERROR : Fatal error when calling function.&lt;/span&gt;
+&lt;span class="go"&gt;Traceback (most recent call last):&lt;/span&gt;
+&lt;span class="go"&gt;  File &amp;quot;example.py&amp;quot;, line 10, in main&lt;/span&gt;
+&lt;span class="go"&gt;    function()&lt;/span&gt;
+&lt;span class="go"&gt;  File &amp;quot;example.py&amp;quot;, line 5, in function&lt;/span&gt;
+&lt;span class="go"&gt;    x = 1/ 0&lt;/span&gt;
+&lt;span class="go"&gt;ZeroDivisionError: division by zero&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The &lt;code&gt;exc_info&lt;/code&gt; is a key word argument of the base &lt;code&gt;log&lt;/code&gt; function so using it is not restricted to just the &lt;code&gt;error&lt;/code&gt; function. The parameter is available to all convenience functions and can be used to log the message and callstack to any other level, like &lt;code&gt;info&lt;/code&gt;, for example:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;python
-try:
-    function()
-except Exception:
-    logger.info("Handled exception when calling function.", exc_info=True)&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Handled exception when calling function.&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;exc_info&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Executing the script changes nothing -- except that the message is now emitted at the &lt;code&gt;info&lt;/code&gt; level instead of the more severe &lt;code&gt;error&lt;/code&gt; level.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-09 21:59:40,506 : __main__ INFO : Handled exception when calling function.
-Traceback (most recent call last):
-  File "example.py", line 10, in main
-    function()
-  File "example.py", line 5, in function
-    x = 1/ 0
-ZeroDivisionError: division by zero&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-09 21:59:40,506 : __main__ INFO : Handled exception when calling function.&lt;/span&gt;
+&lt;span class="go"&gt;Traceback (most recent call last):&lt;/span&gt;
+&lt;span class="go"&gt;  File &amp;quot;example.py&amp;quot;, line 10, in main&lt;/span&gt;
+&lt;span class="go"&gt;    function()&lt;/span&gt;
+&lt;span class="go"&gt;  File &amp;quot;example.py&amp;quot;, line 5, in function&lt;/span&gt;
+&lt;span class="go"&gt;    x = 1/ 0&lt;/span&gt;
+&lt;span class="go"&gt;ZeroDivisionError: division by zero&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Using this technique really should be done in special cases.  It's still best to use the &lt;code&gt;exception&lt;/code&gt; method to log exception classtacks on the &lt;code&gt;error&lt;/code&gt; level.  Callstacks are rather synonymous with applications crashes, so dumping a callstack at a client-visible level, like &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;warning&lt;/code&gt; will end up confusing the user.  In the cases where the application is  handling expected exceptions, it's probably simpler for everybody for the application to use the regular logging functions skip the callstack.&lt;/p&gt;</content><category term="application development"></category><category term="python"></category><category term="logging"></category></entry><entry><title>Quick Start to Python Logging</title><link href="https://dbarsam.github.io/blog/articles/python-logging-quick-start/" rel="alternate"></link><published>2021-02-08T19:13:00-05:00</published><updated>2021-02-08T19:13:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2021-02-08:/blog/articles/python-logging-quick-start/</id><summary type="html">&lt;p&gt;The bare minimum needed to get started with thePython logging system.&lt;/p&gt;</summary><content type="html">&lt;!--
 spell-checker:ignore NOTSET asctime levelname
 --&gt;
@@ -81,16 +83,16 @@ spell-checker:ignore NOTSET asctime levelname
 &lt;p&gt;Fortunately, Python has a logging service built into its core system libraries that is both powerful and flexible -- so much so that it's slightly intimidating.  This post will introduce the logging system through a collection of basic logging topics.&lt;/p&gt;
 &lt;h2 id="replacing-print"&gt;Replacing &lt;code&gt;print&lt;/code&gt;&lt;/h2&gt;
 &lt;p&gt;The most basic way of logging is to write messages to the console using the &lt;code&gt;print&lt;/code&gt; function.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;python
-print('This is an info message')&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an info message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The &lt;code&gt;print&lt;/code&gt; function writes text to the system's standard output stream.  For small scraps of code this works well because they are small scraps of code.  Scaling this practice up to more complex projects, like applications or system libraries, becomes problematic. In those situations, where a single client is brining in various libraries from multiple developers, all of the &lt;code&gt;print&lt;/code&gt;s would overwhelm the user with information and turn the system console's into a performance bottleneck.&lt;/p&gt;
 &lt;p&gt;Library developers could work around this, maybe creating a dev and release mode of their library, but that's adding an extra layer of needless work and responsibility onto each individual library.  Python's logging system has already solved this problem and splits the responsibility between the developer and client.  The developer write the logging messages and the client controls the output.&lt;/p&gt;
 &lt;h2 id="using-logger-objects"&gt;Using Logger Objects&lt;/h2&gt;
 &lt;p&gt;The developer-facing part of the logging system is the &lt;a href="https://docs.python.org/3/library/logging.html#logger-objects"&gt;logger objects&lt;/a&gt;.  These logger objects are aptly named &lt;code&gt;logger&lt;/code&gt;s and developers request one from the &lt;code&gt;logging&lt;/code&gt; module.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;python
-import logging
-logger = logging.getLogger(__name__)
-logger.info('This is an info message')&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+&lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an info message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;There are a few things to note with the snippet:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
@@ -112,12 +114,13 @@ logger.info('This is an info message')&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Printing messages to the console with &lt;code&gt;print&lt;/code&gt; works right out of the box.  Sending logging messages to the console, like in the above snippet, does not.&lt;/p&gt;
 &lt;p&gt;The logging system must be initialized and configured to send logging messages to the console.  This configuration step will be custom for larger projects that require more than one output for messages, but smaller projects can initialize the system in a single line using the &lt;code&gt;logging.basicConfig&lt;/code&gt; function.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;basicConfig&lt;/code&gt; function allows the user to configure the most frequently used options.  The snippet from the &lt;code&gt;example.py&lt;/code&gt; module below initializes the logging system with a opinionated configuration that works for basic usage.&lt;/p&gt;
-&lt;p&gt;```python
-import logging&lt;/p&gt;
-&lt;p&gt;logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)&lt;/p&gt;
-&lt;p&gt;logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
-logger.info('This is an info message')
-```&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an info message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The function takes in multiple parameters, but the bare minimum should include the &lt;code&gt;format&lt;/code&gt; and the &lt;code&gt;level&lt;/code&gt; arguments.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;format&lt;/code&gt; text is the template to apply to all messages and in our case we have a simple one that makes a logging message from three logging message properties:&lt;/p&gt;
 &lt;ol&gt;
@@ -126,133 +129,177 @@ logger.info('This is an info message')
 &lt;li&gt;&lt;code&gt;message&lt;/code&gt;: the message itself&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;Running the code example above yields the print message, but also the time and the level name as well:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-08 20:02:30,998 : INFO : This is an info message&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-08 20:02:30,998 : INFO : This is an info message&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The &lt;code&gt;level&lt;/code&gt; argument is a filter.  Changing the value from &lt;code&gt;logging.INFO&lt;/code&gt; to a higher level, like &lt;code&gt;logging.WARNING&lt;/code&gt; will blocked the info messages from being displayed.  Similarly, going to a lower level, like &lt;code&gt;logging.DEBUG&lt;/code&gt;, will allow the &lt;code&gt;info&lt;/code&gt; messages, but also include all &lt;code&gt;debug&lt;/code&gt; messages.  But again, with the goal of minimally replacing the print statement, this can be set to &lt;code&gt;logging.INFO&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="how-to-initialize"&gt;How to Initialize&lt;/h2&gt;
 &lt;p&gt;Initialization should occur only once in an application's lifespan as each initialization destroyers the previous initialization.  For this reason, initialization should not be done in a library but instead by done in the application's &lt;code&gt;__main__&lt;/code&gt; block.&lt;/p&gt;
 &lt;p&gt;The official &lt;code&gt;__main__&lt;/code&gt; &lt;a href="https://docs.python.org/3/library/__main__.html"&gt;documentation&lt;/a&gt; does a great job explaining what this block is.  But, it's best to use the &lt;code&gt;__main__&lt;/code&gt; block to initialize the logging system because it is the main entry point of the application and executed before anything else.  For example, update the above &lt;code&gt;example.py&lt;/code&gt; by adding a &lt;code&gt;__main__&lt;/code&gt; block:&lt;/p&gt;
-&lt;p&gt;```python
-import sys
-import logging&lt;/p&gt;
-&lt;p&gt;def main(args=[]):
-    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
-    logger.info('This is an info message')
-    return 0&lt;/p&gt;
-&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-    sys.exit(main(sys.argv))
-```&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[]):&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an info message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;If we execute &lt;code&gt;example.py&lt;/code&gt; directly, we see the logging statement.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-08 20:03:01,900 : INFO : This is an info message&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-08 20:03:01,900 : INFO : This is an info message&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;However, if we &lt;code&gt;import&lt;/code&gt; the module, the &lt;code&gt;__main__&lt;/code&gt; block (and the initialization) is ignored and the logging statement is skipped:&lt;/p&gt;
 &lt;!-- markdownlint-disable MD014 --&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python -c "from example import main;main([])"
-$&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python -c &lt;span class="s2"&gt;&amp;quot;from example import main;main([])&amp;quot;&lt;/span&gt;
+&lt;span class="gp"&gt;$&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;!-- markdownlint-enable MD014 --&gt;
 
 &lt;p&gt;The second example doesn't have any logging messages because the &lt;code&gt;__name__&lt;/code&gt; value contains the module name &lt;code&gt;example&lt;/code&gt; instead of the &lt;code&gt;__main__&lt;/code&gt; value.&lt;/p&gt;
 &lt;h2 id="a-note-about-loggings-name-and-__name__"&gt;A note about logging's &lt;code&gt;name&lt;/code&gt; and &lt;code&gt;__name__&lt;/code&gt;&lt;/h2&gt;
 &lt;p&gt;Remember that using &lt;code&gt;__name__&lt;/code&gt; in &lt;code&gt;logger = logging.getLogger(__name__)&lt;/code&gt; is considered a best practice because it leverages the python module name stored in that variable and simplifies the way to acquire the logger through the code.&lt;/p&gt;
 &lt;p&gt;However, when using &lt;code&gt;__name__&lt;/code&gt; in the &lt;code&gt;__main__&lt;/code&gt; block, the value of &lt;code&gt;__name__&lt;/code&gt; changes to &lt;code&gt;__main__&lt;/code&gt;.  If we include the &lt;code&gt;%(name)s&lt;/code&gt; field in our initialization we can see this in practice.&lt;/p&gt;
-&lt;p&gt;```python
-import sys
-import logging&lt;/p&gt;
-&lt;p&gt;def main(args=[]):
-    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
-    logger.info('This is an info message')
-    return 0&lt;/p&gt;
-&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
-    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.INFO)
-    sys.exit(main(sys.argv))
-```&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[]):&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an info message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(name)s&lt;/span&gt;&lt;span class="s1"&gt; &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Executing the file from the command line includes the &lt;code&gt;__main__&lt;/code&gt; in the logging message.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-08 20:05:02,700 : __main__ - INFO : This is an info message&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-08 20:05:02,700 : __main__ - INFO : This is an info message&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;However, executing the code as a module (after we manually initialize the logging system), displays the name of the module &lt;code&gt;example&lt;/code&gt; in the name value:&lt;/p&gt;
-&lt;p&gt;```console
-$ python&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;import logging
-logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.INFO)
-from example import main
-main([])
-2021-02-08 20:07:03,600 : example - INFO : This is an info message
-0
-```&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python
+&lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt; import logging&lt;/span&gt;
+&lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt; logging.basicConfig(format=&amp;#39;%(asctime)s : %(name)s %(levelname)s : %(message)s&amp;#39;, level=logging.INFO)&lt;/span&gt;
+&lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt; from example import main&lt;/span&gt;
+&lt;span class="go"&gt;&amp;gt;&amp;gt;&amp;gt; main([])&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:07:03,600 : example - INFO : This is an info message&lt;/span&gt;
+&lt;span class="go"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;This is important to know as the client could very well use the &lt;code&gt;name&lt;/code&gt; field to filter in or out logging messages from a particular module.&lt;/p&gt;
 &lt;h2 id="using-different-logging-levels"&gt;Using different logging levels&lt;/h2&gt;
 &lt;p&gt;The logging system attaches a numerical severity level to each logging message.  These levels are actually customizable, but in practically all cases its best to just use the default levels define in the &lt;code&gt;logging&lt;/code&gt; module: &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warning&lt;/code&gt;, &lt;code&gt;error&lt;/code&gt;, and &lt;code&gt;critical&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The logger object implements a convenience logging function for each logging level, wrapping around the actual &lt;code&gt;log&lt;/code&gt; function.  The &lt;code&gt;log&lt;/code&gt; function is public to use, and can be used for special handling or for custom levels:&lt;/p&gt;
-&lt;p&gt;```python
-import sys
-import logging&lt;/p&gt;
-&lt;p&gt;def main(args=[]):
-    logger = logging.getLogger(&lt;strong&gt;name&lt;/strong&gt;)
-    logger.log(5, 'This is a custom message at level 5')
-    logger.debug('This is a debug message')
-    logger.info('This is an info message')
-    logger.warning('This is a warning message')
-    logger.error('This is an error message')
-    logger.critical('This is a critical message')
-    logger.log(100, 'This is a custom message at level 100')
-    return 0&lt;/p&gt;
-&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
-    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.INFO)
-    sys.exit(main(sys.argv))
-```&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[]):&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getLogger&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;This is a custom message at level 5&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is a debug message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an info message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;warning&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is a warning message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is an error message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;critical&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;This is a critical message&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;This is a custom message at level 100&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(name)s&lt;/span&gt;&lt;span class="s1"&gt; &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;INFO&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The uses all convenience functions and uses custom levels &lt;code&gt;5&lt;/code&gt; and &lt;code&gt;100&lt;/code&gt;. Execute the above module yields the following results:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-08 20:19:58,867 : __main__ INFO : This is an info message
-2021-02-08 20:19:58,867 : __main__ WARNING : This is a warning message
-2021-02-08 20:19:58,867 : __main__ ERROR : This is an error message
-2021-02-08 20:19:58,867 : __main__ CRITICAL : This is a critical message
-2021-02-08 20:19:58,867 : __main__ Level 100 : This is a custom message at level 100&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-08 20:19:58,867 : __main__ INFO : This is an info message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:19:58,867 : __main__ WARNING : This is a warning message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:19:58,867 : __main__ ERROR : This is an error message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:19:58,867 : __main__ CRITICAL : This is a critical message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:19:58,867 : __main__ Level 100 : This is a custom message at level 100&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;All of the logging messages appear -- except for the &lt;code&gt;5&lt;/code&gt; and &lt;code&gt;debug&lt;/code&gt; messages.  This is because we set the global level parameter to &lt;code&gt;logging.INFO&lt;/code&gt; in our &lt;code&gt;basicConfig&lt;/code&gt; call.  That &lt;code&gt;level&lt;/code&gt; parameter configures the system to filter out all messages with a severity level less than given level.  Changing the value to &lt;code&gt;logging.ERROR&lt;/code&gt; will filter out &lt;code&gt;5&lt;/code&gt;, &lt;code&gt;debug&lt;/code&gt;  &lt;code&gt;warning&lt;/code&gt;, and &lt;code&gt;info&lt;/code&gt; messages:&lt;/p&gt;
-&lt;p&gt;```python
-import sys
-import logging&lt;/p&gt;
-&lt;p&gt;def main(args=[]):
-    ....
-    return 0&lt;/p&gt;
-&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
-    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.ERROR)
-    sys.exit(main(sys.argv))
-```&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[]):&lt;/span&gt;
+    &lt;span class="o"&gt;....&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(name)s&lt;/span&gt;&lt;span class="s1"&gt; &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ERROR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Executing the above module yields the following results:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-08 20:36:05,829 : __main__ ERROR : This is an error message
-2021-02-08 20:36:05,829 : __main__ CRITICAL : This is an critical message
-2021-02-08 20:36:05,829 : __main__ Level 100 : This is an custom message at level 100&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-08 20:36:05,829 : __main__ ERROR : This is an error message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:36:05,829 : __main__ CRITICAL : This is an critical message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:36:05,829 : __main__ Level 100 : This is an custom message at level 100&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;And likewise, setting the value to &lt;code&gt;logging.NOTSET&lt;/code&gt; is the equivalent of setting the filter to &lt;code&gt;0&lt;/code&gt; and letting all messages through:&lt;/p&gt;
-&lt;p&gt;```python
-import sys
-import logging&lt;/p&gt;
-&lt;p&gt;def main(args=[]):
-    ....
-    return 0&lt;/p&gt;
-&lt;p&gt;if &lt;strong&gt;name&lt;/strong&gt; == '&lt;strong&gt;main&lt;/strong&gt;':
-    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.NOTSET)
-    sys.exit(main(sys.argv))
-```&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;console
-$ python example.py
-2021-02-08 20:37:34,355 : __main__ Level 5 : This is an custom message at level 5
-2021-02-08 20:37:34,355 : __main__ DEBUG : This is an debug message
-2021-02-08 20:37:34,355 : __main__ INFO : This is an info message
-2021-02-08 20:37:34,355 : __main__ WARNING : This is an warning message
-2021-02-08 20:37:34,355 : __main__ ERROR : This is an error message
-2021-02-08 20:37:34,355 : __main__ CRITICAL : This is an critical message
-2021-02-08 20:37:34,355 : __main__ Level 100 : This is an custom message at level 100&lt;/code&gt;&lt;/p&gt;</content><category term="application development"></category><category term="python"></category><category term="logging"></category></entry></feed>
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;logging&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[]):&lt;/span&gt;
+    &lt;span class="o"&gt;....&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;__main__&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;basicConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;%(asctime)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(name)s&lt;/span&gt;&lt;span class="s1"&gt; &lt;/span&gt;&lt;span class="si"&gt;%(levelname)s&lt;/span&gt;&lt;span class="s1"&gt; : &lt;/span&gt;&lt;span class="si"&gt;%(message)s&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;logging&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;NOTSET&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;python example.py
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ Level 5 : This is an custom message at level 5&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ DEBUG : This is an debug message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ INFO : This is an info message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ WARNING : This is an warning message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ ERROR : This is an error message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ CRITICAL : This is an critical message&lt;/span&gt;
+&lt;span class="go"&gt;2021-02-08 20:37:34,355 : __main__ Level 100 : This is an custom message at level 100&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</content><category term="application development"></category><category term="python"></category><category term="logging"></category></entry><entry><title>Headless Qt?</title><link href="https://dbarsam.github.io/blog/articles/headless-qt/" rel="alternate"></link><published>2020-11-06T10:14:00-05:00</published><updated>2020-11-06T10:14:00-05:00</updated><author><name>db</name></author><id>tag:dbarsam.github.io,2020-11-06:/blog/articles/headless-qt/</id><summary type="html">&lt;p&gt;Can you configure Qt to work in systems with no UI?&lt;/p&gt;</summary><content type="html">&lt;!--
+spell-checker:ignore FONTDIR vcxsrv
+--&gt;
+&lt;p&gt;This isn't a real article.  Instead, it's more of an annotated bookmark of this &lt;a href="https://www.qcad.org/bugtracker/index.php?do=details&amp;amp;task_id=1534"&gt;post&lt;/a&gt;, which was used in some research on how to configure Qt applications to run in Docker Windows containers -- and that Docker task is part of another, work-in-progress project that may not ever be completed. So, there are no solutions here.  Sorry.&lt;/p&gt;
+&lt;p&gt;The &lt;a href="https://www.qcad.org/bugtracker/index.php?do=details&amp;amp;task_id=1534"&gt;post&lt;/a&gt;, archived here, says this:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Since the launcher batch no longer requests "-style plastique" QT wants to apply the native style of the desktop environment. This fails on a headless system (or where the current user has no graphical shell to connect to) with the message "Gtk-WARNING **: cannot open display: ". Fortunately, QT provides a workaround in addition to the new "platform=offscreen" flag.&lt;/p&gt;
+&lt;p&gt;In the tools that set &lt;em&gt;-no-gui&lt;/em&gt;, beforehand export these variables into the environment&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;export QT_STYLE_OVERRIDE=&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="go"&gt;export QT_QPA_PLATFORM=offscreen&lt;/span&gt;
+&lt;span class="go"&gt;export DISPLAY=&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;PS: QT-offscreen will not find fonts; unfortunately the workaround only allows for a single directory to search them (I need helvetica):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="go"&gt;export QT_QPA_FONTDIR=&amp;quot;/usr/local/share/fonts/type1&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Maybe that should get reported upstream, so that like LD_LIBRARY_PATH several directories could be specified.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The post has some concepts that require some commentary, done here via unorganized bullet points:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The solution should be as simple as setting the &lt;code&gt;QT_QPA_PLATFORM=offscreen&lt;/code&gt; variable setting. However, it's probably wishful thinking that Qt would make it that easy to disable the UI part of their UI framework.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;This post is for Linux, in case it's not obvious.  Windows does not support the &lt;code&gt;export&lt;/code&gt; command nor the &lt;code&gt;DISPLAY&lt;/code&gt; environment variable:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;code&gt;export&lt;/code&gt; command does has an equivalent &lt;code&gt;set&lt;/code&gt; command.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;code&gt;DISPLAY&lt;/code&gt; variable is actually part of the &lt;code&gt;X server&lt;/code&gt; window system, which introduces an entirely different problem if you want this to work on Windows.  This is a awkward problem:  You have to either find the Windows equivalent or launch an X compatible window system, like &lt;a href="https://sourceforge.net/projects/vcxsrv/"&gt;vcxsrv&lt;/a&gt;, on top of your system -- but why would if you do that if your goal is a to run as headless application?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The Qt library does provide a &lt;a href="https://doc.qt.io/qt-5/qoffscreensurface.html"&gt;QOffscreenSurface&lt;/a&gt; class but is it intended for cases common to &lt;a href="https://forum.qt.io/topic/56889/what-exactly-is-a-qoffscreensurface"&gt;OpenGL rendering&lt;/a&gt;.  Despite the name it does not seem applicable to the problem.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The Qt help page for &lt;a href="https://doc.qt.io/qt-5/qcoreapplication.html"&gt;QtCoreApplication&lt;/a&gt; describes it as the class for non-GUI applications:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This class is used by non-GUI applications to provide their event loop. For non-GUI application that uses Qt, there should be exactly one QCoreApplication object. For GUI applications, see QGuiApplication. For applications that use the Qt Widgets module, see QApplication.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;But since we need the UI application to only be headless in certain situations it's unclear if this is really applicable.  Our goal is to seamlessly work in the different environments without having to add additional code to switch between &lt;code&gt;QApplication&lt;/code&gt; and &lt;code&gt;QCoreApplication&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Here's the unanswered &lt;a href="https://stackoverflow.com/questions/42686691/create-a-truly-headless-qapplication-instance"&gt;StackOverflow&lt;/a&gt; question asking the same thing.  One comment confirms that it worked with the &lt;a href="https://doc.qt.io/qt-5/qguiapplication.html#platformName-prop"&gt;offscreen&lt;/a&gt; setting.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</content><category term="application development"></category><category term="python"></category><category term="qt"></category><category term="docker"></category><category term="gui"></category></entry></feed>

@@ -122,70 +122,72 @@ spell-checker:ignore
 <li>It includes the stack trace of the current exception from <a href="https://docs.python.org/3/library/sys.html#sys.exc_info">sys.exc_info()</a>.</li>
 </ol>
 <p>These are useful when logging messages during an exception.  For example, consider this example script:</p>
-<p>```python
-import sys
-import logging</p>
-<p>def function():
-    x = 1/ 0</p>
-<p>def main(args=[]):
-    logger = logging.getLogger(<strong>name</strong>)
-    try:
-        function()
-    except Exception:
-        logger.exception("Fatal error when calling function.")
-        return 1
-    return 0</p>
-<p>if <strong>name</strong> == '<strong>main</strong>':
-    logging.basicConfig(format='%(asctime)s : %(name)s %(levelname)s : %(message)s', level=logging.NOTSET)
-    sys.exit(main(sys.argv))
-```</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="k">def</span> <span class="nf">function</span><span class="p">():</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">function</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Fatal error when calling function.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> : </span><span class="si">%(name)s</span><span class="s1"> </span><span class="si">%(levelname)s</span><span class="s1"> : </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">NOTSET</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">))</span>
+</pre></div>
 <p>The script uses a catch-all pattern by using the base <code>Exception</code> object in the tr/except block.  This is normally discouraged and is only used here for sake of simplicity.</p>
 <p>Executing the example intercepts the divide by 0 and prints out the messasge along with the respective call stack and -- it's important to note it here -- resumes the execution, returning 1 instead of 0.</p>
 <p>Running this script yeilds the following output:</p>
-<p><code>console
-$ python example.py
-2021-02-09 21:34:23,560 : __main__ ERROR : Fatal error when calling function.
-Traceback (most recent call last):
-  File "example.py", line 10, in main
-    function()
-  File "example.py", line 5, in function
-    x = 1/ 0
-ZeroDivisionError: division by zero</code></p>
+<div class="highlight"><pre><span></span><span class="gp">$ </span>python example.py
+<span class="go">2021-02-09 21:34:23,560 : __main__ ERROR : Fatal error when calling function.</span>
+<span class="go">Traceback (most recent call last):</span>
+<span class="go">  File &quot;example.py&quot;, line 10, in main</span>
+<span class="go">    function()</span>
+<span class="go">  File &quot;example.py&quot;, line 5, in function</span>
+<span class="go">    x = 1/ 0</span>
+<span class="go">ZeroDivisionError: division by zero</span>
+</pre></div>
 <p>The accompanying callstack appears right under the logging message, starting with <code>Traceback</code> and ending with the exception name, <code>ZeroDivisionError</code>.</p>
 <h2 id="logging-exceptions-at-other-levels">Logging Exceptions at other Levels</h2>
 <p>Underneath the hood, the <code>exception</code> function assigns the message to the <code>error</code> level and sets the <code>exc_info</code> parameter to <code>True</code>.  So with the parameter, we can accomplish the same thing by being more explict with the <code>logger.error</code> function:</p>
-<p><code>python
-try:
-    function()
-except Exception:
-    logger.error("Fatal error when calling function.", exc_info=True)
-    return 1</code></p>
+<div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">function</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Fatal error when calling function.&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span>
+</pre></div>
 <p>Running the updated script yields the same output:</p>
-<p><code>console
-$ python example.py
-2021-02-09 21:42:23,560 : __main__ ERROR : Fatal error when calling function.
-Traceback (most recent call last):
-  File "example.py", line 10, in main
-    function()
-  File "example.py", line 5, in function
-    x = 1/ 0
-ZeroDivisionError: division by zero</code></p>
+<div class="highlight"><pre><span></span><span class="gp">$ </span>python example.py
+<span class="go">2021-02-09 21:42:23,560 : __main__ ERROR : Fatal error when calling function.</span>
+<span class="go">Traceback (most recent call last):</span>
+<span class="go">  File &quot;example.py&quot;, line 10, in main</span>
+<span class="go">    function()</span>
+<span class="go">  File &quot;example.py&quot;, line 5, in function</span>
+<span class="go">    x = 1/ 0</span>
+<span class="go">ZeroDivisionError: division by zero</span>
+</pre></div>
 <p>The <code>exc_info</code> is a key word argument of the base <code>log</code> function so using it is not restricted to just the <code>error</code> function. The parameter is available to all convenience functions and can be used to log the message and callstack to any other level, like <code>info</code>, for example:</p>
-<p><code>python
-try:
-    function()
-except Exception:
-    logger.info("Handled exception when calling function.", exc_info=True)</code></p>
+<div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">function</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Handled exception when calling function.&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
 <p>Executing the script changes nothing -- except that the message is now emitted at the <code>info</code> level instead of the more severe <code>error</code> level.</p>
-<p><code>console
-$ python example.py
-2021-02-09 21:59:40,506 : __main__ INFO : Handled exception when calling function.
-Traceback (most recent call last):
-  File "example.py", line 10, in main
-    function()
-  File "example.py", line 5, in function
-    x = 1/ 0
-ZeroDivisionError: division by zero</code></p>
+<div class="highlight"><pre><span></span><span class="gp">$ </span>python example.py
+<span class="go">2021-02-09 21:59:40,506 : __main__ INFO : Handled exception when calling function.</span>
+<span class="go">Traceback (most recent call last):</span>
+<span class="go">  File &quot;example.py&quot;, line 10, in main</span>
+<span class="go">    function()</span>
+<span class="go">  File &quot;example.py&quot;, line 5, in function</span>
+<span class="go">    x = 1/ 0</span>
+<span class="go">ZeroDivisionError: division by zero</span>
+</pre></div>
 <p>Using this technique really should be done in special cases.  It's still best to use the <code>exception</code> method to log exception classtacks on the <code>error</code> level.  Callstacks are rather synonymous with applications crashes, so dumping a callstack at a client-visible level, like <code>info</code> or <code>warning</code> will end up confusing the user.  In the cases where the application is  handling expected exceptions, it's probably simpler for everybody for the application to use the regular logging functions skip the callstack.</p>
     </article>
 

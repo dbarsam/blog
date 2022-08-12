@@ -115,38 +115,42 @@
         <!--
 spell-checker:ignore
 -->
-<p>In the <a href="{filename}../2020-12-01-python-vscode-and-max-1/note.md">previous article</a>, we set up a conventional Python development environment with a Python virtual environment and our Python plugin as an editable package.  In this article, we'll make that virtual environment a side-car environment by grafting it onto the external application.</p>
+<p>In the <a href="https://dbarsam.github.io/blog/articles/python-vscode-max-1/">previous article</a>, we set up a conventional Python development environment with a Python virtual environment and our Python plugin as an editable package.  In this article, we'll make that virtual environment a side-car environment by grafting it onto the external application.</p>
 <h2 id="python-activator">Python Activator</h2>
 <p>The virtual environment that we've created is linked to the <em>system</em> Python environment that created it.  In order to graft that environment onto the application's Python installation, we're going to play around with that relationship by activating that virtual environment not in the original Python installation, but in the application's Python environment.</p>
 <p>We can do that in a non-destructible way via a bootstrap script that is launched at application start-up.  We're really emphasizing the non-destructive nature of this because we don't want to make any permanent changes to the application.  In fact, everything should be isolated to the current executing session.  The goal here is that the user should be able to launch the application without the start-up script and have the new instance co-exist without any side effects.</p>
 <p>Fortunately, the <code>virtualenv</code>'s Python activator option has done most of the work for us in its <a href="https://github.com/pypa/virtualenv/blob/main/src/virtualenv/activation/python/activate_this.py">activate_this.py</a> Python script.  You can see this script online at GitHub.  The snapshot used for this article is available below:</p>
-<p>```python</p>
-<h1 id="-coding-utf-8-">-<em>- coding: utf-8 -</em>-</h1>
-<p>"""Activate virtualenv for current interpreter:
-Use exec(open(this_file).read(), {'<strong>file</strong>': this_file}).
-This can be used when you must use an existing Python interpreter, not the virtualenv bin/python.
-"""
-import os
-import site
-import sys</p>
-<p>try:
-    abs_file = os.path.abspath(<strong>file</strong>)
-except NameError:
-    raise AssertionError("You must use exec(open(this_file).read(), {'<strong>file</strong>': this_file}))")</p>
-<p>bin_dir = os.path.dirname(abs_file)
-base = bin_dir[: -len("<strong>BIN_NAME</strong>") - 1]  # strip away the bin part from the <strong>file</strong>, plus the path separator</p>
-<h1 id="prepend-bin-to-path-this-file-is-inside-the-bin-directory">prepend bin to PATH (this file is inside the bin directory)</h1>
-<p>os.environ["PATH"] = os.pathsep.join([bin_dir] + os.environ.get("PATH", "").split(os.pathsep))
-os.environ["VIRTUAL_ENV"] = base  # virtual env is right above bin directory</p>
-<h1 id="add-the-virtual-environments-libraries-to-the-host-python-import-mechanism">add the virtual environments libraries to the host python import mechanism</h1>
-<p>prev_length = len(sys.path)
-for lib in "<strong>LIB_FOLDERS</strong>".split(os.pathsep):
-    path = os.path.realpath(os.path.join(bin_dir, lib))
-    site.addsitedir(path.decode("utf-8") if "<strong>DECODE_PATH</strong>" else path)
-sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]</p>
-<p>sys.real_prefix = sys.prefix
-sys.prefix = base
-```</p>
+<div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Activate virtualenv for current interpreter:</span>
+<span class="sd">Use exec(open(this_file).read(), {&#39;__file__&#39;: this_file}).</span>
+<span class="sd">This can be used when you must use an existing Python interpreter, not the virtualenv bin/python.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">site</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">abs_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;You must use exec(open(this_file).read(), {&#39;__file__&#39;: this_file}))&quot;</span><span class="p">)</span>
+
+<span class="n">bin_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">abs_file</span><span class="p">)</span>
+<span class="n">base</span> <span class="o">=</span> <span class="n">bin_dir</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;__BIN_NAME__&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># strip away the bin part from the __file__, plus the path separator</span>
+
+<span class="c1"># prepend bin to PATH (this file is inside the bin directory)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">bin_dir</span><span class="p">]</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">))</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VIRTUAL_ENV&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span>  <span class="c1"># virtual env is right above bin directory</span>
+
+<span class="c1"># add the virtual environments libraries to the host python import mechanism</span>
+<span class="n">prev_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="s2">&quot;__LIB_FOLDERS__&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bin_dir</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+    <span class="n">site</span><span class="o">.</span><span class="n">addsitedir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;__DECODE_PATH__&quot;</span> <span class="k">else</span> <span class="n">path</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="n">prev_length</span><span class="p">:]</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">prev_length</span><span class="p">]</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">real_prefix</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">prefix</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">base</span>
+</pre></div>
 <p>The Python activator is designed to be executed from within the application.  When we do that, the <code>activate_this.py</code> script will be making some low-level changes, so it's important to note the following things:</p>
 <ol>
 <li>
@@ -161,15 +165,15 @@ sys.prefix = base
 </ol>
 <h2 id="the-bootstrappy-bootstrap-script">The <code>bootstrap.py</code> Bootstrap script</h2>
 <p>The <code>virtualenv</code> module's <code>activate_this.py</code> provides the core functionality that we need to graft the environment onto our application's Python environment.  The script even gives us instruction on how to execute it:</p>
-<p><code>python
-script_path = r"D:\project\.env27\Scripts\activate_this.py"
-exec(open(script_path).read(), {"__file__": script_path})</code></p>
+<div class="highlight"><pre><span></span><span class="n">script_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;D:\project\.env27\Scripts\activate_this.py&quot;</span>
+<span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+</pre></div>
 <p>The problem here is that we need to make the script portable.  If we put that code into a startup file, named <code>bootstrap.py</code>, then we can use the <code>__file__</code> attribute to resolve the current path and resolve the location of the <code>activate_this.py</code>.</p>
-<p><code>python
-import os
-root_path = os.path.dirname(__file__)
-script_path = os.path.join(root_path, ".env27", "Scripts", "activate_this.py")
-exec(open(script_path).read(), {"__file__": script_path})</code></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">script_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="s2">&quot;.env27&quot;</span><span class="p">,</span> <span class="s2">&quot;Scripts&quot;</span><span class="p">,</span> <span class="s2">&quot;activate_this.py&quot;</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+</pre></div>
 <p>That's better, but it still not as portable as it needs to be.</p>
 <h2 id="bootstrap-environment-variables">Bootstrap Environment Variables</h2>
 <p>The <code>bootstrap.py</code>'s <code>script_path</code> variable is problematic for two reasons:</p>
@@ -179,10 +183,10 @@ exec(open(script_path).read(), {"__file__": script_path})</code></p>
 </ol>
 <p>We can punt that responsibility down the line to the user and have him pass the correct path in as a parameter.  However, the application's design will most definitely limit our ability to pass parameters to the script.  While the application's command line will probably include a way to execute a Python script, chances are good that any subsequence command line arguments will be processed by the application instead of being passed through to the Python script.</p>
 <p>One solution that seems to work around those limitations is environment variables:</p>
-<p><code>python
-import os
-script_path =  os.getenv("ACTIVATE_THIS_SCRIPT", "")
-exec(open(script_path).read(), {"__file__": script_path})</code></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">script_path</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ACTIVATE_THIS_SCRIPT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">exec</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+</pre></div>
 <p>Environment variables local to a process are a simple way to pass arguments down through multiple layers of code.  They're the equivalent to global variables and can be made local to the running instance of the application.  The alternative is to either automatically generate the script or a parameter file before launch -- which is not necessarily wrong, but won't work well for our particular task.  In our case it will be easier to set up the script to get it's data from environment variables.</p>
 <h2 id="bootstrap-safety-checks">Bootstrap Safety Checks</h2>
 <p>We can decorate our <code>bootstrap.py</code> with a bit more flare.</p>
@@ -201,107 +205,117 @@ exec(open(script_path).read(), {"__file__": script_path})</code></p>
 <ol>
 <li>We wrap the entire script in a <a href="https://docs.python.org/3/library/__main__.html">main scope</a> out of good habit.</li>
 </ol>
-<p>```python
-"""
-Standalone set-up script</p>
-<p>The script will inject various sites and execute startup files in
-order to set-up the Python environment for development.</p>
-<p>This script expects the following environment variables:</p>
-<ul>
-<li><code>PROJECT_SCRIPTS</code> A semi-colon separated list of files to execute with
-  <code>exec</code>.</li>
-</ul>
-<p>"""
-import os</p>
-<p>def main():
-    # Execute a list of startup scripts
-    scripts = os.getenv("PROJECT_SCRIPTS", "").split(";")
-    script_paths = [sf for sf in scripts if os.path.exists(sf)]
-    if not script_paths:
-        print("Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.")
-    for script_path in script_paths:
-        print("Executing Script: %s" % script_path)
-        with open(script_path) as f:
-            contents = f.read()
-        try:
-            exec(contents, {"<strong>file</strong>": script_path})
-        except Exception:
-            print("   ! %s failed to execute" % script_path)</p>
-<p>if <strong>name</strong> == "<strong>main</strong>":
-    main()
-```</p>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone set-up script</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Execute a list of startup scripts</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">scripts</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">script_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span> <span class="o">%</span> <span class="n">script_path</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
 <h2 id="bootstrap-logging">Bootstrap Logging</h2>
 <p>We take our basic premise one step further and replace the <code>prints</code> with <a href="https://docs.python.org/3/library/logging.html">logging</a> statements.  This step is optional, but recommended as your Python tool should already be set-up to use logging instead of <code>print</code> messages.</p>
 <p>As a convenience we use the logging module's basic set-up function <a href="https://docs.python.org/3/library/logging.html#logging.basicConfig">logging.basicConfig</a>.  This can be easily extended to something more advanced with the <a href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig">logging.config.dictConfig</a> configuration function.  And again, any parameter should be passed in via environment variables:</p>
-<p>```python
-"""
-Standalone set-up script</p>
-<p>The script will inject various sites and execute startup files in
-order to set-up the Python environment for development.</p>
-<p>This script expects the following environment variables:</p>
-<ul>
-<li>
-<p><code>PROJECT_SCRIPTS</code> A semi-colon separated list of files to execute with
-  <code>exec</code>.</p>
-</li>
-<li>
-<p><code>PROJECT_LOG_LEVEL</code> A semi-colon separated list of files to execute with
-  <code>exec</code>.</p>
-</li>
-</ul>
-<p>.. note::</p>
-<p>This script does not install ptvsd and expects the module to be already installed, or installed during the site injection or exec execution step.</p>
-<p>"""
-import logging
-import os
-import site</p>
-<p>def main():
-    # Configure the logging for the application
-    log_level = os.getenv("PROJECT_LOG_LEVEL", logging.DEBUG)
-    logging.basicConfig(level=log_level, format="%(message)s")
-    logger = logging.getLogger(<strong>name</strong>)</p>
-<p>logger.info("Python Bootstrap script - start -")
-    logger.info('Initialized logging to "%s"', log_level)</p>
-<p># Execute a list of startup scripts
-    scripts = os.getenv("PROJECT_SCRIPTS", "").split(";")
-    script_paths = [sf for sf in scripts if os.path.exists(sf)]
-    if not script_paths:
-        logger.warning("Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.")
-    for script_path in script_paths:
-        logger.info("Executing Script: %s", script_path)
-        with open(script_path) as f:
-            contents = f.read()
-        try:
-            exec(contents, {"<strong>file</strong>": script_path})
-        except Exception:
-            logger.exception("   ! %s failed to execute", script_path)</p>
-<p>logger.info("Python Bootstrap script - stop -")</p>
-<p>if <strong>name</strong> == "<strong>main</strong>":
-    main()</p>
-<p>```</p>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standalone set-up script</span>
+
+<span class="sd">The script will inject various sites and execute startup files in</span>
+<span class="sd">order to set-up the Python environment for development.</span>
+
+<span class="sd">This script expects the following environment variables:</span>
+
+<span class="sd">- `PROJECT_SCRIPTS` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">- `PROJECT_LOG_LEVEL` A semi-colon separated list of files to execute with</span>
+<span class="sd">  `exec`.</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">    This script does not install ptvsd and expects the module to be already installed, or installed during the site injection or exec execution step.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">site</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># Configure the logging for the application</span>
+    <span class="n">log_level</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - start -&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Initialized logging to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="p">)</span>
+
+    <span class="c1"># Execute a list of startup scripts</span>
+    <span class="n">scripts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">script_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">scripts</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sf</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Environment variable PROJECT_SCRIPTS does not exist or is empty.  Skipping script execution.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">script_path</span> <span class="ow">in</span> <span class="n">script_paths</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Executing Script: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">script_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;__file__&quot;</span><span class="p">:</span> <span class="n">script_path</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;   ! </span><span class="si">%s</span><span class="s2"> failed to execute&quot;</span><span class="p">,</span> <span class="n">script_path</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Python Bootstrap script - stop -&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
 <h2 id="execute-the-bootstrap">Execute the Bootstrap</h2>
 <p>With a virtual environment created and a basic bootstrap script in place, we're now ready to launch our application with its side-car environment.  To ensure that we do that the most portable way possible, we look to the application's start-up process and see what methods we have to execute a script an startup.  This will be application-specific, but usually it will involve a command line argument or environment variable.  From the <a href="https://knowledge.autodesk.com/support/3ds-max/getting-started/caas/CloudHelp/cloudhelp/2021/ENU/3DSMax-Basics/files/GUID-BCB04DEC-7967-4091-B980-638CFDFE47EC-htm.html">3ds Max help</a>, we're lucky enough that we can execute any Python file using the <code>-u PythonHost</code> command:</p>
-<p><code>batch
-3dsmax.exe -u PythonHost file.py</code></p>
+<div class="highlight"><pre><span></span>3dsmax.exe -u PythonHost file.py
+</pre></div>
 <p>With that information, we can create a very rudimentary <code>launcher.cmd</code> script to launch 3ds Max with both our project environment variables and the command line configured to launch with our bootstrap script:</p>
-<p><code>batch
-@echo off
-setlocal
-cd %~dp0
-set "PROJECT_LOG_LEVEL=DEBUG"
-set "PROJECT_SCRIPTS=%CD%\.env27\Scripts\activate_this.py"
-3dsmax.exe -u PythonHost bootstrap.py</code></p>
+<div class="highlight"><pre><span></span><span class="p">@</span><span class="k">echo</span> off
+<span class="k">setlocal</span>
+<span class="k">cd</span> <span class="nv">%~dp0</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_LOG_LEVEL=DEBUG&quot;</span>
+<span class="k">set</span> <span class="s2">&quot;PROJECT_SCRIPTS=</span><span class="nv">%CD%</span><span class="s2">\.env27\Scripts\activate_this.py&quot;</span>
+3dsmax.exe -u PythonHost bootstrap.py
+</pre></div>
 <p>Running this from the command line should launch 3ds Max and produce the following output in the 3ds Max Listener:</p>
-<p>```text
-Welcome to MAXScript.</p>
-<p>Python Bootstrap script - start -
-Initialized logging to "DEBUG"
-Executing Script: D:\projects.env27\Scripts\activate_this.py
+<div class="highlight"><pre><span></span>Welcome to MAXScript.
+
+
+Python Bootstrap script - start -
+Initialized logging to &quot;DEBUG&quot;
+Executing Script: D:\projects\.env27\Scripts\activate_this.py
 Python Bootstrap script - stop -
-```</p>
+</pre></div>
 <h2 id="next-step">Next Step</h2>
 <p>The final <code>bootstrap.py</code>  <code>launcher.cmd</code> scripts execute all of the necessary steps needed to launch the application with a grafted side-car environment.
-The next step, <a href="{filename}../2020-12-05-python-vscode-and-max-3/note.md">Part III</a>, will look into how exactly we can incorporate VSCode and extend this workflow with debugging capabilities.</p>
+The next step, <a href="https://dbarsam.github.io/blog/articles/python-vscode-max-3/">Part III</a>, will look into how exactly we can incorporate VSCode and extend this workflow with debugging capabilities.</p>
     </article>
 
         <div class="tags">

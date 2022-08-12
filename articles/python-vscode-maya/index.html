@@ -115,70 +115,70 @@
         <!--
 spell-checker:ignore
 -->
-<p>In the <a href="{filename}../2020-11-30-python-vscode-and-max/note.md">previous series of articles</a>, we built a quasi auto-attach workflow to debug 3ds Max's Python scripts with VSCode.  Fortunately, that workflow was general enough that trying to apply that to Maya only requires some slight tweaking.</p>
+<p>In the <a href="https://dbarsam.github.io/blog/articles/python-vscode-max/">previous series of articles</a>, we built a quasi auto-attach workflow to debug 3ds Max's Python scripts with VSCode.  Fortunately, that workflow was general enough that trying to apply that to Maya only requires some slight tweaking.</p>
 <h2 id="bootstrapmel"><code>bootstrap.mel</code></h2>
 <p>The Maya <a href="https://help.autodesk.com/view/MAYAUL/2018/ENU/?guid=GUID-2E5D1D43-DC3D-4CB2-9A35-757598220F22">command line</a> interface does not expose any way to execute a Python script.  However, it does accept <a href="https://help.autodesk.com/view/MAYAUL/2018/ENU/?guid=GUID-60178D44-9990-45B4-8B43-9429D54DF70E">Mel Scripts</a> and we can easily create a <code>bootstrap.mel</code> instead.  Since our goal is to keep the work centralized in the <code>bootstrap.py</code> script, the resulting MEL script simply executes that file:</p>
-<p><code>mel
-// Execute the Python bootstrap script
-string $python_env = getenv("PROJECT_MAYA_PYTHON_SCRIPT");
-string $python_files[] = stringToStringArray($python_env, ";");
+<div class="highlight"><pre><span></span>// Execute the Python bootstrap script
+string $python_env = getenv(&quot;PROJECT_MAYA_PYTHON_SCRIPT&quot;);
+string $python_files[] = stringToStringArray($python_env, &quot;;&quot;);
 for( $python_file in $python_files )
 {
     string $filename = fromNativePath($python_file);
-    print("Executing " + $filename + " python file\n");
-    python("exec(open('" + $filename + "').read())");
-}</code></p>
+    print(&quot;Executing &quot; + $filename + &quot; python file\n&quot;);
+    python(&quot;exec(open(&#39;&quot; + $filename + &quot;&#39;).read())&quot;);
+}
+</pre></div>
 <p>We follow the same model as before and use environment variables to pass parameters into the process.  We use the new <code>PROJECT_MAYA_PYTHON_SCRIPT</code> environment variable to contain a list of <code>;</code> separated python files that the MEL script will execute using MEL script's <code>python</code> command.</p>
 <h2 id="updated-launcher">Updated Launcher</h2>
 <p>We need to update the <code>launcher.json</code> file in VSCode to account for the new executable, command line, and our environment variable:</p>
-<p><code>json
-{
-    "name": "Maya 2018",
-    "type": "cppvsdbg",
-    "request": "launch",
-    "program": "${env:ProgramW6432}\\Autodesk\\Maya2018\\bin\\maya.exe",
-    "args": [
-        "-script",
-        "${workspaceFolder}\\scripts\\bootstrap.mel"
-    ],
-    "stopAtEntry": false,
-    "cwd": "",
-    "environment": [
-        // PROJECT_SCRIPTS contains a `;` separated list of filenames to run at startup in `bootstrap.py`
-        {
-            "name": "PROJECT_SCRIPTS",
-            "value": "${workspaceRoot}\\.env27\\Scripts\\activate_this.py"
-        },
-        // PROJECT_DEBUG_PORT / PROJECT_DEBUG_HOST should match 'Remote Attach' below.
-        {
-            "name": "PROJECT_DEBUG_PORT",
-            "value": "5678"
-        },
-        {
-            "name": "PROJECT_DEBUG_HOST",
-            "value": "localhost"
-        },
-        // PROJECT_LOG_LEVEL for the level of `logging` statements
-        {
-            "name": "PROJECT_LOG_LEVEL",
-            "value": "DEBUG"
-        },
-        // PROJECT_MAYA_PYTHON_SCRIPT contains a `;` separated list of filenames to run at startup in `bootstrap.mel`
-        {
-            "name": "PROJECT_MAYA_PYTHON_SCRIPT",
-            "value": "${workspaceFolder}\\scripts\\bootstrap.py"
-        }
-    ]
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Maya 2018&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cppvsdbg&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;request&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;launch&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;program&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${env:ProgramW6432}\\Autodesk\\Maya2018\\bin\\maya.exe&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;-script&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;${workspaceFolder}\\scripts\\bootstrap.mel&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;stopAtEntry&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cwd&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="err">PROJECT_SCRIPTS</span><span class="w"> </span><span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ns</span><span class="w"> </span><span class="err">a</span><span class="w"> </span><span class="err">`;`</span><span class="w"> </span><span class="err">separa</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="err">lis</span><span class="kc">t</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="kc">f</span><span class="err">ile</span><span class="kc">na</span><span class="err">mes</span><span class="w"> </span><span class="kc">t</span><span class="err">o</span><span class="w"> </span><span class="err">ru</span><span class="kc">n</span><span class="w"> </span><span class="err">a</span><span class="kc">t</span><span class="w"> </span><span class="err">s</span><span class="kc">tartu</span><span class="err">p</span><span class="w"> </span><span class="err">i</span><span class="kc">n</span><span class="w"> </span><span class="err">`boo</span><span class="kc">tstra</span><span class="err">p.py`</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROJECT_SCRIPTS&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${workspaceRoot}\\.env27\\Scripts\\activate_this.py&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="err">PROJECT_DEBUG_PORT</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">PROJECT_DEBUG_HOST</span><span class="w"> </span><span class="err">should</span><span class="w"> </span><span class="err">ma</span><span class="kc">t</span><span class="err">ch</span><span class="w"> </span><span class="err">&#39;Remo</span><span class="kc">te</span><span class="w"> </span><span class="err">A</span><span class="kc">tta</span><span class="err">ch&#39;</span><span class="w"> </span><span class="err">below.</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROJECT_DEBUG_PORT&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5678&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROJECT_DEBUG_HOST&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="err">PROJECT_LOG_LEVEL</span><span class="w"> </span><span class="kc">f</span><span class="err">or</span><span class="w"> </span><span class="kc">t</span><span class="err">he</span><span class="w"> </span><span class="err">level</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="err">`loggi</span><span class="kc">n</span><span class="err">g`</span><span class="w"> </span><span class="err">s</span><span class="kc">tate</span><span class="err">me</span><span class="kc">nts</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROJECT_LOG_LEVEL&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="err">PROJECT_MAYA_PYTHON_SCRIPT</span><span class="w"> </span><span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ns</span><span class="w"> </span><span class="err">a</span><span class="w"> </span><span class="err">`;`</span><span class="w"> </span><span class="err">separa</span><span class="kc">te</span><span class="err">d</span><span class="w"> </span><span class="err">lis</span><span class="kc">t</span><span class="w"> </span><span class="err">o</span><span class="kc">f</span><span class="w"> </span><span class="kc">f</span><span class="err">ile</span><span class="kc">na</span><span class="err">mes</span><span class="w"> </span><span class="kc">t</span><span class="err">o</span><span class="w"> </span><span class="err">ru</span><span class="kc">n</span><span class="w"> </span><span class="err">a</span><span class="kc">t</span><span class="w"> </span><span class="err">s</span><span class="kc">tartu</span><span class="err">p</span><span class="w"> </span><span class="err">i</span><span class="kc">n</span><span class="w"> </span><span class="err">`boo</span><span class="kc">tstra</span><span class="err">p.mel`</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PROJECT_MAYA_PYTHON_SCRIPT&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${workspaceFolder}\\scripts\\bootstrap.py&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 <p>And we still need to add the compound job that launches this new companion launch configuration with the generic <code>Python: Remote Attach</code> auto-attach configuration from the previous article:</p>
-<p><code>json
-{
-    "name": "Python Maya 2018",
-    "configurations": [
-        "Maya 2018",
-        "Python: Remote Attach"
-    ]
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Python Maya 2018&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;configurations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;Maya 2018&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;Python: Remote Attach&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 <p>We're still following the same workflow from our previous 3ds Max example.  The only real difference with Maya is the addition of a <code>bootstrap.mel</code>, which is only needed as a workaround to Maya's command line interface.</p>
     </article>
 

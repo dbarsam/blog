@@ -126,55 +126,55 @@ spell-checker:ignore colour colouring
 <h2 id="handling-code-with-markdown">Handling Code with Markdown</h2>
 <p>The first part is to use the correct Markdown syntax.  The problem here is that most examples explaining how to do this are written for different flavours of Markdown and may not be applicable to our Pelican powered blog.</p>
 <p>Starting with the basics, Markdown handles code blocks with code fences, denoted by the 3 backticks (<code>```</code>).  For example, consider the below Markdown:</p>
-<p><code>markdown
-```
-This is a monospace code block
-```</code></p>
+<div class="highlight"><pre><span></span><span class="sb">```</span>
+<span class="sb">This is a monospace code block</span>
+<span class="sb">```</span>
+</pre></div>
 <p>This gets rendered as:</p>
-<p><code>markdown
-This is a monospace code block</code></p>
+<div class="highlight"><pre><span></span>This is a monospace code block
+</pre></div>
 <p>However that's the basic case and unfortunately, there's more needed to take that and make it display code sample in a Pelican blog.</p>
 <h2 id="syntax-highlighting">Syntax Highlighting</h2>
 <p>Markdown doesn't handle syntax highlighting.  Instead it passes the code-fence's attributes to the renderer and it interprets in some way.  In most cases, it adds it to the resulting html as a css class.  Consider this bit of Markdown describing Python code:</p>
-<p><code>markdown
-```python
-print("Hello world")
-```</code></p>
+<div class="highlight"><pre><span></span><span class="sb">```python</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">)</span>
+<span class="sb">```</span>
+</pre></div>
 <p>The <code>python</code> text there is just an text attribute is passed through to the html as a interpreted as css class for that particular scope.  <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> has a much better explanation about attributes and syntax highlighting in its <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Fenced Code</a> section, so please refer to that for more information.</p>
 <p>The important thing to note is that in <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> it's actually the <a href="https://python-markdown.github.io/extensions/code_hilite/">codehilite</a> extension that is responsible for the syntax highlighting and the actual rendering of the text is controlled by its <code>css_class</code> option, which by default is also set to <code>codehilite</code>.</p>
 <p>The basic code fence and the syntax highlighting work pretty much out of the box so there's no need to tinker with the settings.  However, this blog does tinker with the settings because of requiring more specialized way of rendering code blocks.</p>
 <h2 id="nested-code-blocks">Nested Code Blocks</h2>
 <p>Instructional steps are nice and having those steps point to fully rendered code blocks is even nicer.  This is one part where the standard Markdown specification doesn't really provide a definition and <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> doesn't seem to support it, so this a case where it's up to other groups provide a solution and implement this feature in their Markdown 'flavour'.</p>
 <p>Consider this this bit of Markdown:</p>
-<p>```markdown
-1. Step 1</p>
-<ol>
-<li>
-<p>Step 2, but with Python code.</p>
-<p><code>print("Hello world")</code></p>
-</li>
-<li>
-<p>Step 3, but with syntax highlighted Python code.</p>
-<p><code>python
-print("Hello world")</code>
-```</p>
-</li>
-</ol>
+<div class="highlight"><pre><span></span><span class="k">1.</span> Step 1
+
+<span class="k">2.</span> Step 2, but with Python code.
+
+<span class="sb">    ```</span>
+<span class="sb">    print(&quot;Hello world&quot;)</span>
+<span class="sb">    ```</span>
+
+<span class="k">3.</span> Step 3, but with syntax highlighted Python code.
+
+<span class="sb">    ```python</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">)</span>
+<span class="sb">    ```</span>
+</pre></div>
 <p>This Markdown sample lists a series of steps and, in Step 2 and 3, adds a bit of sample Python code.  The code in Step 2 should render as monospace text, but the code in Step 3 should be rendered with syntax colouring appropriate for Python.  Unfortunately, this is somewhat fragile and only works in a very specific scenario:</p>
 <ol>
 <li>Indent your fenced block by an indent at your level (i.e. add extra 4 spaces).</li>
 <li>The fence requires a newline above and below the fenced block, so to be consistent, make the whole list double spaced.</li>
 </ol>
 <p>And even then, this is only made possible by some behind the scenes work in our Pelican configuration file.  By default, Pelican is being powered by <a href="https://python-markdown.github.io/extensions/fenced_code_blocks/">Python-Markdown</a> and that will not render our example correctly.  Instead, we need to first install another package, <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a> and then enable its <a href="https://facelessuser.github.io/pymdown-extensions/extensions/superfences/">superfences</a> extension in the <code>pelicanconf.py</code> file:</p>
-<p><code>python
-MARKDOWN = {
-    "extension_configs": {
-        ....
-        'pymdownx.superfences' : {}
-        ....
-    },
-    'output_format': 'html5'
-}</code></p>
+<div class="highlight"><pre><span></span><span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+        <span class="s1">&#39;pymdownx.superfences&#39;</span> <span class="p">:</span> <span class="p">{}</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
 <p>After that, the aboves renders as expected with the <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a>'s default settings:</p>
 <ol>
 <li>
@@ -182,13 +182,13 @@ MARKDOWN = {
 </li>
 <li>
 <p>Step 2, but with Python code.</p>
-<p><code>text
-print("Hello world")</code></p>
+<div class="highlight"><pre><span></span>print(&quot;Hello world&quot;)
+</pre></div>
 </li>
 <li>
 <p>Step 3, but with syntax highlighted Python code.</p>
-<p><code>python
-print("Hello world")</code></p>
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">)</span>
+</pre></div>
 </li>
 </ol>
 <h2 id="adding-line-numbering">Adding line numbering</h2>
@@ -198,82 +198,77 @@ print("Hello world")</code></p>
 <li>Separate Table Column</li>
 </ol>
 <p>Note:  <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a> does add third option, <code>pymdownx-inline</code>, but that's not working with this current theme. Incidentally, this seems to be part of a larger problem of non-working extensions, like <code>markdown.extensions.admonition</code> and <code>pymdownx.tabbed</code>, and it's not clear if the fault lies with the theme, Pelican, or something on the blog's configuration side.  As a result, this blog uses the separate table column as configured in thr <code>pelicanconf.py</code>, under the <code>pymdownx.highlight</code> extension:</p>
-<p><code>python
-MARKDOWN = {
-    "extension_configs": {
-        ....
-        'pymdownx.highlight' : {
-            ....
-            'linenums_style': 'table',
-            ....
-        }
-        ....
-    },
-    'output_format': 'html5'
-}</code></p>
+<div class="highlight"><pre><span></span><span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+        <span class="s1">&#39;pymdownx.highlight&#39;</span> <span class="p">:</span> <span class="p">{</span>
+            <span class="o">....</span>
+            <span class="s1">&#39;linenums_style&#39;</span><span class="p">:</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span>
+            <span class="o">....</span>
+        <span class="p">}</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
 <p>The <code>pelicanconf.py</code> configuration has line number disabled by default. Line numbers are enabled by adding the <code>linenums</code> attribute to each individual code block with the starting line number as its argument.</p>
 <p>For example, this Markdown:</p>
-<p><code>markdown
-```python linenums="3"
+<div class="highlight"><pre><span></span>```python linenums=&quot;3&quot;
 for i in range(10):
-    print("Hello world!")
-print("Goodbye")
-```</code></p>
+    print(&quot;Hello world!&quot;)
+print(&quot;Goodbye&quot;)
+```
+</pre></div>
 <p>Renders this code, with line number starting on line 3.</p>
-<p><code>python linenums="3"
-for i in range(10):
-    print("Hello world!")
-print("Goodbye")</code></p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world!&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
 <p>To highlight a specific lines use the <code>hl_lines</code> option.</p>
 <p>For example, this Markdown:</p>
-<p><code>markdown
-```python linenums="5" hl_lines="2-3"
+<div class="highlight"><pre><span></span>```python linenums=&quot;5&quot; hl_lines=&quot;2-3&quot;
 for i in range(10):
-    print("Hello world!")
-print("Goodbye")
-```</code></p>
+    print(&quot;Hello world!&quot;)
+print(&quot;Goodbye&quot;)
+```
+</pre></div>
 <p>Renders this code, with line number starting on line 5, but highlighted code block lines 2 and 3:</p>
-<p><code>python linenums="5" hl_lines="2-3"
-for i in range(10):
-    print("Hello world!")
-print("Goodbye")</code></p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="hll">    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello world!&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
+</span></pre></div>
+</td></tr></table>
 <p>Note that the <code>hl_lines</code> refers to lines in the code block, not the lines as numbered by <code>linenums</code>.</p>
 <h2 id="line-numbering-and-line-wrapping">Line Numbering And Line Wrapping</h2>
 <p>There's one small problem with the theme and <a href="https://facelessuser.github.io/pymdown-extensions/">pymdown-extensions</a>.  If a line of code is too long, the theme will wrap the code but not update the line numbering accordingly.  The ends up with mis-aligned line numbering and breaks the feature.</p>
 <p>To work around this, this blog disables word wrapping for code blocks in the <code>pelicanconf.py</code> file with the <code>legacy_no_wrap_code</code>.</p>
-<p><code>python
-MARKDOWN = {
-    "extension_configs": {
-        ....
-        'legacy_no_wrap_code' : True,
-        'pymdownx.highlight' : {
-            ....
-            'linenums_style': 'table',
-            ....
-        }
-        ....
-    },
-    'output_format': 'html5'
-}</code></p>
+<div class="highlight"><pre><span></span><span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">....</span>
+        <span class="s1">&#39;legacy_no_wrap_code&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;pymdownx.highlight&#39;</span> <span class="p">:</span> <span class="p">{</span>
+            <span class="o">....</span>
+            <span class="s1">&#39;linenums_style&#39;</span><span class="p">:</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span>
+            <span class="o">....</span>
+        <span class="p">}</span>
+        <span class="o">....</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
+<span class="p">}</span>
+</pre></div>
 <p>For example, this Markdown:</p>
-<p><code>markdown
-```python linenums="5"
+<div class="highlight"><pre><span></span>```python linenums=&quot;5&quot;
 for i in range(10):
-    print("ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-print("Goodbye")
-```</code></p>
+    print(&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;)
+print(&quot;Goodbye&quot;)
+```
+</pre></div>
 <p>Renders the long line at line <code>6</code> un-wrapped and preserves the alignment with the table columns:</p>
-<p><code>python linenums="5"
-for i in range(10):
-    print("ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-print("Goodbye")</code></p>
-<p>It's important to also note that this is behaving differently if there were no line numbering at all. For example, the above code block with the <code>linenums</code> attribute removed renders this code block:</p>
-<p><code>python
-for i in range(10):
-    print("ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-print("Goodbye")</code></p>
-<p>The above code block is not wrapped, but embedded in a scroll box to work around that.  The problem lies with the table mechanism used for the table column line numbering. Underneath the hood, the code block with <code>linenums</code> renders this html:</p>
-<p>```html</p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">5</span>
 <span class="normal">6</span>
 <span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -281,14 +276,26 @@ print("Goodbye")</code></p>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
 </pre></div>
 </td></tr></table>
-<p>```</p>
-<p>While the one without, renders this html (which is the same as the table cell containing the code in the above example):</p>
-<p>```html</p>
+<p>It's important to also note that this is behaving differently if there were no line numbering at all. For example, the above code block with the <code>linenums</code> attribute removed renders this code block:</p>
 <div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goodbye&quot;</span><span class="p">)</span>
 </pre></div>
-<p>```</p>
+<p>The above code block is not wrapped, but embedded in a scroll box to work around that.  The problem lies with the table mechanism used for the table column line numbering. Underneath the hood, the code block with <code>linenums</code> renders this html:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlighttable&quot;</span><span class="p">&gt;&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;linenos&quot;</span><span class="p">&gt;&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;linenodiv&quot;</span><span class="p">&gt;&lt;</span><span class="nt">pre</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;normal&quot;</span><span class="p">&gt;</span>5<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;normal&quot;</span><span class="p">&gt;</span>6<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;normal&quot;</span><span class="p">&gt;</span>7<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">pre</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;code&quot;</span><span class="p">&gt;&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlight&quot;</span><span class="p">&gt;&lt;</span><span class="nt">pre</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;k&quot;</span><span class="p">&gt;</span>for<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;n&quot;</span><span class="p">&gt;</span>i<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;ow&quot;</span><span class="p">&gt;</span>in<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>range<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;mi&quot;</span><span class="p">&gt;</span>10<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>):<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>Goodbye<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">pre</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+<p>While the one without, renders this html (which is the same as the table cell containing the code in the above example):</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlight&quot;</span><span class="p">&gt;&lt;</span><span class="nt">pre</span><span class="p">&gt;&lt;</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;k&quot;</span><span class="p">&gt;</span>for<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;n&quot;</span><span class="p">&gt;</span>i<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;ow&quot;</span><span class="p">&gt;</span>in<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>range<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;mi&quot;</span><span class="p">&gt;</span>10<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>):<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZ<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;nb&quot;</span><span class="p">&gt;</span>print<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>(<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;s2&quot;</span><span class="p">&gt;</span><span class="ni">&amp;quot;</span>Goodbye<span class="ni">&amp;quot;</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">&gt;</span>)<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">pre</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
     </article>
 
         <div class="tags">

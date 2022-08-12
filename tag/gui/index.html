@@ -2,15 +2,14 @@
 <html lang="en">
 
 <head>
-            <meta charset="utf-8">
+        <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-        <title>How this blog styles keyboard keys</title>
+        <title>#Dev - Tag gui</title>
 
             <link href="https://dbarsam.github.io/blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Full Atom Feed" />
-            <link href="https://dbarsam.github.io/blog/feeds/{slug}.atom.xml" type="application/atom+xml" rel="alternate" title="#Dev Categories Atom Feed" />
         <!-- Bootstrap Core CSS -->
         <link href="https://dbarsam.github.io/blog/theme/css/bootstrap.min.css" rel="stylesheet">
 
@@ -35,30 +34,11 @@
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-
-
-        <meta name="description" content="An quick example of one of how this blog uses PyMdown Extensions' 'keys' feature to render keyboard keys">
-
-        <meta name="author" content="db">
-
-        <meta name="tags" content="markdown">
-        <meta name="tags" content="pelican">
-        <meta name="tags" content="pymdown extensions">
-
-	                <meta property="og:locale" content="">
+                <meta property="og:locale" content="">
 		<meta property="og:site_name" content="#Dev">
-
-	<meta property="og:type" content="article">
-            <meta property="article:author" content="https://dbarsam.github.io/blog/author/db.html">
-	<meta property="og:url" content="https://dbarsam.github.io/blog/articles/how-this-blog-renders-keyboard-keys/">
-	<meta property="og:title" content="How this blog styles keyboard keys">
-	<meta property="article:published_time" content="2021-01-14 17:48:00-05:00">
-            <meta property="og:description" content="An quick example of one of how this blog uses PyMdown Extensions' 'keys' feature to render keyboard keys">
-
-            <meta property="og:image" content="https://dbarsam.github.io/blog/images/home-bg.png">
 </head>
 
-<body class="article-how-this-blog-renders-keyboard-keys">
+<body class="tag-gui">
 
     <!-- Navigation -->
     <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
@@ -88,18 +68,12 @@
         <!-- /.container -->
     </nav>
 
-    <!-- Page Header -->
-        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog//images/home-bg.png')">
+        <header class="intro-header" style="background-image: url('https://dbarsam.github.io/blog/images/home-bg.png')">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <div class="post-heading">
-                        <h1>How this blog styles keyboard keys</h1>
-                        <span class="meta">Posted by
-                                <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
-                             on Thu 14 January 2021
-                        </span>
-                        
+                    <div class="page-heading">
+                        <h1>Tag gui</h1>
                     </div>
                 </div>
             </div>
@@ -110,36 +84,20 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-    <!-- Post Content -->
-    <article>
-        <!--
-spell-checker:ignore
--->
-<p>One of the features this blog uses from the <a href="https://facelessuser.github.io/pymdown-extensions">PyMdown Extensions</a> extension is the <a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/">Keys</a> option.  That options enables <code>++</code> as Markdown syntax and converts it to HTML5's <code>&lt;kbd&gt;&lt;/kbd&gt;</code> html.</p>
-<p>This means that <code>++ctrl+alt+delete++</code> renders out as <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-alt">Alt</kbd><span>+</span><kbd class="key-delete">Del</kbd></span>.  Better information is available on the official <a href="https://facelessuser.github.io/pymdown-extensions/extensions/keys/">help</a>.</p>
-<h2 id="installation">Installation</h2>
-<p>Install the Python package into Pelican's Python environment:</p>
-<div class="highlight"><pre><span></span><span class="go">pip install pymdown-extensions</span>
-</pre></div>
-<h2 id="configuration">Configuration</h2>
-<p>Enable it in the <code>pelicanconf.py</code> file, in the <code>MARKDOWN</code> variable:</p>
-<div class="highlight"><pre><span></span><span class="c1"># Extra configuration settings for the Markdown processor.</span>
-<span class="n">MARKDOWN</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;extension_configs&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="o">....</span>
-        <span class="s1">&#39;pymdownx.keys&#39;</span> <span class="p">:</span> <span class="p">{},</span>
-        <span class="o">....</span>
-    <span class="p">},</span>
-    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;html5&#39;</span>
-<span class="p">}</span>
-</pre></div>
-    </article>
-
-        <div class="tags">
-            <p>tags: <a href="https://dbarsam.github.io/blog/tag/markdown/">markdown</a>, <a href="https://dbarsam.github.io/blog/tag/pelican/">pelican</a>, <a href="https://dbarsam.github.io/blog/tag/pymdown-extensions/">pymdown extensions</a></p>
+        <div class="post-preview">
+            <a href="https://dbarsam.github.io/blog/articles/headless-qt/" rel="bookmark" title="Permalink to Headless Qt?">
+                <h2 class="post-title">
+                    Headless Qt?
+                </h2>
+            </a>
+                <p class="article-summary">
+                    Can you configure Qt to work in systems with no UI?
+                </p>
+            <p class="post-meta">Posted by
+                    <a href="https://dbarsam.github.io/blog/author/db.html">db</a>
+                 on Fri 06 November 2020
+            </p>
         </div>
-
-    <hr>
 
             </div>
         </div>

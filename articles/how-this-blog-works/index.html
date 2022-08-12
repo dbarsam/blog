@@ -136,38 +136,38 @@ spell-checker:ignore publishconf
 <ol>
 <li>
 <p>Markdown Linting with <a href="https://github.com/DavidAnson/markdownlint">MarkdownLint</a>.</p>
-<p><code>yaml
-- stage: lint
-  language: node_js
-  node_js:
-    - 12
-  install:
-    - npm install -g npm@latest
-    - npm install -g markdownlint-cli
-  script:
-    - markdownlint **/*.md</code></p>
+<div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lint</span><span class="w"></span>
+<span class="w">  </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node_js</span><span class="w"></span>
+<span class="w">  </span><span class="nt">node_js</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12</span><span class="w"></span>
+<span class="w">  </span><span class="nt">install</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g npm@latest</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npm install -g markdownlint-cli</span><span class="w"></span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdownlint **/*.md</span><span class="w"></span>
+</pre></div>
 </li>
 <li>
 <p>Build with <a href="http://docs.getpelican.com">Pelican</a> and publish to <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site">GitHub Pages</a>.</p>
-<p><code>yaml
-- stage: build
-  language: python
-  python:
-    - 3.6
-  install:
-    - python -m pip install --upgrade pip
-    - python -m pip install -r requirements.txt
-  script:
-    - make publish
-  deploy:
-    provider: pages
-    skip_cleanup: true
-    strategy: git
-    token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-    keep_history: true
-    local_dir: output
-    on:
-      branch: master</code></p>
+<div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span><span class="w"></span>
+<span class="w">  </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python</span><span class="w"></span>
+<span class="w">  </span><span class="nt">python</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.6</span><span class="w"></span>
+<span class="w">  </span><span class="nt">install</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python -m pip install --upgrade pip</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python -m pip install -r requirements.txt</span><span class="w"></span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">make publish</span><span class="w"></span>
+<span class="w">  </span><span class="nt">deploy</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pages</span><span class="w"></span>
+<span class="w">    </span><span class="nt">skip_cleanup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span><span class="w"></span>
+<span class="w">    </span><span class="nt">token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$GITHUB_TOKEN</span><span class="w">  </span><span class="c1"># Set in the settings page of your repository, as a secure variable</span><span class="w"></span>
+<span class="w">    </span><span class="nt">keep_history</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">local_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
+<span class="w">    </span><span class="nt">on</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">branch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">master</span><span class="w"></span>
+</pre></div>
 </li>
 </ol>
 <h2 id="pelican">Pelican</h2>

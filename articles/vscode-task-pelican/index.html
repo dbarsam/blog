@@ -118,47 +118,47 @@ spell-checker:ignore
 <p>In this Pelican powered project, we can take advantage of that flexibility and add support for two Pelican specific commands:  build and serve.</p>
 <h2 id="the-build-task">The <code>build</code> Task</h2>
 <p>The build command is pretty straight forward to adapt.  On the command line it looks like this:</p>
-<p><code>batch
-python -m pelican .\content</code></p>
+<div class="highlight"><pre><span></span>python -m pelican .\content
+</pre></div>
 <p>And we can turn that into the following json block and add it to the <code>tasks.json</code> file in the project's <code>.vscode</code> folder:</p>
-<p><code>json
-    {
-        "label": "pelican-build",
-        "type": "process",
-        "isBuildCommand": true,
-        "command": "${workspaceFolder}\\.conda\\env\\python.exe",
-        "args": [
-            "-m",
-            "pelican",
-            "${workspaceFolder}\\content"
-        ],
-        "problemMatcher": []
-    },</code></p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pelican-build&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;process&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;isBuildCommand&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${workspaceFolder}\\.conda\\env\\python.exe&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;-m&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;pelican&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;${workspaceFolder}\\content&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;problemMatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+</pre></div>
 <p>We mark this task as an explicit <em>build</em> command with the <code>isBuildCommand</code> flag.  This adds it the list of commands automatically bound to VSCode's <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-b">B</kbd></span> keyboard mapping.</p>
 <p>We also add an empty <code>problemMatcher</code>.  VSCode's <a href="https://code.visualstudio.com/docs/editor/tasks#_defining-a-problem-matcher">problem matching</a> feature is how the editor converts the text output of the command into the editor's <a href="https://code.visualstudio.com/docs/editor/editingevolved#_errors-warnings">problems panel</a>, accessible via <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-m">M</kbd></span>.  Unfortunately Pelican does not output its error messages into a compatible format so we add the feature but leave it empty until a future change in either VSCode or Pelican.</p>
 <h2 id="the-serve-task">The <code>serve</code> Task</h2>
 <p>The <code>serve</code> command is also fairly simple to adapt.  Like the <code>build</code> command we take a command line and turn it into a json task entry.</p>
 <p>The serve command line:</p>
-<p><code>shell
-python -m pelican --autoreload --listen</code></p>
+<div class="highlight"><pre><span></span>python -m pelican --autoreload --listen
+</pre></div>
 <p>The json equivalent of the command line, added it to the <code>tasks.json</code> file in the <code>.vscode</code> folder:</p>
-<p><code>json
-    {
-        "label": "pelican-serve",
-        "type": "process",
-        "isBackground": true,
-        "runOptions": {
-            "instanceLimit": 1
-        },
-        "command": "${workspaceFolder}\\.conda\\env\\python.exe",
-        "args": [
-            "-m",
-            "pelican",
-            "--autoreload",
-            "--listen"
-        ],
-        "problemMatcher": []
-    },</code></p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pelican-serve&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;process&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;isBackground&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;runOptions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;instanceLimit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${workspaceFolder}\\.conda\\env\\python.exe&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;-m&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;pelican&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;--autoreload&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;--listen&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;problemMatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+</pre></div>
 <p>Since this task will be running the internal web server in the background, we mark it with the <code>isBackground</code> flag and we limit the instances to a single instance in the <code>runOptions</code>.  This allows us to launch it once from VSCode and any subsequent launch will prompt us to kill it or restart it, avoiding any awkwardness over the single HTTP port.</p>
 <p>We don't bother with a keyboard shortcuts for two reasons:</p>
 <ol>

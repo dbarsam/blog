@@ -128,23 +128,23 @@ spell-checker:ignore deliminators frontmark jekkyl elio struyf contenttype lastm
 <p>Fortunately, Axle H. has developed the <a href="https://github.com/noirbizarre/pelican-frontmark/">pelican-frontmark</a> Python library, which is a Pelican plugin that adds the missing YAML support via the <a href="https://pyyaml.org/">PyYAML</a> library.</p>
 <p>Unfortunately, it looks like development on it has stopped.  It's suffering from a deprecation problem, introduced in this <a href="https://github.com/getpelican/pelican/pull/2644#issuecomment-548304256">pull request</a> from Pelican.  It was fixed in <a href="https://github.com/noirbizarre/pelican-frontmark/pull/2">PR #2</a>, but it has yet to be reviewed and accepted.</p>
 <p>There's another bug in <code>pelican-frontmark</code>, openly discussed in its <a href="https://github.com/noirbizarre/pelican-frontmark/issues/1">Issue #1</a>.  The <a href="https://pyyaml.org/">PyYAML</a> parser is too good and automatically converts recognizable text chunks to known Python types before Pelican processes the metadata.  This means that when <code>PyYAML</code> comes across a date, it will convert the value from text to the Python native <code>datetime</code> object and store that type.  However Pelican expects <code>str</code> and not <code>datetime</code> objects, so you may see the following exception:</p>
-<p><code>python
-ERROR    Could not process articles\2020-12-20-dummy.md       log.py:96
-    an integer is required (got type str)
-    Traceback (most recent call last):
-        File "....\pelican\generators.py", line 633, in generate_context
-            context_sender=self)
-        File "....\pelican\readers.py", line 573, in read_file
-            content, reader_metadata = reader.read(path)
-        File "....\pelican-frontmark\frontmark\reader.py", line 138, in read
-            return content, self._parse_metadata(metadata)
-        File "....\pelican-frontmark\frontmark\reader.py", line 184, in _parse_metadata
-            output[name] = self.process_metadata(name, value)
-        File "....\pelican\readers.py", line 124, in process_metadata
-            return METADATA_PROCESSORS[name](value, self.settings)
-        File "....\pelican\readers.py", line 51, in &lt;lambda&gt;
-            'date': lambda x, y: get_date(x.replace('_', ' ')),
-        TypeError: an integer is required (got type str)</code></p>
+<div class="highlight"><pre><span></span><span class="n">ERROR</span>    <span class="n">Could</span> <span class="ow">not</span> <span class="n">process</span> <span class="n">articles</span>\<span class="mi">2020</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">20</span><span class="o">-</span><span class="n">dummy</span><span class="o">.</span><span class="n">md</span>       <span class="n">log</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">96</span>
+    <span class="n">an</span> <span class="n">integer</span> <span class="ow">is</span> <span class="n">required</span> <span class="p">(</span><span class="n">got</span> <span class="nb">type</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican\generators.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">633</span><span class="p">,</span> <span class="ow">in</span> <span class="n">generate_context</span>
+            <span class="n">context_sender</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican</span><span class="se">\r</span><span class="s2">eaders.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">573</span><span class="p">,</span> <span class="ow">in</span> <span class="n">read_file</span>
+            <span class="n">content</span><span class="p">,</span> <span class="n">reader_metadata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican-frontmark</span><span class="se">\f</span><span class="s2">rontmark</span><span class="se">\r</span><span class="s2">eader.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">138</span><span class="p">,</span> <span class="ow">in</span> <span class="n">read</span>
+            <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican-frontmark</span><span class="se">\f</span><span class="s2">rontmark</span><span class="se">\r</span><span class="s2">eader.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">184</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_parse_metadata</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_metadata</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican</span><span class="se">\r</span><span class="s2">eaders.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">124</span><span class="p">,</span> <span class="ow">in</span> <span class="n">process_metadata</span>
+            <span class="k">return</span> <span class="n">METADATA_PROCESSORS</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
+        <span class="n">File</span> <span class="s2">&quot;....\pelican</span><span class="se">\r</span><span class="s2">eaders.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">51</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span>
+            <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">get_date</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)),</span>
+        <span class="ne">TypeError</span><span class="p">:</span> <span class="n">an</span> <span class="n">integer</span> <span class="ow">is</span> <span class="n">required</span> <span class="p">(</span><span class="n">got</span> <span class="nb">type</span> <span class="nb">str</span><span class="p">)</span>
+</pre></div>
 <p>There is a work around that does not require any code modification.  You need to configure your Pelican system to use <em>unrecognizable</em> date formats like <code>2020-12-20 10:04</code> instead of <code>datetime</code>-parsable ones, like <code>2020-12-20T10:04:07.000Z</code>.  The <code>PyYAML</code> parser will simply skip over the unrecognizable dates and leave it as text, which is what Pelican's <code>get_date</code> function expects.</p>
 <p>However, that work around does not fix the deprecation problem so we're still stuck with a broken plugin.  We could fix the plugin and get YAML style front matter working, but that's a task for another day.</p>
 <h2 id="category-vs-categories">Category vs Categories</h2>
@@ -170,70 +170,70 @@ ERROR    Could not process articles\2020-12-20-dummy.md       log.py:96
 <ol>
 <li>
 <p>Configure the date format to the expected format:</p>
-<p><code>json
-{
-    ....
-    "frontMatter.taxonomy.dateFormat": "YYYY-MM-DD H:mm",
-    ....
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.taxonomy.dateFormat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YYYY-MM-DD H:mm&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 </li>
 <li>
 <p>Change the draft field from the <code>boolean</code> to a Pelican enum <code>choice</code>:</p>
-<p><code>json
-{
-    ....
-    "frontMatter.content.draftField": {
-        "name": "draft",
-        "type": "choice",
-        "choices": ["draft", "hidden", "published"]
-    },
-    ....
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.content.draftField&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;draft&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;choice&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;draft&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;hidden&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;published&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 </li>
 <li>
 <p>Specify the modified field from <code>lastmod</code> to <code>modified</code>:</p>
-<p><code>json
-{
-    ....
-    "frontMatter.taxonomy.modifiedField": "modified",
-    ....
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.taxonomy.modifiedField&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;modified&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 </li>
 <li>
 <p>Change the description field from <code>description</code> to <code>summary</code>:</p>
-<p><code>json
-{
-    ....
-    "frontMatter.taxonomy.seoDescriptionField": "summary",
-    ....
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.taxonomy.seoDescriptionField&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;summary&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 </li>
 <li>
 <p>Change the arrays from YAML lists to comma separated fields:</p>
-<p><code>json
-{
-    ....
-    "frontMatter.taxonomy.commaSeparatedFields": [
-        "tags",
-        "categories",
-        "keywords"
-    ],
-    ....
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.taxonomy.commaSeparatedFields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;tags&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;keywords&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 </li>
 <li>
 <p>Remove the YAML quoting from all respective fields:</p>
-<p><code>json
-{
-    ....
-    "frontMatter.taxonomy.noPropertyValueQuotes": [
-        "tags",
-        "categories",
-        "modified",
-        "date",
-        "title"
-    ],
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.taxonomy.noPropertyValueQuotes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;tags&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;modified&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;date&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;title&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 </li>
 </ol>
 <h3 id="the-content-panel">The Content Panel</h3>
@@ -241,80 +241,80 @@ ERROR    Could not process articles\2020-12-20-dummy.md       log.py:96
 <p><img alt="default-contenttype.png" class="center-image" src="images/front-matter-panel.png"></p>
 <p>What's great about this, is that it can also be completely customized by specifying the fields in the project's <code>settings.json</code> file.</p>
 <p>The panel can have multiple configurations depending on documentation types.  This Pelican blog only have one type, <code>article</code>, so we add a new view that matches an article's <code>type</code> metadata.</p>
-<p><code>json
-{
-    ....
-    "frontMatter.taxonomy.contentTypes": [
-        {
-            "name": "article",
-            "fields": [
-                {
-                    "title": "Title",
-                    "name": "title",
-                    "type": "string"
-                },
-                {
-                    "title": "Description",
-                    "name": "summary",
-                    "type": "string"
-                },
-                {
-                    "title": "Publishing date",
-                    "name": "date",
-                    "type": "datetime"
-                },
-                {
-                    "title": "Last modified date",
-                    "name": "modified",
-                    "type": "datetime"
-                },
-                {
-                    "title": "Status",
-                    "name": "status",
-                    "type": "draft"
-                },
-                {
-                    "title": "Tags",
-                    "name": "tags",
-                    "type": "tags"
-                },
-                {
-                    "title": "Category",
-                    "name": "category",
-                    "type": "string",
-                },
-                {
-                    "title": "Categories",
-                    "name": "categories",
-                    "type": "categories",
-                },
-                {
-                    "title": "Header Image",
-                    "name": "header_cover",
-                    "type": "choice",
-                    "choices": [
-                        {
-                            "id": "/images/article-bg.png",  "title": "Article Header"
-                        },
-                    ]
-                }
-            ]
-        }
-    ]
-    ....</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontMatter.taxonomy.contentTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;article&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Title&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;title&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Description&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;summary&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Publishing date&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;date&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datetime&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Last modified date&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;modified&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datetime&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Status&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;status&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;draft&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tags&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tags&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tags&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Category&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;category&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Header Image&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;header_cover&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;choice&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;choices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">                        </span><span class="p">{</span><span class="w"></span>
+<span class="w">                            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/images/article-bg.png&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Article Header&quot;</span><span class="w"></span>
+<span class="w">                        </span><span class="p">},</span><span class="w"></span>
+<span class="w">                    </span><span class="p">]</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="err">....</span><span class="w"></span>
+</pre></div>
 <p>It works great, except for one small hitch.  The extension provides a nice tag selection UI for tags, keywords, and categories, and binds to a <a href="https://frontmatter.codes/docs/content-types#how-it-works">known type</a> but it doesn't allow us to remap that type to a different field.</p>
 <p>For example, we can use the Front Matter UI for YAML <code>categories</code> field but we can't remap it to the Pelican's <code>category</code> field.  We can do this with other fields, like <code>drafts</code>, but <code>categories</code> looks like it is hard coded at this point.  So, as a work around, we specify the Pelican field <code>category</code> as a <code>string</code> field and keep the <code>categories</code> field around, well, for fun until a solution is found:</p>
-<p><code>json
-{
-    "title": "Category",
-    "name": "category",
-    "type": "string",
-},
-{
-    "title": "Categories",
-    "name": "categories",
-    "type": "categories",
-},</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Category&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;category&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="p">},</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;categories&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="p">},</span><span class="w"></span>
+</pre></div>
 <p>After jumping through all the hoops, Front Matter is a pretty good extension.  It's pretty powerful too, probably designed for something more complicated than a simple blog.  However, it really nails down the front matter management and is only hampered by an awkward user request to work with an incomplete Markdown implementation provided by Pelican.</p>
     </article>
 

@@ -118,23 +118,23 @@ spell-checker:ignore
 <p>This article is a follow-up to <a href="https://dbarsam.github.io/blog/articles/how-this-blog-detects-broken-links/">how this blog detects broken links</a>, describing updated ways to use the <a href="https://github.com/tcort/markdown-link-check">markdown-link-check</a> npm package.</p>
 <h2 id="batch-operation">Batch Operation</h2>
 <p>The previous article used a <code>for</code> loop and an shortcut or-operator (<code>||</code>) with an <code>exit</code> command.</p>
-<p><code>bash
-for file in  $(find ./content -name \*.md); do markdown-link-check --verbose "$file" || exit 1; done;</code></p>
+<div class="highlight"><pre><span></span><span class="k">for</span> file <span class="k">in</span>  <span class="k">$(</span>find ./content -name <span class="se">\*</span>.md<span class="k">)</span><span class="p">;</span> <span class="k">do</span> markdown-link-check --verbose <span class="s2">&quot;</span><span class="nv">$file</span><span class="s2">&quot;</span> <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span><span class="p">;</span> <span class="k">done</span><span class="p">;</span>
+</pre></div>
 <p>That <code>exit</code> command turned out to exit the shell in some cases and this was not desirable on some machines.  Instead, we switched to <code>xargs</code> and enforce single parameters with <code>--max-lines</code> argument:</p>
-<p><code>bash
-find content -name \*.md -print0 | xargs --null --max-lines=1 markdown-link-check --config .markdown-link-check.json --verbose</code></p>
+<div class="highlight"><pre><span></span>find content -name <span class="se">\*</span>.md -print0 <span class="p">|</span> xargs --null --max-lines<span class="o">=</span><span class="m">1</span> markdown-link-check --config .markdown-link-check.json --verbose
+</pre></div>
 <p>Using <code>xargs</code> introduces some new changes.  At first <code>xargs</code> passed all arguments to <code>markdown-link-check</code>, but the additional flag executes it once per file.  Second, <code>xargs</code> will return back exit code 123 if any of invocations returns back a non-zero value, which is fine in the ci pipeline.  And lastly, <code>xargs</code> processes all arguments, regardless if one invocation fails.  This is desirable in our case because we need to check all links and not quit at the first failure.</p>
 <h2 id="ignore-rules">Ignore Rules</h2>
 <p>We have another update regarding Pelican's shorthand for <a href="https://docs.getpelican.com/en/latest/content.html#linking-to-internal-content">local links</a>: <code>{filename}</code> and <code>{static}</code>.  These are not valid links but we create a configuration file, <code>.markdown-link-check.json</code>, and use the <code>ignorePatterns</code> option to skip those special cases.  Before we could use the raw <code>{</code> and <code>}</code> characters.  Now, it looks like we have to use the html escape codes <code>%7B</code> and <code>%7D</code>:</p>
-<p><code>json
-{
-    "ignorePatterns": [
-        {
-            "pattern": "^({|%7B)filename(}|%7D)"
-        },
-        ....
-    ]
-}</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ignorePatterns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;pattern&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^({|%7B)filename(}|%7D)&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="err">....</span><span class="w"></span>
+<span class="w">    </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
 <p>For backwards compatibility, both characters are in a regex <em>or</em> (<code>|</code>) group.</p>
     </article>
 
