@@ -13,11 +13,11 @@ type: article
 <!--
 spell-checker:ignore
 -->
-The various functions of `logger.debug`, `logger.info`, `logger.warning`, `logger.error` and `logger.critical` were introduced in the [quick-start article about logging].  The `logger.exception` function was not covered in that article and it has a very specific use.
+The various functions of `logger.debug`, `logger.info`, `logger.warning`, `logger.error` and `logger.critical` were introduced in the [quick-start article about logging].  However, there is another useful function, the `logger.exception` function, that that was not covered in that article but should be mentioned because it has a very special use.
 
 ## Logging during Exceptions
 
-The Like the other conveinience functions, the `logger.exception` function is a wrapper around the base `logger.log` function.  The function, however, does two specific things:
+Like the other conveinience functions, the `logger.exception` function is a wrapper around the base `logger.log` function.  The function, however, does two specific things:
 
 1. It logs to the `error` level.
 2. It includes the stack trace of the current exception from [sys.exc_info()].
@@ -111,7 +111,7 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero
 ```
 
-Using this technique really should be done in special cases.  It's still best to use the `exception` method to log exception classtacks on the `error` level.  Callstack are rather synonymous with applications crashes so dumping a callstack at a client-visible level, like `info` or `warning` will end up confusing the user.  In the case of logging the handling of expected exceptions, simply use the regular conveience functions and skip the callstack.
+Using this technique really should be done in special cases.  It's still best to use the `exception` method to log exception classtacks on the `error` level.  Callstacks are rather synonymous with applications crashes, so dumping a callstack at a client-visible level, like `info` or `warning` will end up confusing the user.  In the cases where the application is  handling expected exceptions, it's probably simpler for everybody for the application to use the regular logging functions skip the callstack.
 
 [sys.exc_info()]: https://docs.python.org/3/library/sys.html#sys.exc_info
 [quick-start article about logging]: {filename}../2021-02-08-python-logging-quick-start/python-logging-quick-start.md
