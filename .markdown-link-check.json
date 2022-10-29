@@ -9,5 +9,13 @@
         {
             "pattern": "^({|%7B)attach(}|%7D)"
         }
+    ],
+    "httpHeaders": [
+        {
+            "urls": ["https://docs.github.com/"],
+            "headers": {
+                "Accept-Encoding": "zstd, br, gzip, deflate"
+            }
+        }
     ]
 }
